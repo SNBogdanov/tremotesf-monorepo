@@ -1,0 +1,15 @@
+# Реестр сабмодулей монорепозитория.
+#
+# Оба исходных проекта содержали собственные .gitmodules со своими путями;
+# они сохранены без изменений в desktop/ и android/ для совместимости с
+# апстримом, но git читает только этот корневой файл.
+#
+# SPDX-License-Identifier: CC0-1.0
+
+[submodule "desktop/src/3rdparty/cpp-httplib"]
+	path = desktop/src/3rdparty/cpp-httplib
+	url = https://github.com/yhirose/cpp-httplib.git
+
+[submodule "android/bencode"]
+	path = android/bencode
+	url = https://github.com/equeim/kotlinx-serialization-bencode.git
