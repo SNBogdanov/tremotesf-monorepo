@@ -1,0 +1,589 @@
+<!--
+SPDX-FileCopyrightText: 2017-2026 Alexey Rochev <equeim@gmail.com>
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="disconnected">Отключено</string>
+    <string name="connecting">Подключение…</string>
+
+    <string name="connect">Подключиться</string>
+    <string name="disconnect">Отключиться</string>
+    <string name="add">Добавить</string>
+
+    <string name="invalid_connection_configuration">Недействительные параметры подключения</string>
+    <string name="timed_out">Время соединения истекло</string>
+    <string name="connection_error">Ошибка соединения</string>
+    <string name="connection_error_with_cause">Ошибка подключения: %1$s</string>
+    <string name="authentication_error">Ошибка аутентификации</string>
+    <string name="parsing_error">Ошибка разбора JSON</string>
+    <string name="unsupported_server_version">Версия Transmission \'%1$s\' не поддерживается</string>
+    <string name="server_returned_error_result">Сервер ответил \'%1$s\'</string>
+
+    <string name="main_activity_subtitle">\u2193 %1$s    \u2191 %2$s</string>
+
+    <string name="current_server_string">%1$s (%2$s)</string>
+
+    <string name="download_speed_string">\u2193 %s</string>
+    <string name="upload_speed_string">\u2191 %s</string>
+
+    <string name="server">Сервер</string>
+    <string name="server_settings">Настройки сервера</string>
+
+    <string name="sort">Сортировать</string>
+    <string name="progress">Прогресс</string>
+    <string name="eta">ETA</string>
+    <string name="ratio">Рейтинг</string>
+    <string name="size">Размер</string>
+    <string name="added_date">Дата добавления</string>
+
+    <string name="status">Статус</string>
+
+    <string name="no_torrents">Нет торрентов</string>
+
+    <string name="torrents_all">Все (%d)</string>
+    <string name="torrents_active">Активные (%d)</string>
+    <string name="torrents_downloading">Загрузки (%d)</string>
+    <string name="torrents_seeding">Раздачи (%d)</string>
+    <string name="torrents_paused">Приостановленные (%d)</string>
+    <string name="torrents_checking">Проверяющиеся (%d)</string>
+    <string name="torrents_errored">С ошибкой (%d)</string>
+
+    <!-- e.g. "example.com (42)" -->
+    <string name="trackers_spinner_text">%1$s (%2$d)</string>
+    <string name="directories_spinner_text">%1$s (%2$d)</string>
+
+    <plurals name="torrents_selected">
+        <item quantity="one">%d торрент выбран</item>
+        <item quantity="few">%d торрента выбраны</item>
+        <item quantity="many">%d торрентов выбраны</item>
+        <item quantity="other">%d торрентов выбраны</item>
+    </plurals>
+
+    <plurals name="files_selected">
+        <item quantity="one">%d файл выбран</item>
+        <item quantity="few">%d файла выбраны</item>
+        <item quantity="many">%d файлов выбраны</item>
+        <item quantity="other">%d файлов выбраны</item>
+    </plurals>
+
+    <plurals name="trackers_selected">
+        <item quantity="one">%d трекер выбран</item>
+        <item quantity="few">%d трекера выбраны</item>
+        <item quantity="many">%d трекеров выбраны</item>
+        <item quantity="other">%d трекеров выбраны</item>
+    </plurals>
+
+    <plurals name="peers_plural">
+        <item quantity="one">%d пир</item>
+        <item quantity="few">%d пира</item>
+        <item quantity="many">%d пиров</item>
+        <item quantity="other">%d пиров</item>
+    </plurals>
+
+    <plurals name="seeders_plural">
+        <item quantity="one">%d сид</item>
+        <item quantity="few">%d сида</item>
+        <item quantity="many">%d сидов</item>
+        <item quantity="other">%d сидов</item>
+    </plurals>
+
+    <plurals name="leechers_plural">
+        <item quantity="one">%d лич</item>
+        <item quantity="few">%d лича</item>
+        <item quantity="many">%d личей</item>
+        <item quantity="other">%d личей</item>
+    </plurals>
+
+    <string name="next_update">Следующее обновление через %s</string>
+    <string name="add_trackers">Добавить трекеры</string>
+    <string name="edit_tracker">Редактировать трекер</string>
+
+    <string name="tracker_announce_url">Адрес объявлений трекера</string>
+    <string name="trackers_announce_urls">Адреса объявлений трекеров</string>
+
+    <string name="torrent_finished">Торрент завершен</string>
+    <string name="torrent_added">Торрент добавлен</string>
+
+    <string name="torrent_not_found">Торрент не найден</string>
+
+    <string name="details">Сведения</string>
+    <string name="files">Файлы</string>
+    <string name="trackers">Трекеры</string>
+    <string name="directories">Каталоги</string>
+    <string name="peers">Пиры</string>
+    <string name="web_seeders">Веб-сиды</string>
+    <string name="limits">Ограничения</string>
+
+    <string name="activity">Активность</string>
+    <string name="information">Информация</string>
+
+    <string name="completed">Завершено</string>
+    <string name="downloaded">Загружено</string>
+    <string name="uploaded">Отдано</string>
+    <string name="download_speed">Скорость загрузки</string>
+    <string name="upload_speed">Скорость отдачи</string>
+    <string name="seeders">Сиды</string>
+    <string name="leechers">Личи</string>
+    <string name="peers_sending_to_us">Пиры с которых мы загружаем</string>
+    <string name="web_seeders_sending_to_us">Веб-сиды с которых мы загружаем</string>
+    <string name="peers_getting_from_us">Пиры которым мы отдаем</string>
+    <string name="last_activity">Последняя активность</string>
+
+    <string name="total_size">Общий размер</string>
+    <string name="location">Расположение</string>
+    <string name="hash">Хэш</string>
+    <string name="created_by">Создан в</string>
+    <string name="created_on">Дата создания</string>
+    <string name="comment">Комментарий</string>
+    <string name="labels">Метки</string>
+    <string name="edit_labels">Редактировать метки</string>
+    <string name="no_labels">Нет меток</string>
+    <string name="new_label">Новая метка</string>
+    <string name="set_labels_error">Не удалось обновить метки торрента: %1$s</string>
+
+    <string name="parent_directory_list_item_label">..</string>
+
+    <string name="progress_string">%s%%</string>
+
+    <string name="progress_string_with_dot">\u00b7 %s%%</string>
+
+    <!-- e.g. "100 MiB of 200 MiB (50%)" -->
+    <string name="completed_string">%1$s из %2$s (%3$s%%)</string>
+
+    <string name="priority">Приоритет</string>
+    <string name="high_priority">Высокий</string>
+    <string name="normal_priority">Нормальный</string>
+    <string name="low_pririty">Низкий</string>
+    <string name="mixed_priority">Смешанный</string>
+
+    <string name="download_verb">Загружать</string>
+    <string name="not_download">Не загружать</string>
+
+    <string name="no_files">Нет файлов</string>
+
+    <string name="tracker_inactive">Неактивен</string>
+    <string name="tracker_waiting_for_update">В ожидании обновления</string>
+    <string name="tracker_queued_for_update">В очереди на обновление</string>
+    <string name="tracker_updating">Обновляется</string>
+    <string name="tracker_error">Ошибка: %s</string>
+
+    <string name="loading">Загрузка…</string>
+    <string name="no_peers">Нет пиров</string>
+
+    <string name="no_trackers">Нет трекеров</string>
+
+    <string name="speed">Скорость</string>
+    <string name="honor_global_limits">Учитывать глобальные ограничения</string>
+    <string name="download_noun">Загрузка</string>
+    <string name="upload_noun">Отдача</string>
+
+    <string name="seeding">Раздача</string>
+
+    <string name="ratio_limit">Ограничение рейтинга</string>
+    <string name="ratio_limit_global">Использовать глобальные настройки</string>
+    <string name="ratio_limit_unlimited">Раздавать независимо от рейтинга</string>
+
+    <string name="idle_seeding">Раздача при простое</string>
+    <string name="idle_seeding_global">Использовать глобальные настройки</string>
+    <string name="idle_seeding_unlimited">Раздавать независимо от активности</string>
+
+    <string name="text_field_suffix_minutes">минуты</string>
+    <string name="maximum_peers">Максимальное количество пиров</string>
+
+    <string name="settings">Настройки</string>
+    <string name="notifications">Уведомления</string>
+
+    <string name="quit">Выйти</string>
+
+    <string name="select_all">Выбрать все</string>
+
+    <string name="add_server">Добавить сервер</string>
+    <string name="edit_server">Редактировать сервер</string>
+
+    <plurals name="servers_selected">
+        <item quantity="one">%d сервер выбран</item>
+        <item quantity="few">%d сервера выбраны</item>
+        <item quantity="many">%d серверов выбраны</item>
+        <item quantity="other">%d серверов выбраны</item>
+    </plurals>
+
+    <string name="save">Сохранить</string>
+
+    <string name="remove">Удалить</string>
+
+    <plurals name="remove_servers_message">
+        <item quantity="one">Вы уверены, что хотите удалить %d выбранный сервер?</item>
+        <item quantity="few">Вы уверены, что хотите удалить %d выбранных сервера?</item>
+        <item quantity="many">Вы уверены, что хотите удалить %d выбранных серверов?</item>
+        <item quantity="other">Вы уверены, что хотите удалить %d выбранных серверов?</item>
+    </plurals>
+
+    <string name="no_servers">Нет серверов</string>
+
+    <string name="name">Название</string>
+    <string name="address_edit_hint">Доменное имя или IP-адрес</string>
+    <string name="port">Порт</string>
+    <string name="api_path">Путь API</string>
+    <string name="use_https_protocol">Использовать HTTPS протокол</string>
+    <string name="https_hint">Удостоверьтесь что выбранный порт ожидает HTTPS соединение. При использовании переадресации с HTTP на HTTPS эта опция должна быть отключена</string>
+    <string name="certificates">Сертификаты</string>
+    <string name="server_uses_self_signed_certificate">Сервер использует самоподписанный сертификат</string>
+    <string name="certificate">Сертификат в PEM-формате</string>
+    <string name="use_client_certificate_authentication">Использовать аутентификацию с помощью клиентского сертификата</string>
+    <string name="authentication">Аутентификация</string>
+    <string name="username">Имя пользователя</string>
+    <string name="password">Пароль</string>
+    <string name="update_interval">Интервал обновления</string>
+    <string name="update_interval_hint">Этот интервал обновления используется только когда приложение активно, либо при включенном постоянном уведомлении. Фоновый интервал обновления можно изменить в настройках приложения.</string>
+    <string name="text_field_suffix_seconds">секунды</string>
+    <string name="timeout">Таймаут</string>
+
+    <string name="empty_field_error">Это поле должно быть заполнено</string>
+    <string name="number_range_error">Значение должно быть в диапазоне %1$d - %2$d</string>
+    <string name="number_range_error_float">Значение должно быть в диапазоне %1$.1f - %2$.1f</string>
+    <string name="number_parse_error_integer">Значение не является целым числом</string>
+    <string name="number_parse_error_float">Значение не является десятичной дробью</string>
+
+    <string name="server_exists">Сервер с эти именем уже существует</string>
+    <string name="overwrite">Перезаписать</string>
+
+    <string name="add_torrent">Добавить торрент</string>
+    <string name="add_torrent_file">Добавить торрент-файл</string>
+    <string name="storage_permission_error">Требуется разрешение на доступ к памяти</string>
+    <string name="file_is_too_large">Файл слишком большой</string>
+    <string name="file_reading_error">Ошибка чтения файла</string>
+    <string name="file_parsing_error">Ошибка разбора файла</string>
+
+    <string name="download_directory">Каталог загрузки</string>
+
+    <string name="server_settings_downloading">Загрузки</string>
+    <string name="server_settings_seeding">Раздачи</string>
+    <string name="server_settings_queue">Очередь</string>
+    <string name="server_settings_speed">Скорость</string>
+    <string name="server_settings_network">Сеть</string>
+
+    <string name="start_added_torrents">Запускать добавленные торренты</string>
+    <string name="rename_incomplete_files">Добавлять \".part\" к именам незавершенных файлов</string>
+    <string name="incomplete_files_directory">Каталог для незавершенных файлов</string>
+    <string name="stop_seeding_at_ratio">Прекратить раздачу при рейтинге</string>
+    <string name="stop_seeding_if_idle_for">Прекратить раздачу при простое</string>
+    <string name="maximum_active_downloads">Максимальное количество активных загрузок</string>
+    <string name="maximum_active_uploads">Максимальное количество активных раздач</string>
+    <string name="ignore_queue">Игнорировать позицию в очереди при простое</string>
+    <string name="alternative_limits">Альтернативные ограничения</string>
+    <string name="enable">Включить</string>
+    <string name="text_field_suffix_kbps">кБ/с</string>
+    <string name="scheduled">По расписанию</string>
+    <string name="from">С</string>
+    <string name="to">до</string>
+    <string name="every_day">Ежедневно</string>
+    <string name="weekdays">По будням</string>
+    <string name="weekends">По выходным</string>
+    <string name="connection">Соединение</string>
+    <string name="peer_port">Порт для входящих соединений</string>
+    <string name="random_port">Случайный порт при запуске Transmission</string>
+    <string name="port_forwarding">Перенаправление портов</string>
+    <string name="encryption">Шифрование</string>
+    <string name="encryption_mode_allowed">Разрешить</string>
+    <string name="encryption_mode_preferred">Предпочитать</string>
+    <string name="encryption_mode_required">Требовать</string>
+    <string name="enable_utp">Использовать uTP</string>
+    <string name="enable_pex">Использовать PEX</string>
+    <string name="enable_dht">Использовать DHT</string>
+    <string name="enable_lpd">Использовать LPD</string>
+    <string name="peer_limits">Ограничения пиров</string>
+    <string name="maximum_peers_per_torrent">Максимальное количество пиров на торрент</string>
+    <string name="maximum_peers_globally">Общее максимальное количество пиров</string>
+
+    <string name="start_downloading_after_adding">Начать загрузку после добавления</string>
+
+    <string name="torrent_links">Ссылки на торренты</string>
+    <string name="add_torrent_link">Добавить ссылку на торрент</string>
+
+    <string name="current_session">Текущая сессия</string>
+    <string name="total">Всего</string>
+    <string name="duration">Продолжительность</string>
+    <string name="close">Закрыть</string>
+    <string name="server_stats">Статистика сервера</string>
+
+    <!-- e.g. "5 d 21 h" -->
+    <string name="duration_days">%1$d д %2$d ч</string>
+
+    <!-- e.g. "5 h 21 m" -->
+    <string name="duration_hours">%1$d ч %2$d м</string>
+
+    <!-- e.g. "5 m 21 s" -->
+    <string name="duration_minutes">%1$d м %2$d с</string>
+
+    <!-- e.g. "21 s" -->
+    <string name="duration_seconds">%d с</string>
+
+    <plurals name="started_times">
+        <item quantity="one">Запущен %d раз</item>
+        <item quantity="few">Запущен %d раза</item>
+        <item quantity="many">Запущен %d раз</item>
+        <item quantity="other">Запущен %d раз</item>
+    </plurals>
+
+    <string name="start">Запустить</string>
+    <string name="start_now">Запустить сейчас</string>
+    <string name="pause">Приостановить</string>
+
+    <plurals name="remove_torrents_message">
+        <item quantity="one">Вы уверены, что хотите удалить %d выбранный торрент?</item>
+        <item quantity="few">Вы уверены, что хотите удалить %d выбранных торрента?</item>
+        <item quantity="many">Вы уверены, что хотите удалить %d выбранных торрентов?</item>
+        <item quantity="other">Вы уверены, что хотите удалить %d выбранных торрентов?</item>
+    </plurals>
+    <string name="delete_files">Также удалить файлы на жестком диске</string>
+    <string name="check_local_data">Проверить локальные данные</string>
+    <string name="reannounce">Переанонсировать</string>
+    <string name="torrents_remove_error">Не удалось удалить торренты: %1$s</string>
+    <string name="add_torrent_error">Не удалось добавить торрент: %1$s</string>
+    <string name="torrent_set_location_error">Не удалось переместить торренты: %1$s</string>
+    <string name="set_server_settings_error">Не удалось сохранить настройки: %1$s</string>
+    <string name="set_torrent_limits_error">Не удалось сохранить ограничения торрента: %1$s</string>
+    <string name="set_files_wanted_error">Не удалось отметить файлы для загрузки: %1$s</string>
+    <string name="set_files_priority_error">Не удалось сохранить приоритет файлов: %1$s</string>
+    <string name="file_rename_error">Не удалось переименовать файл: %1$s</string>
+    <string name="torrents_start_error">Не удалось запустить торренты: %1$s</string>
+    <string name="torrents_pause_error">Не удалось приостановить торренты: %1$s</string>
+    <string name="torrents_check_error">Не удалось проверить торренты: %1$s</string>
+    <string name="torrents_reannounce_error">Не удалось переанонсировать торренты: %1$s</string>
+    <string name="trackers_add_error">Не удалось добавить трекеры: %1$s</string>
+    <string name="tracker_replace_error">Не удалось изменить трекер: %1$s</string>
+    <string name="trackers_remove_error">Не удалось удалить трекеры: %1$s</string>
+
+    <!-- e.g. "100 MiB, uploaded 200 MiB" -->
+    <string name="uploaded_string">%1$s, роздано %2$s</string>
+
+    <string name="torrent_paused">Приостановлен</string>
+    <string name="torrent_paused_with_error">Приостановлен (%s)</string>
+    <plurals name="torrent_downloading">
+        <item quantity="one">Загружается от %d пира</item>
+        <item quantity="few">Загружается от %d пиров</item>
+        <item quantity="many">Загружается от %d пиров</item>
+        <item quantity="other">Загружается от %d пиров</item>
+    </plurals>
+    <plurals name="torrent_downloading_with_error">
+        <item quantity="one">Загружается от %1$d пира (%2$s)</item>
+        <item quantity="few">Загружается от %1$d пиров (%2$s)</item>
+        <item quantity="many">Загружается от %1$d пиров (%2$s)</item>
+        <item quantity="other">Загружается от %1$d пиров (%2$s)</item>
+    </plurals>
+    <string name="torrent_downloading_stalled">Загружается</string>
+    <string name="torrent_downloading_stalled_with_error">Загружается (%s)</string>
+    <plurals name="torrent_seeding">
+        <item quantity="one">Раздается к %d пиру</item>
+        <item quantity="few">Раздается к %d пирам</item>
+        <item quantity="many">Раздается к %d пирам</item>
+        <item quantity="other">Раздается к %d пирам</item>
+    </plurals>
+    <plurals name="torrent_seeding_with_error">
+        <item quantity="one">Раздается к %1$d пиру (%2$s)</item>
+        <item quantity="few">Раздается к %1$d пирам (%2$s)</item>
+        <item quantity="many">Раздается к %1$d пирам (%2$s)</item>
+        <item quantity="other">Раздается к %1$d пирам (%2$s)</item>
+    </plurals>
+    <string name="torrent_seeding_stalled">Раздается</string>
+    <string name="torrent_seeding_stalled_with_error">Раздается (%s)</string>
+    <string name="torrent_queued">В очереди</string>
+    <string name="torrent_queued_with_error">В очереди (%s)</string>
+    <string name="torrent_checking">Проверяется: %s%%</string>
+    <string name="torrent_checking_with_error">Проверяется: %1$s%% (%2$s)</string>
+    <string name="torrent_queued_for_checking">В очереди на проверку</string>
+    <string name="torrent_queued_for_checking_with_error">В очереди на проверку (%s)</string>
+
+    <plurals name="remove_trackers_message">
+        <item quantity="one">Вы уверены, что хотите удалить %d выбранный трекер?</item>
+        <item quantity="few">Вы уверены, что хотите удалить %d выбранных трекера?</item>
+        <item quantity="many">Вы уверены, что хотите удалить %d выбранных трекеров?</item>
+        <item quantity="other">Вы уверены, что хотите удалить %d выбранных трекеров?</item>
+    </plurals>
+
+    <string-array name="size_units">
+        <item>%s Б</item>
+        <item>%s КиБ</item>
+        <item>%s МиБ</item>
+        <item>%s ГиБ</item>
+        <item>%s ТиБ</item>
+        <item>%s ПиБ</item>
+        <item>%s ЭиБ</item>
+        <item>%s ЗиБ</item>
+        <item>%s ЙиБ</item>
+    </string-array>
+
+    <string-array name="speed_units">
+        <item>%s Б/с</item>
+        <item>%s КиБ/с</item>
+        <item>%s МиБ/с</item>
+        <item>%s ГиБ/с</item>
+        <item>%s ТиБ/с</item>
+        <item>%s ПиБ/с</item>
+        <item>%s ЭиБ/с</item>
+        <item>%s ЗиБ/с</item>
+        <item>%s ЙиБ/с</item>
+    </string-array>
+
+    <string name="remove_torrent_message">Вы уверены, что хотите удалить этот торрент?</string>
+
+    <string name="set_location">Переместить</string>
+    <string name="move_files">Переместить файлы из текущего каталога</string>
+
+    <string name="rename">Переименовать</string>
+
+    <string name="file_name">Имя файла</string>
+
+    <string name="about">О программе</string>
+    <string name="authors">Авторы</string>
+    <string name="translators">Переводчики</string>
+    <string name="license">Лицензия</string>
+
+    <string name="prefs_dark_theme_mode_title">Тёмная тема</string>
+
+    <string name="prefs_dark_theme_mode_auto_pre_q">С учетом режима энергосбережения</string>
+    <string name="prefs_dark_theme_mode_auto_q">Как в системе</string>
+    <string name="prefs_dark_theme_mode_on">Включено</string>
+    <string name="prefs_dark_theme_mode_off">Отключено</string>
+
+    <string name="prefs_torrent_compact_view_title">Компактное представление торрентов</string>
+    <string name="prefs_torrent_name_multiline_title">Отображать названия торрентов на нескольких строках</string>
+
+    <string name="prefs_persistent_notification_title">Показывать постоянное уведомление</string>
+
+    <string name="persistent_notification_channel_name">Постоянное уведомление</string>
+    <string name="finished_torrents_channel_name">Завершенные торренты</string>
+    <string name="added_torrents_channel_name">Добавленные торренты</string>
+
+    <string name="appearance">Внешний вид</string>
+    <string name="behaviour">Поведение</string>
+    <string name="torrents">Торренты</string>
+
+    <string name="quick_return_title">Быстрый возврат</string>
+    <string name="quick_return_summary">Коснитесь верхней панели чтобы вернуться к началу</string>
+
+    <string name="prefs_delete_files_title">Удалять файлы на жестком диске при удалении торрента</string>
+    <string name="prefs_link_from_clipboard_title">Автоматически копировать ссылку из буфера обмена при добавлении ссылки на торрент</string>
+    <string name="prefs_remember_add_torrent_parameters_title">Запоминать параметры добавленного торрента</string>
+
+    <string name="prefs_merge_trackers_when_adding_existing_torrent_title">Объединять трекеры при добавлении существующего торрента</string>
+    <string name="prefs_ask_for_merging_trackers_when_adding_existing_torrent_title">Спрашивать об объединении трекеров при добавлении существующего торрента</string>
+
+    <string name="torrent_duplicate_not_merging_trackers">Торрент уже существует: %1$s</string>
+    <string name="torrents_duplicates_not_merging_trackers">Торренты уже существуют:\n%1$s</string>
+    <string name="torrent_duplicate_merging_trackers">Объединены трекеры для «%1$s» торрента</string>
+    <string name="torrents_duplicates_merging_trackers">Объединены трекеры для торрентов:\n%1$s</string>
+    <string name="torrent_duplicate_merging_trackers_question">Торрент «%1$s» уже добавлен, объединить трекеры?</string>
+    <string name="torrents_duplicates_merging_trackers_question">Торренты уже добавлены:\n%1$s\n\nОбъединить трекеры?</string>
+    <string name="merging_trackers_error">Не удалось объединить трекеры: %1$s</string>
+    <string name="merge_no">Не объединять</string>
+    <string name="merge_yes">Объединить</string>
+    <string name="do_not_ask_again">Больше не спрашивать</string>
+
+    <string name="alternative_speed_limits">Альтернативные ограничения скорости</string>
+
+
+    <string name="free_space">Свободное место: %s</string>
+    <string name="free_space_error">Ошибка получения свободного места</string>
+
+    <string name="notify_on_finished">Уведомлять о завершенных торрентах</string>
+    <string name="notify_on_added">Уведомлять о добавленных торрентах</string>
+
+    <string name="notifications_on_connect">Уведомления при подключении к серверу</string>
+    <string name="notify_on_finished_since_last">Уведомлять о завершенных торрентах со времени последнего подключения</string>
+    <string name="notify_on_added_since_last">Уведомлять о добавленных торрентах со времени последнего подключения</string>
+
+    <string name="persistent_notification">Постоянное уведомление</string>
+
+    <string name="persistent_notification_warning">При включенном постоянном уведомлении приложение будет обновлять данные с частотой указанной в настройках подключения даже если приложение в фоне, что может привести к повышенному энергопотреблению</string>
+
+    <string name="prefs_background_update_interval_title">Интервал фонового обновления</string>
+    <string-array name="prefs_background_update_interval_entries">
+        <item>Отключено</item>
+        <item>15 минут</item>
+        <item>30 минут</item>
+        <item>1 час</item>
+        <item>3 часа</item>
+        <item>6 часов</item>
+        <item>12 часов</item>
+        <item>24 часа</item>
+    </string-array>
+
+    <string name="connection_settings">Настройки подключения</string>
+
+    <string name="proxy_settings">Настройки прокси</string>
+    <string name="proxy_type">Тип прокси</string>
+    <string name="share">Поделиться</string>
+    <string name="share_torrent">Поделиться торрентом</string>
+
+    <string name="proxy_type_default">По умолчанию</string>
+    <string name="auto_connect_on_wifi_network">Автоматически подключаться к этому серверу при подключении к сети Wi-Fi</string>
+    <string name="wifi_ssid_hint">SSID Wi-Fi сети</string>
+    <string name="wifi_ssid_set_from_current">Установить из текущей Wi-Fi сети</string>
+    <string name="location_permission_rationale">Для получения информации о SSID Wi-Fi сети требуется разрешение на доступ к точному местоположению</string>
+    <string name="request_location_permission">Разрешить доступ к местоположению</string>
+    <string name="background_wifi_networks_explanation_with_background_permission">Чтобы использовать эту функцию когда приложение находится в фоне, включите постоянное уведомление в настройках приложения либо предоставьте разрешение на фоновый доступ к местоположению</string>
+    <string name="background_wifi_networks_explanation_no_background_permission">Чтобы использовать эту функцию когда приложение находится в фоне, включите постоянное уведомление в настройках приложения</string>
+    <string name="background_location_permission_rationale">Для получения информации о SSID Wi-Fi сети когда приложение находится в фоне требуется разрешение на фоновый доступ к местоположению</string>
+    <string name="request_background_location_permission">Разрешить фоновый доступ к местоположению</string>
+    <string name="background_location_permission_granted">Разрешение на фоновый доступ к местоположению предоставлено</string>
+
+    <string name="runtime_permission_go_to_settings_rationale">Пожалуйста, предоставьте разрешение из системных настроек</string>
+    <string name="go_to_settings">Перейти в настройки</string>
+
+    <string name="current_ssid_error">Не удалось получить SSID текущей Wi-Fi сети</string>
+
+    <string name="request_enable_location">Пожалуйста, включите определение местоположения в системных настройках</string>
+    <string name="enable_location">Включить местоположение</string>
+
+    <string name="storage_permission_rationale_torrent">Для открытия этого торрент-файла требуется разрешение на доступ к памяти</string>
+
+    <string name="torrents_filters">Сортировка и фильтры</string>
+    <string name="transmission_settings">Настройки Transmission</string>
+
+    <string name="load_from_file">Загрузить из файла</string>
+
+    <string name="free_space_in_download_directory">Свободное место в каталоге загрузки</string>
+
+    <string name="reset">Сбросить</string>
+
+    <string name="directory_icon">Иконка каталога</string>
+    <string name="file_icon">Иконка файла</string>
+
+    <string name="prefs_color_theme_title">Цвета</string>
+    <string name="prefs_color_theme_system">Системные цвета</string>
+    <string name="prefs_color_theme_red">Красный</string>
+    <string name="prefs_color_theme_teal">Бирюзовый</string>
+
+    <string name="see_detailed_error_message">Подробное сообщение об ошибке</string>
+    <string name="detailed_error_message">Подробное сообщение об ошибке</string>
+
+    <string name="notification_permission_rationale">Для показа уведомлений о торрентах требуется разрешение</string>
+    <string name="request_permission">Предоставить разрешение</string>
+    <string name="request_notification_permission">Предоставить разрешение на показ уведомлений</string>
+
+    <string name="date_time_with_relative">%1$s (%2$s)</string>
+
+    <string name="no_web_seeders">Нет веб-сидов</string>
+
+    <string name="source_code_url">Исходный код: %1$s</string>
+    <string name="translations_url">Переводы: %1$s</string>
+    <string name="maintainer">Сопровождающий</string>
+    <string name="contributor">Участник</string>
+
+    <string name="navigate_up">Перейти вверх</string>
+
+    <string name="select_action">Выбрать</string>
+    <string name="selection_panel">Панель выбора</string>
+    <string name="selected">Выбрано</string>
+
+    <string name="more_options">Ещё</string>
+
+    <string name="search">Поиск</string>
+    <string name="clear">Очистить</string>
+    <string name="sort_order">Порядок сортировки:</string>
+    <string name="ascending">По возрастанию</string>
+    <string name="descending">По убыванию</string>
+</resources>

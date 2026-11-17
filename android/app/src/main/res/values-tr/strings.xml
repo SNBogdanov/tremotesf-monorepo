@@ -1,0 +1,388 @@
+<!--
+SPDX-FileCopyrightText: 2017-2026 Alexey Rochev <equeim@gmail.com>
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="disconnected">Bağlantı kesildi</string>
+    <string name="connecting">Bağlanıyor\u2026</string>
+
+    <string name="connect">Bağlan</string>
+    <string name="disconnect">Bağlantıyı kes</string>
+    <string name="add">Ekle</string>
+
+    <string name="timed_out">Bağlantı zaman aşımı</string>
+    <string name="connection_error">Bağlantı hatası</string>
+    <string name="authentication_error">Kimlik doğrulama hatası</string>
+    <string name="main_activity_subtitle">\u2193 %1$s    \u2191 %2$s</string>
+
+    <string name="current_server_string">%1$s (%2$s)</string>
+
+    <string name="download_speed_string">\u2193 %s</string>
+    <string name="upload_speed_string">\u2191 %s</string>
+
+    <string name="server">Sunucu</string>
+    <string name="server_settings">Sunucu ayarları</string>
+
+    <string name="sort">Tür</string>
+    <string name="progress">İlerleme</string>
+    <string name="eta">ETA</string>
+    <string name="ratio">Oran</string>
+    <string name="size">Boyut</string>
+    <string name="added_date">Eklenme tarihi</string>
+
+    <string name="status">Durum</string>
+
+    <string name="no_torrents">Torrentler yok</string>
+
+    <string name="torrents_all">Hepsi (%d)</string>
+    <string name="torrents_active">Etkin (%d)</string>
+    <string name="torrents_downloading">İndiriliyor (%d)</string>
+    <string name="torrents_seeding">Gönderiliyor (%d)</string>
+    <string name="torrents_paused">Durduruldu (%d)</string>
+    <string name="torrents_checking">Denetliyor (%d)</string>
+    <string name="torrents_errored">Hatalı (%d)</string>
+
+    <!-- e.g. "example.com (42)" -->
+    <string name="trackers_spinner_text">%1$s (%2$d)</string>
+    <string name="directories_spinner_text">%1$s (%2$d)</string>
+
+    <plurals name="torrents_selected">
+        <item quantity="one">%d torrent seçildi</item>
+        <item quantity="other">%d torrent seçildi</item>
+    </plurals>
+
+    <plurals name="files_selected">
+        <item quantity="one">%d dosya seçildi</item>
+        <item quantity="other">%d dosya seçildi</item>
+    </plurals>
+
+    <plurals name="trackers_selected">
+        <item quantity="one">%d izleyici seçildi</item>
+        <item quantity="other">%d izleyici seçildi</item>
+    </plurals>
+
+    <plurals name="peers_plural">
+        <item quantity="one">%d kullanıcı</item>
+        <item quantity="other">%d eş</item>
+    </plurals>
+
+    <string name="next_update">Sonraki güncelleme %s</string>
+    <string name="add_trackers">İzleyicilere ekle</string>
+    <string name="edit_tracker">İzleyici düzenle</string>
+
+    <string name="tracker_announce_url">İzleyici duyuru URL\'si</string>
+    <string name="trackers_announce_urls">İzleyicilerin duyuru URL\'leri</string>
+
+    <string name="torrent_finished">Torrent bitirildi</string>
+    <string name="torrent_added">Torrent eklendi</string>
+
+    <string name="torrent_not_found">Torrent bulunamadı</string>
+
+    <string name="details">Ayrıntılar</string>
+    <string name="files">Dosyalar</string>
+    <string name="trackers">İzleyiciler</string>
+    <string name="directories">Dizinler</string>
+    <string name="peers">Eşler</string>
+    <string name="limits">Sınırlar</string>
+
+    <string name="activity">Etkinlik</string>
+    <string name="information">Bilgilendirme</string>
+
+    <string name="completed">Tamamlandı</string>
+    <string name="downloaded">İndirildi</string>
+    <string name="uploaded">Yüklenildi</string>
+    <string name="download_speed">İndirme hızı</string>
+    <string name="upload_speed">Yükleme hızı</string>
+    <string name="seeders">Gönderenler</string>
+    <string name="leechers">İndirenler</string>
+    <string name="last_activity">Son etkinlik</string>
+
+    <string name="total_size">Toplam boyut</string>
+    <string name="location">Konum</string>
+    <string name="hash">Hash</string>
+    <string name="created_by">Oluşturan</string>
+    <string name="created_on">Oluşturma tarihi</string>
+    <string name="comment">Yorum</string>
+    <string name="parent_directory_list_item_label">..</string>
+
+    <string name="progress_string">%s%%</string>
+
+    <string name="progress_string_with_dot">\u00b7 %s%%</string>
+
+    <!-- e.g. "100 MiB of 200 MiB (50%)" -->
+    <string name="completed_string">%2$s\'dan %1$s (%%%3$s)</string>
+
+    <string name="priority">Öncelik</string>
+    <string name="high_priority">Yüksek</string>
+    <string name="normal_priority">Normal</string>
+    <string name="low_pririty">Düşük</string>
+    <string name="mixed_priority">Karışık</string>
+
+    <string name="download_verb">İndir</string>
+    <string name="not_download">İndirme</string>
+
+    <string name="no_files">Dosya yok.</string>
+
+    <string name="tracker_inactive">Ettkin değil</string>
+    <string name="tracker_updating">Güncelleniyor</string>
+    <string name="tracker_error">Hata: %s</string>
+
+    <string name="loading">Yükleniyor\u2026</string>
+    <string name="no_peers">Eş yok</string>
+
+    <string name="no_trackers">İzleyici yok</string>
+
+    <string name="speed">Hız</string>
+    <string name="honor_global_limits">Evrensel saygınlık sınırları</string>
+    <string name="download_noun">İndir</string>
+    <string name="upload_noun">Yükle</string>
+
+    <string name="seeding">Gönderme</string>
+
+    <string name="ratio_limit">Oran sınırı</string>
+    <string name="ratio_limit_global">Evrensel ayarları kullan</string>
+    <string name="ratio_limit_unlimited">Oran ne olursa olsun gönderimde kal</string>
+
+    <string name="idle_seeding">Boşta gönderme </string>
+    <string name="idle_seeding_global">Evrensel ayarları kullan</string>
+    <string name="idle_seeding_unlimited">Etkinlik ne olursa olsun gönder</string>
+
+    <string name="maximum_peers">Azami Eşler</string>
+
+    <string name="settings">Ayarlar</string>
+    <string name="notifications">Bildirimler</string>
+
+    <string name="quit">Çıkış</string>
+
+    <string name="select_all">Hepsini seç</string>
+
+    <string name="add_server">Sunucu ekle</string>
+    <string name="edit_server">Sunucuyu düzenle</string>
+
+    <plurals name="servers_selected">
+        <item quantity="one">%d sunucu seçildi</item>
+        <item quantity="other">%d sunucu seçildi</item>
+    </plurals>
+
+    <string name="save">Kaydet</string>
+
+    <string name="remove">Kaldır</string>
+
+    <plurals name="remove_servers_message">
+        <item quantity="one">Seçilen %d sunucuyu silmek istediğinizden emin misiniz?</item>
+        <item quantity="other">Seçilen %d sunucuyu kaldırmak istediğinizden emin misiniz?</item>
+    </plurals>
+
+    <string name="no_servers">Sunucu yok</string>
+
+    <string name="name">İsim</string>
+    <string name="address_edit_hint">Alan adı veya IP adresi</string>
+    <string name="port">Bağlantı noktası</string>
+    <string name="api_path">API yolu</string>
+    <string name="certificates">Sertifikalar</string>
+    <string name="server_uses_self_signed_certificate">Sunucu kendinden imzalı sertifika kullanıyor</string>
+    <string name="certificate">PEM biçiminde sertifika</string>
+    <string name="use_client_certificate_authentication">İstemci sertifikası kimlik doğrulamasını kullan</string>
+    <string name="authentication">Kimlik doğrulama</string>
+    <string name="username">Kullanıcı adı</string>
+    <string name="password">Şifre</string>
+    <string name="empty_field_error">Bu alan boş olamaz</string>
+    <string name="server_exists">Bu ada sahip sunucu zaten var</string>
+    <string name="overwrite">Üzerine Yaz</string>
+
+    <string name="add_torrent">Torrent ekle</string>
+    <string name="add_torrent_file">Torrent dosyası ekle</string>
+    <string name="storage_permission_error">Depolama izni gerekli</string>
+    <string name="file_is_too_large">Dosya çok büyük</string>
+    <string name="file_reading_error">Dosya okunurken hata oluştu</string>
+    <string name="file_parsing_error">Dosya ayrıştırılırken hata oluştu</string>
+
+    <string name="download_directory">İndirme dizini</string>
+
+    <string name="server_settings_downloading">İndiriliyor</string>
+    <string name="server_settings_seeding">Gönderiliyor</string>
+    <string name="server_settings_queue">Kuyruk</string>
+    <string name="server_settings_speed">Hız</string>
+    <string name="server_settings_network">Ağ</string>
+
+    <string name="start_added_torrents">Eklenen torrentleri başlat</string>
+    <string name="rename_incomplete_files">Tamamlanmamış dosyaların adlarına \".part\" ekleyin</string>
+    <string name="incomplete_files_directory">Tamamlanmamış dosyalar için dizin</string>
+    <string name="stop_seeding_at_ratio">Göndermeyi bu oranda durdur</string>
+    <string name="stop_seeding_if_idle_for">Boşta kalırsa göndermeyi durdur</string>
+    <string name="maximum_active_downloads">Azami etkin indirmeler</string>
+    <string name="maximum_active_uploads">Azami etkin yüklemeler</string>
+    <string name="ignore_queue">Boşta kalırsa kuyruk konumunu yoksay</string>
+    <string name="alternative_limits">Muadil sınırlar</string>
+    <string name="enable">Etkinleştir</string>
+    <string name="text_field_suffix_kbps">kB/s</string>
+    <string name="scheduled">Tarifeli</string>
+    <string name="from">İtibaren</string>
+    <string name="to">İçin</string>
+    <string name="every_day">Her gün</string>
+    <string name="weekdays">Hafta içi</string>
+    <string name="weekends">Hafta sonu</string>
+    <string name="connection">Bağlantı</string>
+    <string name="peer_port">Eş bağlantı noktası</string>
+    <string name="random_port">Transmission başlangıcında rastgele bağlantı noktası</string>
+    <string name="port_forwarding">Bağlantı noktası iletmeyi etkinleştir</string>
+    <string name="encryption">Şifreleme</string>
+    <string name="encryption_mode_allowed">İzin ver</string>
+    <string name="encryption_mode_preferred">Tercih et</string>
+    <string name="encryption_mode_required">Zorunlu</string>
+    <string name="enable_utp">UTP\'yi etkinleştir</string>
+    <string name="enable_pex">PEX\'i etkinleştir</string>
+    <string name="enable_dht">DHT\'yi etkinleştir</string>
+    <string name="enable_lpd">LPD\'yi etkinleştir</string>
+    <string name="peer_limits">Eş sınırı</string>
+    <string name="maximum_peers_per_torrent">Torrent başına azami eş</string>
+    <string name="maximum_peers_globally">Genel azami eş</string>
+
+    <string name="start_downloading_after_adding">Ekledikten sonra indirmeye başla</string>
+
+    <string name="add_torrent_link">Torrent bağlantısını ekle</string>
+
+    <string name="current_session">Mevcut oturum</string>
+    <string name="total">Toplam</string>
+    <string name="duration">Süre</string>
+    <string name="close">Kapat</string>
+    <string name="server_stats">Sunucu istatistikleri</string>
+
+    <!-- e.g. "5 d 21 h" -->
+    <string name="duration_days">%1$d g %2$d s</string>
+
+    <!-- e.g. "5 h 21 m" -->
+    <string name="duration_hours">%1$d s %2$d d</string>
+
+    <!-- e.g. "5 m 21 s" -->
+    <string name="duration_minutes">%1$d d%2$d sn</string>
+
+    <!-- e.g. "21 s" -->
+    <string name="duration_seconds">%d sn</string>
+
+    <plurals name="started_times">
+        <item quantity="one">%d\'de başladı</item>
+        <item quantity="other">%d\'de başladı</item>
+    </plurals>
+
+    <string name="start">Başlat</string>
+    <string name="pause">Duraklat</string>
+
+    <plurals name="remove_torrents_message">
+        <item quantity="one">Seçilen %d torrenti silmek istediğinizden emin misiniz?</item>
+        <item quantity="other">Seçilen %d torrenti silmek istediğinizden emin misiniz?</item>
+    </plurals>
+    <string name="delete_files">Ayrıca sabit diskteki dosyaları da silin</string>
+    <string name="check_local_data">Yerel verileri denetle</string>
+    <string name="reannounce">Yeniden duyurma</string>
+    <!-- e.g. "100 MiB, uploaded 200 MiB" -->
+    <string name="uploaded_string">%1$s\'dan %2$s yüklendi</string>
+
+    <string name="torrent_paused">Durduruldu</string>
+    <plurals name="torrent_downloading">
+        <item quantity="one">%d eşten indiriliyor</item>
+        <item quantity="other">%d eşten indiriliyor</item>
+    </plurals>
+    <string name="torrent_downloading_stalled">İndiriliyor</string>
+    <plurals name="torrent_seeding">
+        <item quantity="one">%d eşe gönderiliyor</item>
+        <item quantity="other">%d eşe gönderiliyor</item>
+    </plurals>
+    <string name="torrent_seeding_stalled">Gönderiliyor</string>
+    <string name="torrent_queued">Sıraya alındı</string>
+    <string name="torrent_queued_for_checking">Denetim için sıraya alındı</string>
+    <plurals name="remove_trackers_message">
+        <item quantity="one">Seçilen %d izleyiciyi kaldırmak istediğinizden emin misiniz?</item>
+        <item quantity="other">Seçilen %d izleyiciyi kaldırmak istediğinizden emin misiniz?</item>
+    </plurals>
+
+    <string-array name="size_units">
+        <item>%s B</item>
+        <item>%s KiB</item>
+        <item>%s MiB</item>
+        <item>%s GiB</item>
+        <item>%s TiB</item>
+        <item>%s PiB</item>
+        <item>%s EiB</item>
+        <item>%s ZiB</item>
+        <item>%s YiB</item>
+    </string-array>
+
+    <string-array name="speed_units">
+        <item>%s B/s</item>
+        <item>%s KiB/s</item>
+        <item>%s MiB/s</item>
+        <item>%s GiB/s</item>
+        <item>%s TiB/s</item>
+        <item>%s PiB/s</item>
+        <item>%s EiB/s</item>
+        <item>%s ZiB/s</item>
+        <item>%s YiB/s</item>
+    </string-array>
+
+    <string name="remove_torrent_message">Bu torrent\'i kaldırmak istediğinden emin misin?</string>
+
+    <string name="set_location">Konumu ayarla</string>
+    <string name="move_files">Geçerli dizinden dosyaları taşı</string>
+
+    <string name="rename">Yeniden adlandır</string>
+
+    <string name="file_name">Dosya adı</string>
+
+    <string name="about">Hakkında</string>
+    <string name="authors">Yazarlar</string>
+    <string name="translators">Çevirmenler</string>
+    <string name="license">Lisans</string>
+
+    <string name="prefs_dark_theme_mode_auto_pre_q">Pil tasarrufu ile ayarla</string>
+    <string name="prefs_dark_theme_mode_auto_q">Sistem varsayılanı</string>
+    <string name="prefs_torrent_compact_view_title">Torrentler için derlitoplu görünüm kullanın</string>
+    <string name="prefs_torrent_name_multiline_title">Torrent adlarını birden fazla satırda göster</string>
+
+    <string name="prefs_persistent_notification_title">Kalıcı bildirimi göster</string>
+
+    <string name="persistent_notification_channel_name">Kalıcı bildirim</string>
+    <string name="finished_torrents_channel_name">Biten torrentler</string>
+    <string name="added_torrents_channel_name">Eklenen torrentler</string>
+
+    <string name="appearance">Görünüm</string>
+    <string name="torrents">Torrentler</string>
+
+    <string name="prefs_delete_files_title">Torrent kaldırırken sabit diskteki dosyaları silin</string>
+    <string name="alternative_speed_limits">Muadil hız sınırları</string>
+
+
+    <string name="free_space">Boş alan: %s</string>
+    <string name="free_space_error">Boş alan elde edilirken hata oluştu</string>
+
+    <string name="notify_on_finished">Biten torrentleri bildir</string>
+    <string name="notify_on_added">Eklenen torrentleri bildir</string>
+
+    <string name="notifications_on_connect">Sunucuya bağlanırken bildirimler</string>
+    <string name="notify_on_finished_since_last">Sunucuya son bağlantıdan bu yana biten torrentlerİ bildir</string>
+    <string name="notify_on_added_since_last">Sunucuya son bağlantıdan bu yana eklenen torrentleri bildir</string>
+
+    <string name="persistent_notification">Kalıcı bildirim</string>
+
+    <string name="prefs_background_update_interval_title">Arka plan güncelleme aralığı</string>
+    <string-array name="prefs_background_update_interval_entries">
+        <item>Devredışı</item>
+        <item>15 dakika</item>
+        <item>30 dakika</item>
+        <item>1 saat</item>
+        <item>3 saat</item>
+        <item>6 saat</item>
+        <item>12 saat</item>
+        <item>24 saat</item>
+    </string-array>
+
+    <string name="connection_settings">Bağlantı ayarları</string>
+
+    <string name="proxy_settings">Vekil ayarları</string>
+    <string name="proxy_type">Vekil türü</string>
+    <string name="proxy_type_default">Varsayılan</string>
+    <string name="date_time_with_relative">%1$s (%2$s)</string>
+
+    </resources>

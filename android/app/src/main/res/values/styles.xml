@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+SPDX-FileCopyrightText: 2017-2026 Alexey Rochev <equeim@gmail.com>
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="BaseAppTheme" parent="android:Theme.Material.NoActionBar" />
+
+    <style name="AppTheme" parent="BaseAppTheme">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/navigation_bar_color</item>
+        <item name="android:windowLightStatusBar">@bool/is_light_theme
+        </item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">@bool/is_light_theme
+        </item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <!--       Android removes background from our icon on splash screen. Override windowSplashScreenIconBackgroundColor to fix it -->
+        <item name="android:windowSplashScreenIconBackgroundColor" tools:targetApi="31">
+            @color/ic_launcher_background
+        </item>
+
+        <!-- Used by WebView's dark mode feature pre-Q -->
+        <item name="isLightTheme">@bool/is_light_theme</item>
+
+        <item name="android:windowBackground">@color/window_background</item>
+    </style>
+</resources>

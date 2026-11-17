@@ -1,0 +1,532 @@
+<!--
+SPDX-FileCopyrightText: 2017-2026 Alexey Rochev <equeim@gmail.com>
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="disconnected">Verbindung getrennt</string>
+    <string name="connecting">Verbinden\u2026</string>
+
+    <string name="connect">Verbinden</string>
+    <string name="disconnect">Verbindung trennen</string>
+    <string name="add">Hinzufügen</string>
+
+    <string name="invalid_connection_configuration">Ungültige Verbindungskonfiguration</string>
+    <string name="timed_out">Zeitüberschreitung</string>
+    <string name="connection_error">Verbindungsfehler</string>
+    <string name="connection_error_with_cause">Verbindungsfehler: %1$s</string>
+    <string name="authentication_error">Authentifizierungsfehler</string>
+    <string name="parsing_error">JSON-Analysefehler</string>
+    <string name="unsupported_server_version">Version \'%1$s\' von Transmission wird nicht unterstützt</string>
+    <string name="server_returned_error_result">Server antwortete \'%1$s\'</string>
+
+    <string name="main_activity_subtitle">\u2193 %1$s    \u2191 %2$s</string>
+
+    <string name="current_server_string">%1$s (%2$s)</string>
+
+    <string name="download_speed_string">\u2193 %s</string>
+    <string name="upload_speed_string">\u2191 %s</string>
+
+    <string name="server">Server</string>
+    <string name="server_settings">Server Einstellungen</string>
+
+    <string name="sort">Sortieren</string>
+    <string name="progress">Fortschritt</string>
+    <string name="eta">Geschätzte Fertigstellung</string>
+    <string name="ratio">Verhältnis</string>
+    <string name="size">Größe</string>
+    <string name="added_date">Hinzufügungsdatum</string>
+
+    <string name="status">Status</string>
+
+    <string name="no_torrents">Keine Torrents</string>
+
+    <string name="torrents_all">Alle (%d)</string>
+    <string name="torrents_active">Aktiv (%d)</string>
+    <string name="torrents_downloading">Herunterladen (%d)</string>
+    <string name="torrents_seeding">Seeden (%d)</string>
+    <string name="torrents_paused">Pausiert (%d)</string>
+    <string name="torrents_checking">Prüfen (%d)</string>
+    <string name="torrents_errored">Fehlerhaft (%d)</string>
+
+    <!-- e.g. "example.com (42)" -->
+    <string name="trackers_spinner_text">%1$s (%2$d)</string>
+    <string name="directories_spinner_text">%1$s (%2$d)</string>
+
+    <plurals name="torrents_selected">
+        <item quantity="one">%d Torrent ausgewählt</item>
+        <item quantity="other">%d Torrents ausgewählt</item>
+    </plurals>
+
+    <plurals name="files_selected">
+        <item quantity="one">%d Datei ausgewählt</item>
+        <item quantity="other">%d Dateien ausgewählt</item>
+    </plurals>
+
+    <plurals name="trackers_selected">
+        <item quantity="one">%d Tracker ausgewählt</item>
+        <item quantity="other">%d Tracker ausgewählt</item>
+    </plurals>
+
+    <plurals name="peers_plural">
+        <item quantity="one">%d Teilnehmer</item>
+        <item quantity="other">%d Teilnehmer</item>
+    </plurals>
+
+    <plurals name="seeders_plural">
+        <item quantity="one">%d Seeder</item>
+        <item quantity="other">%d Seeders</item>
+    </plurals>
+
+    <plurals name="leechers_plural">
+        <item quantity="one">%d Leecher</item>
+        <item quantity="other">%d Leechers</item>
+    </plurals>
+
+    <string name="next_update">Nächste Aktualisierung nach %s</string>
+    <string name="add_trackers">Tracker hinzufügen</string>
+    <string name="edit_tracker">Tracker editieren</string>
+
+    <string name="tracker_announce_url">Tracker Ankündigungs-URL</string>
+    <string name="trackers_announce_urls">Ankündigungs-URLs der Tracker</string>
+
+    <string name="torrent_finished">Torrent fertiggestellt</string>
+    <string name="torrent_added">Torrent hinzugefügt</string>
+
+    <string name="torrent_not_found">Torrent nicht gefunden</string>
+
+    <string name="details">Details</string>
+    <string name="files">Dateien</string>
+    <string name="trackers">Tracker</string>
+    <string name="directories">Verzeichnisse</string>
+    <string name="peers">Teilnehmer</string>
+    <string name="web_seeders">Web-Seeders</string>
+    <string name="limits">Beschränkungen</string>
+
+    <string name="activity">Aktivität</string>
+    <string name="information">Information</string>
+
+    <string name="completed">Fertiggestellt</string>
+    <string name="downloaded">Heruntergeladen</string>
+    <string name="uploaded">Hochgeladen</string>
+    <string name="download_speed">Herunterladegeschwindigkeit</string>
+    <string name="upload_speed">Hochladegeschwindigkeit</string>
+    <string name="seeders">Seeder</string>
+    <string name="leechers">Leecher</string>
+    <string name="peers_sending_to_us">Peers, von denen wir herunterladen</string>
+    <string name="web_seeders_sending_to_us">Web-Seeder, von denen wir herunterladen</string>
+    <string name="peers_getting_from_us">Peers, zu denen wir hochladen</string>
+    <string name="last_activity">Letzte Aktivität</string>
+
+    <string name="total_size">Gesamtgröße</string>
+    <string name="location">Ort</string>
+    <string name="hash">Hashwert</string>
+    <string name="created_by">Erstellt von</string>
+    <string name="created_on">Erstellt am</string>
+    <string name="comment">Kommentar</string>
+    <string name="parent_directory_list_item_label">..</string>
+
+    <string name="progress_string">%s%%</string>
+
+    <string name="progress_string_with_dot">\u00b7 %s %%</string>
+
+    <!-- e.g. "100 MiB of 200 MiB (50%)" -->
+    <string name="completed_string">%1$s von %2$s (%3$s%%)</string>
+
+    <string name="priority">Priorität</string>
+    <string name="high_priority">Hoch</string>
+    <string name="normal_priority">Normal</string>
+    <string name="low_pririty">Niedrig</string>
+    <string name="mixed_priority">Gemischt</string>
+
+    <string name="download_verb">Herunterladen</string>
+    <string name="not_download">Nicht herunterladen</string>
+
+    <string name="no_files">Keine Dateien</string>
+
+    <string name="tracker_inactive">Inaktiv</string>
+    <string name="tracker_waiting_for_update">Warten auf Aktualisierung</string>
+    <string name="tracker_queued_for_update">Wird gerade aktualisiert</string>
+    <string name="tracker_updating">Aktualisieren</string>
+    <string name="tracker_error">Fehler: %s</string>
+
+    <string name="loading">Lade\u2026</string>
+    <string name="no_peers">Keine Teilnehmer</string>
+
+    <string name="no_trackers">Keine Tracker</string>
+
+    <string name="speed">Geschwindigkeit</string>
+    <string name="honor_global_limits">Beachte globale Beschränkungen</string>
+    <string name="download_noun">Herunterladen</string>
+    <string name="upload_noun">Hochladen</string>
+
+    <string name="seeding">Seeden</string>
+
+    <string name="ratio_limit">Verhältnislimit</string>
+    <string name="ratio_limit_global">Nutze globale Einstellungen</string>
+    <string name="ratio_limit_unlimited">Seede unabhängig des Verhältnisses</string>
+
+    <string name="idle_seeding">Seede wenn untätig</string>
+    <string name="idle_seeding_global">Nutze globale Einstellungen</string>
+    <string name="idle_seeding_unlimited">Seede unabhängig von der Aktivität</string>
+
+    <string name="text_field_suffix_minutes">Minuten</string>
+    <string name="maximum_peers">Maximale Teilnehmeranzahl</string>
+
+    <string name="settings">Einstellungen</string>
+    <string name="notifications">Benachrichtigungen</string>
+
+    <string name="quit">Beenden</string>
+
+    <string name="select_all">Wähle alles aus</string>
+
+    <string name="add_server">Server hinzufügen</string>
+    <string name="edit_server">Server editieren</string>
+
+    <plurals name="servers_selected">
+        <item quantity="one">%d Server ausgewählt</item>
+        <item quantity="other">%d Server ausgewählt</item>
+    </plurals>
+
+    <string name="save">Speichern</string>
+
+    <string name="remove">Entfernen</string>
+
+    <plurals name="remove_servers_message">
+        <item quantity="one">Sind Sie sich sicher, dass Sie %d gewählten Server entfernen wollen</item>
+        <item quantity="other">Sind Sie sich sicher, dass Sie %d gewählte Server entfernen wollen</item>
+    </plurals>
+
+    <string name="no_servers">Keine Server</string>
+
+    <string name="name">Name</string>
+    <string name="address_edit_hint">Domain Name oder IP Adresse</string>
+    <string name="port">Port</string>
+    <string name="api_path">API Pfad</string>
+    <string name="use_https_protocol">HTTPS-Protokoll verwenden</string>
+    <string name="https_hint">Stellen Sie sicher, dass der Server, der diesen Port überwacht, HTTPS-Verbindungen erwartet. Wenn Sie die HTTP-zu-HTTPS-Umleitung verwenden, müssen Sie das hier deaktivieren</string>
+    <string name="certificates">Zertifikate</string>
+    <string name="server_uses_self_signed_certificate">Server nutzt ein selbstsigniertes Zertifikat</string>
+    <string name="certificate">Zertifikat im PEM Format</string>
+    <string name="use_client_certificate_authentication">Nutze Client Zertifikatsauthentifizierung</string>
+    <string name="authentication">Authentifizierung</string>
+    <string name="username">Benutzername</string>
+    <string name="password">Passwort</string>
+    <string name="update_interval">Aktualisierungsintervall</string>
+    <string name="update_interval_hint">Dieses Aktualisierungsintervall wird nur verwendet, wenn sich die Anwendung im Vordergrund befindet oder die dauerhafte Benachrichtigung aktiv ist. Das Hintergrundaktualisierungsintervall kann in den Anwendungseinstellungen konfiguriert werden.</string>
+    <string name="text_field_suffix_seconds">Sekunden</string>
+    <string name="timeout">Zeitüberschreitung</string>
+
+    <string name="empty_field_error">Dieses Feld darf nicht leer sein</string>
+    <string name="number_range_error">Der Wert muss im Bereich von %1$d - %2$d liegen</string>
+    <string name="number_range_error_float">Der Wert muss im Bereich von %1$.1f - %2$.1f liegen</string>
+    <string name="server_exists">ein Server mit diesem Namen exisiert bereits</string>
+    <string name="overwrite">Überschreiben</string>
+
+    <string name="add_torrent">Torrent hinzufügen</string>
+    <string name="add_torrent_file">Torrent Datei hinzufügen</string>
+    <string name="storage_permission_error">Speicherzugriff wird benötigt</string>
+    <string name="file_is_too_large">Die Datei ist zu groß</string>
+    <string name="file_reading_error">Fehler beim Lesen der Datei</string>
+    <string name="file_parsing_error">Fehler beim Analysieren der Datei</string>
+
+    <string name="download_directory">Downloadverzeichnis</string>
+
+    <string name="server_settings_downloading">Herunterladen</string>
+    <string name="server_settings_seeding">Seeden</string>
+    <string name="server_settings_queue">Warteschlange</string>
+    <string name="server_settings_speed">Geschwindigkeit</string>
+    <string name="server_settings_network">Netzwerk</string>
+
+    <string name="start_added_torrents">Starte hinzugefügte Torrents</string>
+    <string name="rename_incomplete_files">Hänge \".part\" an den Namen von nicht fertiggestellten Dateien an</string>
+    <string name="incomplete_files_directory">Verzeichnis für unvollständige Dateien</string>
+    <string name="stop_seeding_at_ratio">Stoppe seeden bei Verhältnis</string>
+    <string name="stop_seeding_if_idle_for">Stoppe seeden bei Inaktivität von</string>
+    <string name="maximum_active_downloads">Maximale aktive Downloads</string>
+    <string name="maximum_active_uploads">Maximale aktive Uploads</string>
+    <string name="ignore_queue">Ignoriere Warteschlangenposition wenn inaktiv für</string>
+    <string name="alternative_limits">Alternative Beschränkungen</string>
+    <string name="enable">Aktivieren</string>
+    <string name="text_field_suffix_kbps">kB/s</string>
+    <string name="scheduled">Geplant</string>
+    <string name="from">Vom</string>
+    <string name="to">Bis</string>
+    <string name="every_day">Jeden Tag</string>
+    <string name="weekdays">Wochentagen</string>
+    <string name="weekends">Wochenenden</string>
+    <string name="connection">Verbindung</string>
+    <string name="peer_port">Teilnehmerport</string>
+    <string name="random_port">Zufälliger Port beim Starten von Transmission</string>
+    <string name="port_forwarding">Aktiviere Portweiterleitung</string>
+    <string name="encryption">Verschlüsselung</string>
+    <string name="encryption_mode_allowed">Erlaube</string>
+    <string name="encryption_mode_preferred">Bevorzuge</string>
+    <string name="encryption_mode_required">Verlange</string>
+    <string name="enable_utp">Aktiviere uTP</string>
+    <string name="enable_pex">Aktiviere PEX</string>
+    <string name="enable_dht">Aktiviere DHT</string>
+    <string name="enable_lpd">Aktiviere LPD</string>
+    <string name="peer_limits">Teilnehmerlimit</string>
+    <string name="maximum_peers_per_torrent">Maximale Teilnehmer pro Torrent</string>
+    <string name="maximum_peers_globally">Maximale Teilnehmer global</string>
+
+    <string name="start_downloading_after_adding">Starte herunterladen nach dem Hinzufügen</string>
+
+    <string name="add_torrent_link">Füge Torrent Link hinzu</string>
+
+    <string name="current_session">Aktuelle Sitzung</string>
+    <string name="total">Gesamt</string>
+    <string name="duration">Dauer</string>
+    <string name="close">Schließen</string>
+    <string name="server_stats">Serverstatistiken</string>
+
+    <!-- e.g. "5 d 21 h" -->
+    <string name="duration_days">%1$d d  %2$d h</string>
+
+    <!-- e.g. "5 h 21 m" -->
+    <string name="duration_hours">%1$d h %2$d m</string>
+
+    <!-- e.g. "5 m 21 s" -->
+    <string name="duration_minutes">%1$d m %2$d s</string>
+
+    <!-- e.g. "21 s" -->
+    <string name="duration_seconds">%d s</string>
+
+    <plurals name="started_times">
+        <item quantity="one">%d Mal gestartet</item>
+        <item quantity="other">%d Mal gestartet</item>
+    </plurals>
+
+    <string name="start">Start</string>
+    <string name="start_now">Jetzt starten</string>
+    <string name="pause">Pause</string>
+
+    <plurals name="remove_torrents_message">
+        <item quantity="one">Sind Sie sich sicher, dass die den %d ausgewählten Torrent löschen wollen</item>
+        <item quantity="other">Sind Sie sich sicher, dass die %d ausgewählten Torrents entfernen wollen?</item>
+    </plurals>
+    <string name="delete_files">Lösche zusätzlich die Dateien auf der Festplatte</string>
+    <string name="check_local_data">Verifiziere lokale Daten</string>
+    <string name="reannounce">Nochmal akündigen</string>
+    <string name="torrents_remove_error">Entfernen von Torrents fehlgeschlagen: %1$s</string>
+    <string name="add_torrent_error">Hinzufügen von Torrent fehlgeschlagen: %1$s</string>
+    <string name="torrent_set_location_error">Verschieben von Torrents fehlgeschlagen: %1$s</string>
+    <string name="set_server_settings_error">Aktualisierung der Einstellungen fehlgeschlagen: %1$s</string>
+    <string name="set_torrent_limits_error">Aktualisierung der Torrentlimits fehlgeschlagen: %1$s</string>
+    <string name="set_files_wanted_error">Markieren von herunterzuladenden Dateien fehlgeschlagen: %1$s</string>
+    <string name="set_files_priority_error">Festlegen der Dateipriorität fehlgeschlagen: %1$s</string>
+    <string name="file_rename_error">Umbennenen von Torrentdatei fehlgeschlagen: %1$s</string>
+    <string name="torrents_start_error">Starten von Torrents fehlgeschlagen: %1$s</string>
+    <string name="torrents_pause_error">Anhalten von Torrents fehlgeschlagen: %1$s</string>
+    <string name="torrents_check_error">Prüfen von Torrents fehlgeschlagen: %1$s</string>
+    <string name="torrents_reannounce_error">Peer-Anforderung von Torrents fehlgeschlagen: %1$s</string>
+    <string name="trackers_add_error">Hinzufügen von Trackern fehlgeschlagen: %1$s</string>
+    <string name="tracker_replace_error">Ersetzen von Tracker fehlgeschlagen: %1$s</string>
+    <string name="trackers_remove_error">Entfernen von Trackern fehlgeschlagen: %1$s</string>
+
+    <!-- e.g. "100 MiB, uploaded 200 MiB" -->
+    <string name="uploaded_string">%1$s, hochgeladen %2$s</string>
+
+    <string name="torrent_paused">Pausiert</string>
+    <string name="torrent_paused_with_error">Pausiert (%s)</string>
+    <plurals name="torrent_downloading">
+        <item quantity="one">Downloade von %d Teilnehmer</item>
+        <item quantity="other">Downloade von %d Teilnehmern</item>
+    </plurals>
+    <plurals name="torrent_downloading_with_error">
+        <item quantity="one">Lade von %1$d Peer (%2$s) herunter</item>
+        <item quantity="other">Lade von %1$d Peers (%2$s) herunter</item>
+    </plurals>
+    <string name="torrent_downloading_stalled">Herunterladen</string>
+    <string name="torrent_downloading_stalled_with_error">(%s) wird heruntergeladen</string>
+    <plurals name="torrent_seeding">
+        <item quantity="one">Seede zu %d Teilnehmer</item>
+        <item quantity="other">Seede zu %d Teilnehmern</item>
+    </plurals>
+    <plurals name="torrent_seeding_with_error">
+        <item quantity="one">Lade zu %1$d Peer (%2$s) hoch</item>
+        <item quantity="other">Lade zu %1$d Peers (%2$s) hoch</item>
+    </plurals>
+    <string name="torrent_seeding_stalled">Seeden</string>
+    <string name="torrent_seeding_stalled_with_error">(%s) wird hochgeladen</string>
+    <string name="torrent_queued">Eingereiht</string>
+    <string name="torrent_queued_with_error">(%s) in Warteschlange</string>
+    <string name="torrent_checking">Prüfung: %s%%</string>
+    <string name="torrent_checking_with_error">Prüfung: %1$s%% (%2$s)</string>
+    <string name="torrent_queued_for_checking">Eingereiht zum Prüfen</string>
+    <string name="torrent_queued_for_checking_with_error">(%s) zur Überprüfung eingereiht</string>
+
+    <plurals name="remove_trackers_message">
+        <item quantity="one">Sind Sie sich sicher, dass Sie den %d gewählten Tracker entfernen wollen</item>
+        <item quantity="other">Sind Sie sich sicher, dass Sie %d gewählte Tracker entfernen wollen</item>
+    </plurals>
+
+    <string-array name="size_units">
+        <item>%s B</item>
+        <item>%sKiB</item>
+        <item>%sMiB</item>
+        <item>%s GiB</item>
+        <item>%s TiB</item>
+        <item>%s PiB</item>
+        <item>%s EiB</item>
+        <item>%s ZiB</item>
+        <item>%s YiB</item>
+    </string-array>
+
+    <string-array name="speed_units">
+        <item>%s B/s</item>
+        <item>%s KiB/s</item>
+        <item>%s MiB/s</item>
+        <item>%s GiB/s</item>
+        <item>%s TiB/s</item>
+        <item>%s PiB/s</item>
+        <item>%s EiB/s</item>
+        <item>%s ZiB/s</item>
+        <item>%s YiB/s</item>
+    </string-array>
+
+    <string name="remove_torrent_message">Sind Sie sich sicher, dass Sie diesen Torrent entfernen wollen?</string>
+
+    <string name="set_location">Ort neu setzen</string>
+    <string name="move_files">Verschiebe Dateien vom aktuellen Verzeichnis</string>
+
+    <string name="rename">Umbenennen</string>
+
+    <string name="file_name">Dateien</string>
+
+    <string name="about">Über</string>
+    <string name="authors">Autoren</string>
+    <string name="translators">Übersetzer</string>
+    <string name="license">Lizenz</string>
+
+    <string name="prefs_dark_theme_mode_title">Dunkles Thema</string>
+
+    <string name="prefs_dark_theme_mode_auto_pre_q">Setzen durch Energiesparmodus</string>
+    <string name="prefs_dark_theme_mode_auto_q">Systemstandard</string>
+    <string name="prefs_dark_theme_mode_on">Ein</string>
+    <string name="prefs_dark_theme_mode_off">Aus</string>
+
+    <string name="prefs_torrent_compact_view_title">Nutze kompakte Ansicht für Torrents</string>
+    <string name="prefs_torrent_name_multiline_title">Zeige Namen der Torrents über mehrere Zeilen an</string>
+
+    <string name="prefs_persistent_notification_title">Zeige permanente Benachrichtigung</string>
+
+    <string name="persistent_notification_channel_name">Permanente Benachrichtigung</string>
+    <string name="finished_torrents_channel_name">Beendete Torrents</string>
+    <string name="added_torrents_channel_name">Hinzugefügte Torrents</string>
+
+    <string name="appearance">Aussehen</string>
+    <string name="behaviour">Verhalten</string>
+    <string name="torrents">Torrents</string>
+
+    <string name="quick_return_title">Schnelle Rückkehr</string>
+    <string name="quick_return_summary">Auf die obere Werkzeugleiste tippen um nach oben zu gelangen</string>
+
+    <string name="prefs_delete_files_title">Lösche Dateien auf der Festplatte, wenn der Torrent gelöscht wird</string>
+    <string name="prefs_link_from_clipboard_title">Beim Hinzufügen eines Torrent-Links automatisch den Link aus der Zwischenablage ausfüllen</string>
+    <string name="prefs_remember_add_torrent_parameters_title">Parameter des zuletzt hinzugefügten Torrents merken</string>
+
+    <string name="prefs_merge_trackers_when_adding_existing_torrent_title">Beim Hinzufügen vorhandener Torrents die Tracker zusammenführen</string>
+    <string name="prefs_ask_for_merging_trackers_when_adding_existing_torrent_title">Wenn existierende Torrents hinzugefügt werden, fragen ob die Tracker zusammengeführt werden sollen</string>
+
+    <string name="torrent_duplicate_not_merging_trackers">Vorhandenen Torrent «%1$s» nicht hinzufügen</string>
+    <string name="torrent_duplicate_merging_trackers">Tracker für Torrent «%1$s» werden zusammengeführt</string>
+    <string name="torrent_duplicate_merging_trackers_question">Torrent «%1$s» ist bereits hinzugefügt. Tracker zusammenführen?</string>
+    <string name="merging_trackers_error">Tracker konnten nicht zusammengeführt werden: %1$s</string>
+    <string name="merge_no">Nicht zusammenführen</string>
+    <string name="merge_yes">Zusammenführen</string>
+    <string name="do_not_ask_again">Nicht erneut fragen</string>
+
+    <string name="alternative_speed_limits">Alternative Geschwindigkeitslimitierungen</string>
+
+
+    <string name="free_space">Freier Speicher: %s</string>
+    <string name="free_space_error">Fehler beim Auslesen des freien Speichers</string>
+
+    <string name="notify_on_finished">Bei fertiggstellten Torrents benachrichtigen</string>
+    <string name="notify_on_added">Bei hinzugefügten Torrents benachrichtigen</string>
+
+    <string name="notifications_on_connect">Benachrichtigung beim Verbinden zum Server</string>
+    <string name="notify_on_finished_since_last">Benachrichtige bei fertiggestellten Torrents seit der letzten Verbindung</string>
+    <string name="notify_on_added_since_last">Benachrichtige bei hinzugefügten Torrents seit der letzten Verbindung</string>
+
+    <string name="persistent_notification">Permanente Benachrichtigung</string>
+
+    <string name="persistent_notification_warning">Wenn Sie die dauerhafte Benachrichtigung aktivieren, aktualisiert die Anwendung Daten mit dem in den Verbindungseinstellungen konfigurierten Intervall, auch wenn sie im Hintergrund läuft, was zu einer übermäßigen Batterieentladung führen kann</string>
+
+    <string name="prefs_background_update_interval_title">Hintergrund-Aktualisierungsinterval</string>
+    <string-array name="prefs_background_update_interval_entries">
+        <item>Deaktiviert</item>
+        <item>15 Minuten</item>
+        <item>30 Minuten</item>
+        <item>1 Stunde</item>
+        <item>3 Stunden</item>
+        <item>6 Stunden</item>
+        <item>12 Stunden</item>
+        <item>24 Stunden</item>
+    </string-array>
+
+    <string name="connection_settings">Verbindungseinstellungen</string>
+
+    <string name="proxy_settings">Proxy-Einstellungen</string>
+    <string name="proxy_type">Proxy-Typ</string>
+    <string name="share">Teilen</string>
+    <string name="share_torrent">Torrent teilen</string>
+
+    <string name="proxy_type_default">Standard</string>
+    <string name="auto_connect_on_wifi_network">Automatisch mit diesem Server verbinden, wenn mit Wi-Fi-Netzwerk verbunden</string>
+    <string name="wifi_ssid_hint">Wi-Fi-Netzwerk-SSID</string>
+    <string name="wifi_ssid_set_from_current">Aus aktuellem Wi-Fi-Netzwerk eingestellt</string>
+    <string name="location_permission_rationale">Tremotesf benötigt genaue Standortberechtigung, um Informationen über die WLAN-SSID zu erhalten</string>
+    <string name="request_location_permission">Berechtigung für Standort erteilen</string>
+    <string name="background_wifi_networks_explanation_with_background_permission">Um diese Funktion nutzen zu können während sich die App im Hintergrund befindet, aktivieren Sie bitte die dauerhaften Benachrichtigung in den App-Einstellungen oder gewähren die Berechtigung für den Standort im Hintergrund </string>
+    <string name="background_wifi_networks_explanation_no_background_permission">Um diese Funktion nutzen zu können während sich die App im Hintergrund befindet, aktivieren Sie bitte die dauerhaften Benachrichtigung in den App-Einstellungen</string>
+    <string name="background_location_permission_rationale">Tremotesf benötigt die Berechtigung für Standort im Hintergrund, um Informationen über die Wi-Fi-SSID im Hintergrund zu erhalten, ohne eine dauerhafte Benachrichtigung zu verwenden</string>
+    <string name="request_background_location_permission">Berechtigung für Standort im Hintergrund erteilen</string>
+    <string name="background_location_permission_granted">Berechtigung für Standort im Hintergrund gewährt</string>
+
+    <string name="runtime_permission_go_to_settings_rationale">Bitte erlauben Sie die Berechtigung über die Systemeinstellungen</string>
+    <string name="go_to_settings">Zu den Einstellungen gehen</string>
+
+    <string name="current_ssid_error">SSID des aktuellen Wi-Fi-Netzwerks ist unbekannt</string>
+
+    <string name="request_enable_location">Bitte aktivieren Sie den Standort in den Systemeinstellungen</string>
+    <string name="enable_location">Standort aktivieren</string>
+
+    <string name="storage_permission_rationale_torrent">Tremotesf erforder Zugriff auf die Berechtigung für den Speicher, damit diese Torrentdatei geöffnet werden kann</string>
+
+    <string name="transmission_settings">Transmission-Einstellungen</string>
+
+    <string name="load_from_file">Von Datei laden</string>
+
+    <string name="free_space_in_download_directory">Freier Speicher im Downloadverzeichnis</string>
+
+    <string name="reset">Zurücksetzen</string>
+
+    <string name="directory_icon">Verzeichnissymbol</string>
+    <string name="file_icon">Dateisymbol</string>
+
+    <string name="prefs_color_theme_title">Farben</string>
+    <string name="prefs_color_theme_system">Systemfarben</string>
+    <string name="prefs_color_theme_red">Rot</string>
+    <string name="prefs_color_theme_teal">Blaugrün</string>
+
+    <string name="see_detailed_error_message">Ausführliche Fehlermeldung anzeigen</string>
+    <string name="detailed_error_message">Ausführliche Fehlermeldung</string>
+
+    <string name="notification_permission_rationale">Tremotesf benötigt die Berechtigung für Benachrichtigung, um Benachrichtigungen über Torrents anzuzeigen</string>
+    <string name="request_permission">Berechtigung erteilen</string>
+    <string name="request_notification_permission">Berechtigung für Benachrichtung erteilen</string>
+
+    <string name="date_time_with_relative">%1$s (%2$s)</string>
+
+    <string name="no_web_seeders">Keine Web-Seeder</string>
+
+    <string name="source_code_url">Quelltext: %1$s</string>
+    <string name="translations_url">Übersetzungen: %1$s</string>
+    <string name="maintainer">Betreuer</string>
+    <string name="contributor">Mitwirkender</string>
+
+    </resources>

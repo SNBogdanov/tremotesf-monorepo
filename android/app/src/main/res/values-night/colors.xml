@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+SPDX-FileCopyrightText: 2017-2026 Alexey Rochev <equeim@gmail.com>
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
+<resources>
+    <color name="navigation_bar_color">@color/system_bars_semi_transparent_dark</color>
+
+    <color name="icon_color_enabled_focused">@color/icon_color_enabled_focused_night</color>
+    <color name="icon_color_enabled_unfocused">@color/icon_color_enabled_unfocused_night</color>
+    <color name="icon_color_disabled">@color/icon_color_disabled_night</color>
+
+    <color name="window_background">#212121</color>
+</resources>
