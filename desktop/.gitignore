@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: 2015-2025 Alexey Rochev
+#
+# SPDX-License-Identifier: CC0-1.0
+
+/.cache
+
+/.kdev4
+/*.kdev4
+
+/.vs
+/.vscode
+
+/build
+/compile_commands.json
+
+/installroot
+/out
+/RPMS
+
+/vcpkg-installed
+
+/*.list
+/*.user
+/*.user.*
+
+/.qtcreator
+
+/.idea
+/cmake-build*
+
+/.flatpak-builder
+
+.DS_Store

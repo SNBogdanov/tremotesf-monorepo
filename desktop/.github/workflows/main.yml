@@ -1,0 +1,281 @@
+# SPDX-FileCopyrightText: 2015-2025 Alexey Rochev
+#
+# SPDX-License-Identifier: CC0-1.0
+
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches:
+      - master
+      - 'feature/**'
+  schedule:
+    - cron: '0 0 * * 0'
+
+jobs:
+  build-rpm:
+    strategy:
+      fail-fast: false
+      matrix:
+        container-image: ['fedora:44', 'fedora:45', 'opensuse/tumbleweed:latest']
+        compiler: ['gcc', 'clang']
+        arch: ['x86_64', 'arm64']
+        exclude:
+        - container-image: 'opensuse/tumbleweed:latest'
+          compiler: clang
+
+    runs-on: ubuntu-26.04${{ matrix.arch == 'arm64' && '-arm' || '' }}
+    container: ${{ startsWith(matrix.container-image, 'fedora') && 'registry.fedoraproject.org' || 'registry.opensuse.org' }}/${{ matrix.container-image }}
+
+    steps:
+    - name: Add GCC problem matcher
+      uses: ammaraskar/gcc-problem-matcher@cb2e3f949c41b7818628f35f8484a9b0acf90cf9
+
+    - name: Set packages install command for dnf
+      if: startsWith(matrix.container-image, 'fedora')
+      run: |
+        cmd='dnf -y --setopt=install_weak_deps=False install'
+        echo "INSTALL_PACKAGES=$cmd" >> "$GITHUB_ENV"
+        echo "INSTALL_LOCAL_PACKAGES=$cmd" >> "$GITHUB_ENV"
+
+    - name: Set packages install command for zypper
+      if: startsWith(matrix.container-image, 'opensuse')
+      run: |
+        cmd='zypper --non-interactive in --no-recommends --details'
+        echo "INSTALL_PACKAGES=$cmd" >> "$GITHUB_ENV"
+        echo "INSTALL_LOCAL_PACKAGES=$cmd --allow-unsigned-rpm" >> "$GITHUB_ENV"
+
+    - name: Install Git and rpm-build
+      run: ${{env.INSTALL_PACKAGES}} git rpm-build
+
+    - name: Checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        submodules: 'recursive'
+
+    - name: Set Fedora compiler RPM macro
+      id: fedora-compiler
+      if: startsWith(matrix.container-image, 'fedora')
+      run: |
+        echo "rpm-macro=--define 'toolchain ${{ matrix.compiler }}'" >> "$GITHUB_OUTPUT"
+
+    - name: Install build dependencies
+      run: |
+        readarray -t dependencies < <(rpmspec ${{steps.fedora-compiler.outputs.rpm-macro}} --define 'with_asan 1' -q --srpm --qf '[%{REQUIRES}\n]' packaging/rpm/tremotesf.spec)
+        ${{env.INSTALL_PACKAGES}} "${dependencies[@]}"
+
+    - name: Make source archive
+      run: |
+        # Git complains if we don't do that
+        git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+        sourcedir="$(rpmbuild --eval '%_sourcedir')"
+        mkdir -p "$sourcedir"
+        .github/workflows/make-source-archive.py --output-directory "$sourcedir" zstd
+
+    - name: Build RPM
+      run: |
+        rpmbuild ${{steps.fedora-compiler.outputs.rpm-macro}} -bb --with asan packaging/rpm/tremotesf.spec
+
+    - name: Install RPM
+      run: |
+        ${{env.INSTALL_LOCAL_PACKAGES}} "$(rpm --eval='%_rpmdir')"/*/*.rpm
+
+  build-deb:
+    strategy:
+      fail-fast: false
+      matrix:
+        container-image: ['debian:13', 'ubuntu:26.04', 'ubuntu:26.10']
+        arch: ['x86_64', 'arm64']
+
+    runs-on: ubuntu-26.04${{ matrix.arch == 'arm64' && '-arm' || '' }}
+    container: docker.io/library/${{ matrix.container-image }}
+
+    steps:
+    - name: Add GCC problem matcher
+      uses: ammaraskar/gcc-problem-matcher@cb2e3f949c41b7818628f35f8484a9b0acf90cf9
+
+    - name: Install dependencies needed to make source archive
+      run: |
+        apt-get update && DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends --assume-yes install ca-certificates git python3 cmake
+
+    - name: Check out sources
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        submodules: 'recursive'
+
+    - name: Make source archive
+      run: |
+        # Git complains if we don't do that
+        git config --global --add safe.directory "$GITHUB_WORKSPACE"
+        .github/workflows/make-source-archive.py --output-directory .. --debian gzip
+
+    - name: Check out Debian sources
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        repository: equeim/tremotesf-debian
+        path: tremotesf-debian
+
+    - name: Remove everything except debian/ directory
+      run: |
+        mv tremotesf-debian/debian debian
+        rm -rf tremotesf-debian
+
+    - name: Install build dependencies
+      run: |
+        apt-get update && DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends --assume-yes build-dep .
+
+    - name: Build DEB
+      run: |
+        DEB_BUILD_OPTIONS=sanitize=+address ASAN_OPTIONS=detect_leaks=0 dpkg-buildpackage
+
+    - name: Install DEB
+      run: |
+        DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends --assume-yes install ../*.deb
+
+  build-flatpak:
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: ['x86_64', 'arm64']
+
+    runs-on: ubuntu-26.04${{ matrix.arch == 'arm64' && '-arm' || '' }}
+
+    steps:
+    - name: Add GCC problem matcher
+      uses: ammaraskar/gcc-problem-matcher@cb2e3f949c41b7818628f35f8484a9b0acf90cf9
+
+    - name: Set up Flatpak
+      run: |
+        sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get --assume-yes install flatpak flatpak-builder
+        flatpak remote-add --user --if-not-exists flathub 'https://flathub.org/repo/flathub.flatpakrepo'
+
+    - name: Checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        submodules: 'recursive'
+
+    - name: Build Tremotesf
+      run: |
+        flatpak-builder --user --install-deps-from=flathub build-dir org.equeim.Tremotesf.json
+
+    - name: Check that generation of release manifest works
+      run: |
+        readonly archive="$(.github/workflows/make-source-archive.py zstd)"
+        .github/workflows/make-flatpak-manifest-for-release.py test "$archive"
+        echo "Release Flatpak manifest:"
+        cat org.equeim.Tremotesf.json
+
+  build-freebsd:
+    strategy:
+      fail-fast: false
+      matrix:
+        freebsd-version: ['14.3', '15.1']
+
+    # arm64 runner doesn't support KVM so only x86_64
+    runs-on: ubuntu-26.04
+
+    steps:
+    - name: Add GCC problem matcher
+      uses: ammaraskar/gcc-problem-matcher@cb2e3f949c41b7818628f35f8484a9b0acf90cf9
+
+    - name: Checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        submodules: 'recursive'
+
+    - name: Build on FreeBSD
+      uses: vmactions/freebsd-vm@c46abacb49f09938ca4e1702d15d836285d694cc
+      with:
+        run: |
+          pkg update -f
+          pkg install -y cmake ninja pkgconf libpsl libfmt qt6-base qt6-tools kf6-kwidgetsaddons kf6-kwindowsystem gettext-tools cxxopts cpp-httplib
+          echo 'Configuring CMake'
+          cmake -S . --preset base -D TREMOTESF_WITH_HTTPLIB=system -D TREMOTESF_ASAN=ON
+          echo 'Building Debug'
+          cmake --build --preset base-debug -v
+          echo 'Testing Debug'
+          ASAN_OPTIONS=detect_leaks=0 ctest --preset base-debug
+          echo 'Building Release'
+          cmake --build --preset base-release -v
+          echo 'Testing Release'
+          ASAN_OPTIONS=detect_leaks=0 ctest --preset base-release
+
+  build-windows-msvc:
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: ['x86_64', 'arm64']
+    uses: ./.github/workflows/build-windows-msvc.yml
+    with:
+      arch: ${{ matrix.arch }}
+
+  build-windows-mingw:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Tremotesf
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        submodules: 'recursive'
+
+    - name: Set up MSYS2
+      uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e
+      with:
+        msystem: 'CLANG64'
+        update: 'true'
+        install: |
+          mingw-w64-clang-x86_64-clang
+          mingw-w64-clang-x86_64-cmake
+          mingw-w64-clang-x86_64-cppwinrt
+          mingw-w64-clang-x86_64-fmt
+          mingw-w64-clang-x86_64-openssl
+          mingw-w64-clang-x86_64-pkgconf
+          mingw-w64-clang-x86_64-qt6-base
+          mingw-w64-clang-x86_64-qt6-svg
+          mingw-w64-clang-x86_64-qt6-tools
+          mingw-w64-clang-x86_64-qt6-translations
+          mingw-w64-clang-x86_64-cxxopts
+          mingw-w64-clang-x86_64-kwidgetsaddons
+
+    - name: Add GCC problem matcher
+      uses: ammaraskar/gcc-problem-matcher@cb2e3f949c41b7818628f35f8484a9b0acf90cf9
+
+    - name: Build with LLVM MinGW toolchain
+      shell: msys2 {0}
+      run: |
+          set -e -o pipefail
+          echo '::group::Configuring CMake'
+          # cpp-httplib doesn't compile with MinGW due to missing function (GetAddrInfoExCancel) in system headers
+          cmake -S . --preset base -D TREMOTESF_WITH_HTTPLIB=none -D TREMOTESF_ASAN=ON
+          echo '::endgroup'
+          echo '::group::Building Debug'
+          cmake --build --preset base-debug -v
+          echo '::endgroup'
+          echo '::group::Testing Debug'
+          ctest --preset base-debug
+          echo '::endgroup'
+          echo '::group::Building Release'
+          cmake --build --preset base-release -v
+          echo '::endgroup'
+          echo '::group::Testing Release'
+          ctest --preset base-release
+          echo '::endgroup'
+      env:
+        QT_FORCE_STDERR_LOGGING: 1
+
+  build-macos:
+    uses: ./.github/workflows/build-macos.yml
+
+  reuse-lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+    - name: Check REUSE compliance
+      run: |
+        sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends --assume-yes install pipx
+        pipx run reuse lint

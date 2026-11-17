@@ -1,0 +1,56 @@
+// SPDX-FileCopyrightText: 2015-2025 Alexey Rochev
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#ifndef TREMOTESF_TORRENTFILESMODEL_H
+#define TREMOTESF_TORRENTFILESMODEL_H
+
+#include <span>
+
+#include "coroutines/scope.h"
+#include "ui/itemmodels/basetorrentfilesmodel.h"
+
+namespace tremotesf {
+    class Rpc;
+    class Torrent;
+
+    class TorrentFilesModel final : public BaseTorrentFilesModel {
+        Q_OBJECT
+
+    public:
+        explicit TorrentFilesModel(Rpc* rpc, QObject* parent = nullptr);
+        ~TorrentFilesModel() override;
+        Q_DISABLE_COPY_MOVE(TorrentFilesModel)
+
+        Torrent* torrent() const;
+        void setTorrent(Torrent* torrent, bool oldTorrentDestroyed);
+
+        Rpc* rpc() const;
+        void setRpc(Rpc* rpc);
+
+        void setFilesWanted(const QModelIndexList& indexes, bool wanted) override;
+        void setFilesPriority(const QModelIndexList& indexes, TorrentFilesModelEntry::Priority priority) override;
+
+        void renameFile(const QModelIndex& index, const QString& newName) override;
+        void fileRenamed(const QString& path, const QString& newName);
+
+        QString localFilePath(const QModelIndex& index) const;
+        bool isWanted(const QModelIndex& index) const;
+
+    private:
+        void update(std::span<const int> changed);
+        Coroutine<> createTree();
+        void resetTree();
+        void updateTree(std::span<const int> changed);
+
+        void setLoaded(bool loaded);
+
+        Torrent* mTorrent{};
+        Rpc* mRpc{};
+        bool mCreatingTree{};
+        bool mLoaded{};
+        CoroutineScope mCoroutineScope{};
+    };
+}
+
+#endif // TREMOTESF_TORRENTFILESMODEL_H

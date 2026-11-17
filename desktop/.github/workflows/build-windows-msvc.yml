@@ -1,0 +1,127 @@
+# SPDX-FileCopyrightText: 2015-2025 Alexey Rochev
+#
+# SPDX-License-Identifier: CC0-1.0
+
+name: Build Tremotesf for Windows
+
+on:
+  workflow_call:
+    inputs:
+      arch:
+        description: Architecture (either x86_64 or arm64)
+        type: string
+        required: true
+      release-tag:
+        description: Release tag
+        type: string
+        required: false
+        default: ''
+
+jobs:
+  build-vcpkg-dependencies:
+    runs-on: ${{ inputs.arch == 'arm64' && 'windows-11-arm' || 'windows-2025' }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        submodules: 'recursive'
+
+    - name: Set up MSVC environment
+      uses: equeim/action-setup-msvc-environment@433e932212086aed3f1dfc9d4039149f44c201ab
+      with:
+        arch: ${{ inputs.arch == 'x86_64' && 'amd64' || 'arm64' }}
+
+    - name: Set up vcpkg
+      uses: equeim/action-setup-vcpkg@927e9ac44aad6c76033aa61500ee31543ab205bd
+      with:
+        vcpkg-root: ${{ github.workspace }}\vcpkg
+        binary-cache-path: ${{ github.workspace }}\vcpkg_binary_cache
+        save-cache: true
+        cache-key-tag: ${{ inputs.arch }}
+
+    - name: Configure CMake
+      run:
+        cmake -G Ninja -S . -B build --preset windows-${{ inputs.arch }}-msvc-vcpkg -D VCPKG_INSTALLED_DIR=${{ github.workspace }}/vcpkg_installed
+
+    - name: Archive vcpkg build logs
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+      if: always()
+      with:
+        name: 'windows-${{ inputs.arch }}-vcpkg-build-logs'
+        retention-days: ${{ github.event_name == 'push' && 7 || 3 }}
+        path: |
+          ${{ github.workspace }}\vcpkg\buildtrees\*\*.log
+          ${{ github.workspace }}\vcpkg\buildtrees\*\*.txt
+
+  build-windows-msvc:
+    needs: build-vcpkg-dependencies
+
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain: ${{ fromJSON(inputs.release-tag == '' && '["msvc", "msvc-clang"]' || '["msvc"]') }}
+
+    runs-on: ${{ inputs.arch == 'arm64' && 'windows-11-arm' || 'windows-2025' }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        submodules: 'recursive'
+
+    - name: Install WiX
+      run: |
+        dotnet tool install --global wix --version 6.0.2
+        wix extension add --global WixToolset.UI.wixext/6.0.2
+
+    - name: Set up MSVC environment
+      uses: equeim/action-setup-msvc-environment@433e932212086aed3f1dfc9d4039149f44c201ab
+      with:
+        arch: ${{ inputs.arch == 'x86_64' && 'amd64' || 'arm64' }}
+
+    - name: Set up vcpkg
+      uses: equeim/action-setup-vcpkg@927e9ac44aad6c76033aa61500ee31543ab205bd
+      with:
+        vcpkg-root: ${{ github.workspace }}\vcpkg
+        binary-cache-path: ${{ github.workspace }}\vcpkg_binary_cache
+        cache-key-tag: ${{ inputs.arch }}
+
+    - name: Build Tremotesf with ${{ matrix.toolchain }} toolchain for ${{ inputs.arch }} architecture
+      id: build
+      uses: equeim/action-cmake-build@f86986b62f4a9c4d4549351b8d04566368c199dd
+      with:
+        cmake-arguments: --preset windows-${{ inputs.arch }}-${{ matrix.toolchain }}-vcpkg -D VCPKG_INSTALLED_DIR=${{ github.workspace }}/vcpkg_installed -D VCPKG_INSTALL_OPTIONS='--disable-metrics' -D TREMOTESF_ASAN=${{ inputs.release-tag == '' && matrix.toolchain == 'msvc' && 'ON' || 'OFF' }}
+        package: true
+      env:
+        QT_FORCE_STDERR_LOGGING: 1
+
+    - name: Archive packages
+      if: inputs.release-tag == ''
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+      with:
+        name: 'windows-${{ inputs.arch }}-${{ matrix.toolchain }}-packages'
+        retention-days: ${{ github.event_name == 'push' && 7 || 3 }}
+        path: |
+          ${{ steps.build.outputs.build-directory }}\packaging\windows\*.zip
+          ${{ steps.build.outputs.build-directory }}\packaging\windows\*.msi
+
+    - name: Upload packages to release
+      if: inputs.release-tag != ''
+      run: |
+        $packages = Get-ChildItem ${{ steps.build.outputs.build-directory }}\packaging\windows\*.zip, ${{ steps.build.outputs.build-directory }}\packaging\windows\*.msi
+        echo "Uploading packages $packages"
+        gh release upload '${{ inputs.release-tag }}' $packages
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Archive build logs
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+      if: always()
+      with:
+        name: 'windows-${{ inputs.arch }}-${{ matrix.toolchain }}-build-logs'
+        retention-days: ${{ github.event_name == 'push' && 7 || 3 }}
+        path: |
+          ${{ steps.build.outputs.build-directory }}\CMakeCache.txt
+          ${{ steps.build.outputs.build-directory }}\compile_commands.json
+          ${{ steps.build.outputs.build-directory }}\CMakeFiles\CMakeConfigureLog.yaml

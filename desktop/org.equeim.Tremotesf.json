@@ -1,0 +1,81 @@
+{
+    "app-id": "org.equeim.Tremotesf",
+    "runtime": "org.kde.Platform",
+    "runtime-version": "6.11",
+    "sdk": "org.kde.Sdk",
+    "command": "tremotesf",
+    "finish-args": [
+        "--socket=fallback-x11",
+        "--socket=wayland",
+        "--share=ipc",
+        "--share=network",
+        "--device=dri",
+        "--filesystem=host:ro",
+        "--talk-name=org.kde.StatusNotifierWatcher",
+        "--talk-name=org.freedesktop.FileManager1"
+    ],
+    "cleanup": [
+        "/include",
+        "/lib/cmake",
+        "/lib/pkgconfig"
+    ],
+    "modules": [
+        {
+            "name": "cxxopts",
+            "buildsystem": "cmake-ninja",
+            "builddir": true,
+            "config-opts": [
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-DCXXOPTS_BUILD_EXAMPLES=OFF",
+                "-DCXXOPTS_BUILD_TESTS=OFF"
+            ],
+            "sources": [
+                {
+                    "type": "archive",
+                    "url": "https://github.com/jarro2783/cxxopts/archive/refs/tags/v3.3.1.tar.gz",
+                    "sha256": "3bfc70542c521d4b55a46429d808178916a579b28d048bd8c727ee76c39e2072"
+                }
+            ]
+        },
+        {
+            "name": "cpp-httplib",
+            "buildsystem": "cmake-ninja",
+            "builddir": true,
+            "config-opts": [
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-DHTTPLIB_REQUIRE_OPENSSL=ON"
+            ],
+            "sources": [
+                {
+                    "type": "archive",
+                    "url": "https://github.com/yhirose/cpp-httplib/archive/refs/tags/v0.64.0.tar.gz",
+                    "sha256": "1ada413782af5e67e80452c39b7c90beb6fa4fc8341e18c0896bf95684b9a620"
+                }
+            ]
+        },
+        {
+            "name": "tremotesf",
+            "buildsystem": "cmake-ninja",
+            "builddir": true,
+            "build-options": {
+                "env": {
+                    "CTEST_OUTPUT_ON_FAILURE": "1",
+                    "ASAN_OPTIONS": "detect_leaks=0"
+                }
+            },
+            "config-opts": [
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON",
+                "-DTREMOTESF_WITH_HTTPLIB=system",
+                "-DTREMOTESF_ASAN=ON"
+            ],
+            "run-tests": true,
+            "sources": [
+                {
+                    "type": "dir",
+                    "path": "."
+                }
+            ]
+        }
+    ]
+}

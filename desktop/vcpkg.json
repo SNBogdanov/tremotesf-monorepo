@@ -1,0 +1,63 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+    "dependencies": [
+        {
+            "name": "qtbase",
+            "host": true,
+            "default-features": false
+        },
+        {
+            "name": "qtbase",
+            "default-features": false,
+            "features": [
+                "brotli",
+                "gui",
+                "network",
+                "pcre2",
+                "png",
+                "shared-mime-info",
+                "testlib",
+                "thread",
+                "widgets",
+                {
+                    "name": "openssl",
+                    "platform": "!windows"
+                }
+            ]
+        },
+        {
+            "name": "qttools",
+            "host": true,
+            "default-features": false,
+            "features": [
+                "linguist"
+            ]
+        },
+        {
+            "name": "qttranslations",
+            "host": true
+        },
+        "qtsvg",
+        "fmt",
+        "kwidgetsaddons",
+        "cxxopts",
+        {
+            "name": "cpp-httplib",
+            "features": [
+                "openssl"
+            ]
+        },
+        {
+            "name": "pkgconf",
+            "platform": "windows",
+            "host": true
+        }
+    ],
+    "overrides": [
+        {
+            "name": "double-conversion",
+            "version": "3.3.0",
+            "port-version": 1
+        }
+    ]
+}
