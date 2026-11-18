@@ -163,12 +163,14 @@ private fun FiltersBottomSheetContent(
                 stringResource(
                     when (it) {
                         StatusFilterMode.All -> R.string.torrents_all
-                        StatusFilterMode.Active -> R.string.torrents_active
                         StatusFilterMode.Downloading -> R.string.torrents_downloading
-                        StatusFilterMode.Seeding -> R.string.torrents_seeding
-                        StatusFilterMode.Paused -> R.string.torrents_paused
-                        StatusFilterMode.Checking -> R.string.torrents_checking
+                        StatusFilterMode.Completed -> R.string.torrents_completed
+                        StatusFilterMode.ActiveDownload -> R.string.torrents_active_download
+                        StatusFilterMode.ActiveUpload -> R.string.torrents_active_upload
+                        StatusFilterMode.Inactive -> R.string.torrents_inactive
+                        StatusFilterMode.Stopped -> R.string.torrents_stopped
                         StatusFilterMode.Errored -> R.string.torrents_errored
+                        StatusFilterMode.Waiting -> R.string.torrents_waiting
                     },
                     calculatedFilters.statusFilterModesCounts.getOrDefault(it, 0)
                 )

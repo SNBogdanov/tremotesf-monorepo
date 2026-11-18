@@ -52,7 +52,6 @@ import org.equeim.tremotesf.rpc.performPeriodicRequest
 import org.equeim.tremotesf.rpc.performRecoveringRequestIntoStateFlow
 import org.equeim.tremotesf.rpc.requests.NormalizedRpcPath
 import org.equeim.tremotesf.rpc.requests.Torrent
-import org.equeim.tremotesf.rpc.requests.isPostProcessing
 import org.equeim.tremotesf.rpc.requests.TorrentStatus
 import org.equeim.tremotesf.rpc.requests.TransferRate
 import org.equeim.tremotesf.rpc.requests.getTorrentsList
@@ -148,12 +147,14 @@ class TorrentsListScreenViewModel(application: Application, savedStateHandle: Sa
 
     enum class StatusFilterMode {
         All,
-        Active,
         Downloading,
-        Seeding,
-        Paused,
-        Checking,
-        Errored;
+        Completed,
+        ActiveDownload,
+        ActiveUpload,
+        Inactive,
+        Stopped,
+        Errored,
+        Waiting;
 
         companion object {
             val DEFAULT = All
@@ -466,37 +467,42 @@ class TorrentsListScreenViewModel(application: Application, savedStateHandle: Sa
     }
 
     companion object {
+        private val ERRORS_ONLY_FOR_RUNNING_TORRENTS_STATUSES = setOf(
+            TorrentStatus.QueuedForDownloading,
+            TorrentStatus.Downloading,
+            TorrentStatus.QueuedForSeeding,
+            TorrentStatus.Seeding
+        )
+
+        private val WAITING_STATUSES = setOf(
+            TorrentStatus.QueuedForChecking,
+            TorrentStatus.Checking,
+            TorrentStatus.QueuedForDownloading,
+            TorrentStatus.QueuedForSeeding,
+            TorrentStatus.PausedDueToSpace,
+            TorrentStatus.WaitingForSpaceToMove,
+            TorrentStatus.RunningScript,
+            TorrentStatus.Moving
+        )
+
         fun statusFilterAcceptsTorrent(torrent: Torrent, filterMode: StatusFilterMode): Boolean {
+            val active = torrent.downloadSpeed.bytesPerSecond != 0L || torrent.uploadSpeed.bytesPerSecond != 0L
+            val stopped = torrent.status == TorrentStatus.Paused
+            val finished = torrent.status == TorrentStatus.Seeding || (stopped && torrent.leftUntilDone.bytes == 0L)
+            // Server does not report tracker/local errors for torrents that are not running
+            val errorsOnlyForRunningTorrents = torrent.status in ERRORS_ONLY_FOR_RUNNING_TORRENTS_STATUSES
             return when (filterMode) {
-                StatusFilterMode.Active -> (torrent.status == TorrentStatus.Downloading && !torrent.isDownloadingStalled) ||
-                        (torrent.status == TorrentStatus.Seeding && !torrent.isSeedingStalled) ||
-                        torrent.status.isPostProcessing
-
-                StatusFilterMode.Downloading -> when (torrent.status) {
-                    TorrentStatus.Downloading,
-                    TorrentStatus.QueuedForDownloading,
-                        -> true
-
-                    else -> false
-                }
-
-                StatusFilterMode.Seeding -> when (torrent.status) {
-                    TorrentStatus.Seeding,
-                    TorrentStatus.QueuedForSeeding,
-                        -> true
-
-                    else -> false
-                }
-
-                StatusFilterMode.Paused -> (torrent.status == TorrentStatus.Paused ||
-                        torrent.status == TorrentStatus.PausedDueToSpace)
-                StatusFilterMode.Checking -> when (torrent.status) {
-                    TorrentStatus.Checking, TorrentStatus.QueuedForChecking -> true
-                    else -> false
-                }
-
-                StatusFilterMode.Errored -> (torrent.error != null)
                 StatusFilterMode.All -> true
+                StatusFilterMode.Downloading -> torrent.status == TorrentStatus.Downloading
+                StatusFilterMode.Completed ->
+                    finished || (torrent.error == Torrent.Error.LocalError && errorsOnlyForRunningTorrents)
+                StatusFilterMode.ActiveDownload ->
+                    torrent.status == TorrentStatus.Downloading && torrent.downloadSpeed.bytesPerSecond != 0L
+                StatusFilterMode.ActiveUpload -> torrent.status == TorrentStatus.Seeding && active
+                StatusFilterMode.Inactive -> !active && !stopped
+                StatusFilterMode.Stopped -> stopped
+                StatusFilterMode.Errored -> torrent.error != null && errorsOnlyForRunningTorrents
+                StatusFilterMode.Waiting -> torrent.status in WAITING_STATUSES
             }
         }
     }

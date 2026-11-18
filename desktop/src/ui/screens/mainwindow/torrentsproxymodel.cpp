@@ -132,40 +132,51 @@ namespace tremotesf {
 
     bool TorrentsProxyModel::statusFilterAcceptsTorrent(const Torrent* torrent, StatusFilter filter) {
         using enum StatusFilter;
+        const auto& data = torrent->data();
+        const bool active = (data.downloadSpeed != 0 || data.uploadSpeed != 0);
+        const bool stopped = (data.status == TorrentData::Status::Paused);
+        const bool finished = (data.status == TorrentData::Status::Seeding
+                               || (stopped && data.leftUntilDone == 0));
+        // Server does not report tracker/local errors for torrents that are not running
+        const bool errorsOnlyForRunningTorrents = (
+            data.status == TorrentData::Status::QueuedForDownloading
+            || data.status == TorrentData::Status::Downloading
+            || data.status == TorrentData::Status::QueuedForSeeding
+            || data.status == TorrentData::Status::Seeding
+        );
         switch (filter) {
-        case Active:
-            return (
-                (torrent->data().status == TorrentData::Status::Downloading && !torrent->data().isDownloadingStalled())
-                || (torrent->data().status == TorrentData::Status::Seeding && !torrent->data().isSeedingStalled())
-                || torrent->data().status == TorrentData::Status::WaitingForSpaceToMove
-                || torrent->data().status == TorrentData::Status::RunningScript
-                || torrent->data().status == TorrentData::Status::Moving
-            );
-        case Downloading:
-            return (
-                torrent->data().status == TorrentData::Status::Downloading
-                || torrent->data().status == TorrentData::Status::QueuedForDownloading
-            );
-        case Seeding:
-            return (
-                torrent->data().status == TorrentData::Status::Seeding
-                || torrent->data().status == TorrentData::Status::QueuedForSeeding
-            );
-        case Paused:
-            return (
-                torrent->data().status == TorrentData::Status::Paused
-                || torrent->data().status == TorrentData::Status::PausedDueToSpace
-            );
-        case Checking:
-            return (
-                torrent->data().status == TorrentData::Status::Checking
-                || torrent->data().status == TorrentData::Status::QueuedForChecking
-            );
-        case Errored:
-            return torrent->data().hasError();
-        default:
+        case All:
             return true;
+        case Downloading:
+            return data.status == TorrentData::Status::Downloading;
+        case Completed:
+            return finished || (data.error == TorrentData::Error::LocalError && errorsOnlyForRunningTorrents);
+        case ActiveDownload:
+            return data.status == TorrentData::Status::Downloading && data.downloadSpeed != 0;
+        case ActiveUpload:
+            return data.status == TorrentData::Status::Seeding && active;
+        case Inactive:
+            return !active && !stopped;
+        case Stopped:
+            return stopped;
+        case Errored:
+            return data.hasError() && errorsOnlyForRunningTorrents;
+        case Waiting:
+            switch (data.status) {
+            case TorrentData::Status::QueuedForChecking:
+            case TorrentData::Status::Checking:
+            case TorrentData::Status::QueuedForDownloading:
+            case TorrentData::Status::QueuedForSeeding:
+            case TorrentData::Status::PausedDueToSpace:
+            case TorrentData::Status::WaitingForSpaceToMove:
+            case TorrentData::Status::RunningScript:
+            case TorrentData::Status::Moving:
+                return true;
+            default:
+                return false;
+            }
         }
+        return true;
     }
 
     bool TorrentsProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex&) const {

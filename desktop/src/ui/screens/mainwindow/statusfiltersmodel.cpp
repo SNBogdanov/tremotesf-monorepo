@@ -32,20 +32,20 @@ namespace tremotesf {
             case StatusFilter::All: {
                 return desktoputils::standardDirIcon();
             }
-            case StatusFilter::Active:
-                return desktoputils::statusIcon(Active);
             case StatusFilter::Downloading:
+            case StatusFilter::ActiveDownload:
                 return desktoputils::statusIcon(Downloading);
-            case StatusFilter::Seeding:
+            case StatusFilter::Completed:
+            case StatusFilter::ActiveUpload:
                 return desktoputils::statusIcon(Seeding);
-            case StatusFilter::Paused:
+            case StatusFilter::Inactive:
+                return desktoputils::statusIcon(Queued);
+            case StatusFilter::Stopped:
                 return desktoputils::statusIcon(Paused);
-            case StatusFilter::Checking:
-                return desktoputils::statusIcon(Checking);
             case StatusFilter::Errored:
                 return desktoputils::statusIcon(Errored);
-            default:
-                break;
+            case StatusFilter::Waiting:
+                return desktoputils::statusIcon(Checking);
             }
             break;
         }
@@ -55,24 +55,30 @@ namespace tremotesf {
             case StatusFilter::All:
                 //: Filter option of torrents list's status filter. %L1 is total number of torrents
                 return qApp->translate("tremotesf", "All (%L1)").arg(item.torrents);
-            case StatusFilter::Active:
-                //: Filter option of torrents list's status filter. %L1 is a number of torrents with that status
-                return qApp->translate("tremotesf", "Active (%L1)").arg(item.torrents);
             case StatusFilter::Downloading:
                 //: Filter option of torrents list's status filter. %L1 is a number of torrents with that status
                 return qApp->translate("tremotesf", "Downloading (%L1)").arg(item.torrents);
-            case StatusFilter::Seeding:
+            case StatusFilter::Completed:
                 //: Filter option of torrents list's status filter. %L1 is a number of torrents with that status
-                return qApp->translate("tremotesf", "Seeding (%L1)").arg(item.torrents);
-            case StatusFilter::Paused:
+                return qApp->translate("tremotesf", "Completed (%L1)").arg(item.torrents);
+            case StatusFilter::ActiveDownload:
                 //: Filter option of torrents list's status filter. %L1 is a number of torrents with that status
-                return qApp->translate("tremotesf", "Paused (%L1)").arg(item.torrents);
-            case StatusFilter::Checking:
+                return qApp->translate("tremotesf", "Active download (%L1)").arg(item.torrents);
+            case StatusFilter::ActiveUpload:
                 //: Filter option of torrents list's status filter. %L1 is a number of torrents with that status
-                return qApp->translate("tremotesf", "Checking (%L1)").arg(item.torrents);
+                return qApp->translate("tremotesf", "Active upload (%L1)").arg(item.torrents);
+            case StatusFilter::Inactive:
+                //: Filter option of torrents list's status filter. %L1 is a number of torrents with that status
+                return qApp->translate("tremotesf", "Inactive (%L1)").arg(item.torrents);
+            case StatusFilter::Stopped:
+                //: Filter option of torrents list's status filter. %L1 is a number of torrents with that status
+                return qApp->translate("tremotesf", "Stopped (%L1)").arg(item.torrents);
             case StatusFilter::Errored:
                 //: Filter option of torrents list's status filter. %L1 is a number of torrents with that status
-                return qApp->translate("tremotesf", "Errored (%L1)").arg(item.torrents);
+                return qApp->translate("tremotesf", "Error (%L1)").arg(item.torrents);
+            case StatusFilter::Waiting:
+                //: Filter option of torrents list's status filter. %L1 is a number of torrents with that status
+                return qApp->translate("tremotesf", "Waiting (%L1)").arg(item.torrents);
             default:
                 break;
             }
@@ -144,12 +150,14 @@ namespace tremotesf {
         using enum TorrentsProxyModel::StatusFilter;
         std::map<TorrentsProxyModel::StatusFilter, int> items{
             {All, rpc()->torrentsCount()},
-            {Active, 0},
             {Downloading, 0},
-            {Seeding, 0},
-            {Paused, 0},
-            {Checking, 0},
-            {Errored, 0}
+            {Completed, 0},
+            {ActiveDownload, 0},
+            {ActiveUpload, 0},
+            {Inactive, 0},
+            {Stopped, 0},
+            {Errored, 0},
+            {Waiting, 0}
         };
 
         const auto processFilter = [&](Torrent* torrent, TorrentsProxyModel::StatusFilter filter) {
@@ -159,12 +167,14 @@ namespace tremotesf {
         };
 
         for (const auto& torrent : rpc()->torrents()) {
-            processFilter(torrent.get(), Active);
             processFilter(torrent.get(), Downloading);
-            processFilter(torrent.get(), Seeding);
-            processFilter(torrent.get(), Checking);
-            processFilter(torrent.get(), Paused);
+            processFilter(torrent.get(), Completed);
+            processFilter(torrent.get(), ActiveDownload);
+            processFilter(torrent.get(), ActiveUpload);
+            processFilter(torrent.get(), Inactive);
+            processFilter(torrent.get(), Stopped);
             processFilter(torrent.get(), Errored);
+            processFilter(torrent.get(), Waiting);
         }
 
         StatusFiltersModelUpdater updater(*this);

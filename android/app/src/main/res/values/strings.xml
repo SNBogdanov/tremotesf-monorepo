@@ -45,12 +45,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="no_torrents">No torrents</string>
 
     <string name="torrents_all">All (%d)</string>
-    <string name="torrents_active">Active (%d)</string>
     <string name="torrents_downloading">Downloading (%d)</string>
-    <string name="torrents_seeding">Seeding (%d)</string>
-    <string name="torrents_paused">Paused (%d)</string>
-    <string name="torrents_checking">Checking (%d)</string>
-    <string name="torrents_errored">Errored (%d)</string>
+    <string name="torrents_completed">Completed (%d)</string>
+    <string name="torrents_active_download">Active download (%d)</string>
+    <string name="torrents_active_upload">Active upload (%d)</string>
+    <string name="torrents_inactive">Inactive (%d)</string>
+    <string name="torrents_stopped">Stopped (%d)</string>
+    <string name="torrents_errored">Error (%d)</string>
+    <string name="torrents_waiting">Waiting (%d)</string>
 
     <!-- e.g. "example.com (42)" -->
     <string name="trackers_spinner_text">%1$s (%2$d)</string>
