@@ -128,6 +128,8 @@ private fun FiltersBottomSheetContent(
                         SortMode.Size -> R.string.size
                         SortMode.AddedDate -> R.string.added_date
                         SortMode.LastActivity -> R.string.last_activity
+                        SortMode.DownloadSpeed -> R.string.download_speed
+                        SortMode.UploadSpeed -> R.string.upload_speed
                     }
                 )
             },

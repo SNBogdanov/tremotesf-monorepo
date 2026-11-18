@@ -129,7 +129,9 @@ class TorrentsListScreenViewModel(application: Application, savedStateHandle: Sa
         Ratio,
         Size,
         AddedDate,
-        LastActivity;
+        LastActivity,
+        DownloadSpeed,
+        UploadSpeed;
 
         companion object {
             val DEFAULT = Name
@@ -454,6 +456,10 @@ class TorrentsListScreenViewModel(application: Application, savedStateHandle: Sa
                     SortMode.Size -> o1.totalSize.bytes.compareTo(o2.totalSize.bytes)
                     SortMode.AddedDate -> nullsFirst<Instant>().compare(o1.addedDate, o2.addedDate)
                     SortMode.LastActivity -> nullsFirst<Instant>().compare(o1.activityDate, o2.activityDate)
+                    SortMode.DownloadSpeed ->
+                        o1.downloadSpeed.bytesPerSecond.compareTo(o2.downloadSpeed.bytesPerSecond)
+                    SortMode.UploadSpeed ->
+                        o1.uploadSpeed.bytesPerSecond.compareTo(o2.uploadSpeed.bytesPerSecond)
                 }
                 if (sortMode != SortMode.Name && compared == 0) {
                     compared = nameComparator.compare(o1.name, o2.name)
