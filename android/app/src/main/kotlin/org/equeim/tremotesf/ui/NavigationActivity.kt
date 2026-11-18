@@ -18,6 +18,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draganddrop.DragAndDropEvent
@@ -145,7 +146,9 @@ class NavigationActivity : ComponentActivity() {
                     transitionSpec = { SCREEN_TRANSITION_SPEC },
                     popTransitionSpec = { SCREEN_TRANSITION_SPEC },
                     predictivePopTransitionSpec = { SCREEN_TRANSITION_SPEC },
-                    modifier = Modifier.dragAndDropTarget(
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .dragAndDropTarget(
                         shouldStartDragAndDrop = model::shouldStartDragAndDrop,
                         target = object : DragAndDropTarget {
                             override fun onDrop(event: DragAndDropEvent): Boolean {
