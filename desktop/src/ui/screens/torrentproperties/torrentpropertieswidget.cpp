@@ -191,6 +191,22 @@ namespace tremotesf {
         //: Torrent's comment text
         infoGroupBoxLayout->addRow(qApp->translate("tremotesf", "Comment:"), commentTextEdit);
 
+        auto topicLabel = new QLabel(this);
+        topicLabel->setOpenExternalLinks(true);
+        topicLabel->setTextFormat(Qt::RichText);
+        topicLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
+        //: Torrent's topic name (metadata provided by server's fork)
+        infoGroupBoxLayout->addRow(qApp->translate("tremotesf", "Topic:"), topicLabel);
+        auto topicLabelLabel = infoGroupBoxLayout->labelForField(topicLabel);
+
+        auto topicUrlLabel = new QLabel(this);
+        topicUrlLabel->setOpenExternalLinks(true);
+        topicUrlLabel->setTextFormat(Qt::RichText);
+        topicUrlLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
+        //: Torrent's topic URL (metadata provided by server's fork)
+        infoGroupBoxLayout->addRow(qApp->translate("tremotesf", "Topic URL:"), topicUrlLabel);
+        auto topicUrlLabelLabel = infoGroupBoxLayout->labelForField(topicUrlLabel);
+
         auto labelsModel = new StringListModel({}, QIcon::fromTheme("tag"_L1), this);
         auto labelsProxyModel = new BaseProxyModel(labelsModel, Qt::DisplayRole, std::nullopt, this);
         auto labelsView = new QListView(this);
@@ -252,6 +268,19 @@ namespace tremotesf {
                     commentTextEdit->document()->setPlainText(mTorrent->data().comment);
                     desktoputils::findLinksAndAddAnchors(commentTextEdit->document());
                 }
+                const auto& topicName = mTorrent->data().topicName;
+                const auto& topicUrl = mTorrent->data().topicUrl;
+                if (!topicUrl.isEmpty()) {
+                    topicLabel->setText(
+                        QStringLiteral("<a href=\"%1\">%2</a>").arg(topicUrl.toHtmlEscaped(), topicName.toHtmlEscaped())
+                    );
+                    topicUrlLabel->setText(
+                        QStringLiteral("<a href=\"%1\">%1</a>").arg(topicUrl.toHtmlEscaped())
+                    );
+                } else {
+                    topicLabel->setText(topicName.toHtmlEscaped());
+                    topicUrlLabel->clear();
+                }
                 labelsModel->setStringList(mTorrent->data().labels);
             } else {
                 completedLabel->clear();
@@ -273,8 +302,15 @@ namespace tremotesf {
                 creatorLabel->clear();
                 creationDateLabel->clear();
                 commentTextEdit->clear();
+                topicLabel->clear();
+                topicUrlLabel->clear();
                 labelsModel->setStringList({});
             }
+            const bool topicVisible = mTorrent && (!mTorrent->data().topicName.isEmpty() || !mTorrent->data().topicUrl.isEmpty());
+            topicLabel->setVisible(topicVisible);
+            topicLabelLabel->setVisible(topicVisible);
+            topicUrlLabel->setVisible(topicVisible);
+            topicUrlLabelLabel->setVisible(topicVisible);
             const bool labelsViewVisible = labelsModel->rowCount() > 0;
             labelsView->setVisible(labelsViewVisible);
             labelsLabel->setVisible(labelsViewVisible);

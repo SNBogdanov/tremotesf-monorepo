@@ -90,6 +90,11 @@ data class TorrentDetails(
     @SerialName("creator")
     val creator: String,
 
+    @SerialName("topic_name")
+    val topicName: String = "",
+    @SerialName("topic_url")
+    val topicUrl: String = "",
+
     @SerialName("trackerStats")
     val trackerStats: List<TrackerStats>,
 ) {

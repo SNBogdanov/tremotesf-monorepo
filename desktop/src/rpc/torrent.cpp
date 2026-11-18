@@ -74,6 +74,8 @@ namespace tremotesf {
         Comment,
         TrackerStats,
         Labels,
+        TopicName,
+        TopicUrl,
 
         Count
     };
@@ -175,6 +177,10 @@ namespace tremotesf {
                 return "trackerStats"_L1;
             case TorrentData::UpdateKey::Labels:
                 return "labels"_L1;
+            case TorrentData::UpdateKey::TopicName:
+                return "topic_name"_L1;
+            case TorrentData::UpdateKey::TopicUrl:
+                return "topic_url"_L1;
             case TorrentData::UpdateKey::Count:
                 return {};
             }
@@ -476,6 +482,12 @@ namespace tremotesf {
             );
             return;
         }
+        case TorrentData::UpdateKey::TopicName:
+            setChanged(topicName, value.toString(), changed);
+            return;
+        case TorrentData::UpdateKey::TopicUrl:
+            setChanged(topicUrl, value.toString(), changed);
+            return;
         case TorrentData::UpdateKey::Count:
             throw std::logic_error("UpdateKey::Count should not be mapped");
         }
@@ -521,6 +533,12 @@ namespace tremotesf {
         QJsonArray fields{};
         for (auto key : allUpdateKeys) {
             if (key == TorrentData::UpdateKey::Labels && !serverSettings->data().hasLabelsProperty()) {
+                continue;
+            }
+            if (key == TorrentData::UpdateKey::TopicName && !serverSettings->data().hasForkFeature("topic_name/v1"_L1)) {
+                continue;
+            }
+            if (key == TorrentData::UpdateKey::TopicUrl && !serverSettings->data().hasForkFeature("topic_url/v1"_L1)) {
                 continue;
             }
             fields.push_back(updateKeyString(key));

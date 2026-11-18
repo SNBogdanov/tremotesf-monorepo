@@ -127,6 +127,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="created_by">Created by</string>
     <string name="created_on">Created on</string>
     <string name="comment">Comment</string>
+    <string name="topic">Topic</string>
+    <string name="topic_url">Topic URL</string>
     <string name="labels">Labels</string>
     <string name="edit_labels">Edit labels</string>
     <string name="no_labels">No labels</string>

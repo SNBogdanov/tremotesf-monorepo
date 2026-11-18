@@ -161,6 +161,32 @@ fun DetailsTab(
                 }
             }
 
+            if (torrentDetails.topicName.isNotBlank()) {
+                Text(stringResource(R.string.topic))
+                SelectionContainer {
+                    val linkColor = MaterialTheme.colorScheme.primary
+                    val annotated = remember(torrentDetails.topicName, torrentDetails.topicUrl, linkColor) {
+                        if (torrentDetails.topicUrl.isBlank()) {
+                            AnnotatedString(torrentDetails.topicName)
+                        } else {
+                            torrentDetails.topicName.annotateLinks(linkColor)
+                        }
+                    }
+                    Text(annotated)
+                }
+            }
+
+            if (torrentDetails.topicUrl.isNotBlank()) {
+                Text(stringResource(R.string.topic_url))
+                SelectionContainer {
+                    val linkColor = MaterialTheme.colorScheme.primary
+                    val annotated = remember(torrentDetails.topicUrl, linkColor) {
+                        torrentDetails.topicUrl.annotateLinks(linkColor)
+                    }
+                    Text(annotated)
+                }
+            }
+
             if (shouldShowLabels.value) {
                 Text(stringResource(R.string.labels))
                 Column(verticalArrangement = Arrangement.spacedBy(Dimens.SpacingSmall)) {

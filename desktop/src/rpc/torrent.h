@@ -119,6 +119,8 @@ namespace tremotesf {
         QString comment{};
         QString creator{};
         QDateTime creationDate{{}, {}, QTimeZone::utc()};
+        QString topicName{};
+        QString topicUrl{};
         Priority bandwidthPriority{};
         bool honorSessionLimits;
 
