@@ -7,14 +7,21 @@
 #include <QApplication>
 #include <QCheckBox>
 #include <QFrame>
+#include <QIcon>
 #include <QItemSelectionModel>
 #include <QLineEdit>
 #include <QListView>
+#include <QMenu>
 #include <QVBoxLayout>
 #include <QShortcut>
 
+#include <algorithm>
+#include <vector>
+
 #include "rpc/rpc.h"
 #include "rpc/serversettings.h"
+#include "rpc/torrent.h"
+#include "rpc/tracker.h"
 #include "ui/itemmodels/baseproxymodel.h"
 #include "ui/stylehelpers.h"
 #include "ui/widgets/tooltipwhenelideddelegate.h"
@@ -24,6 +31,8 @@
 #include "labelsmodel.h"
 #include "statusfiltersmodel.h"
 #include "torrentsproxymodel.h"
+
+using namespace Qt::StringLiterals;
 
 namespace tremotesf {
     namespace {
@@ -73,6 +82,15 @@ namespace tremotesf {
 
         protected:
             void init(Rpc* rpc, std::optional<int> sortByRole = {}) {
+                mRpc = rpc;
+                setContextMenuPolicy(Qt::CustomContextMenu);
+                QObject::connect(
+                    this,
+                    &QWidget::customContextMenuRequested,
+                    this,
+                    &BaseListView::showContextMenu
+                );
+                setSelectionMode(QAbstractItemView::ExtendedSelection);
                 QAbstractItemModel* actualModel{};
                 if (sortByRole.has_value()) {
                     mProxyModel = new BaseProxyModel(mModel, *sortByRole, std::nullopt, this);
@@ -136,9 +154,61 @@ namespace tremotesf {
                 }
             }
 
+            void showContextMenu(const QPoint& pos) {
+                const QModelIndex clickedViewIndex = indexAt(pos);
+                if (!clickedViewIndex.isValid()) {
+                    return;
+                }
+                QModelIndexList viewIndexes = selectionModel()->selectedIndexes();
+                if (!viewIndexes.contains(clickedViewIndex)) {
+                    viewIndexes = {clickedViewIndex};
+                }
+
+                std::vector<int> torrentIds{};
+                for (const QModelIndex& viewIndex : viewIndexes) {
+                    const QModelIndex index = mProxyModel ? mProxyModel->mapToSource(viewIndex) : viewIndex;
+                    const auto ids = torrentIdsForFilterIndex(index);
+                    torrentIds.insert(torrentIds.end(), ids.begin(), ids.end());
+                }
+                std::ranges::sort(torrentIds);
+                torrentIds.erase(std::ranges::unique(torrentIds).begin(), torrentIds.end());
+                if (torrentIds.empty()) {
+                    return;
+                }
+
+                QMenu menu;
+                QAction* const startAction = menu.addAction(
+                    QIcon::fromTheme("media-playback-start"_L1),
+                    //: Context menu item to start torrents that match the selected filter
+                    qApp->translate("tremotesf", "&Start")
+                );
+                QAction* const startNowAction = menu.addAction(
+                    QIcon::fromTheme("media-playback-start"_L1),
+                    //: Context menu item to start torrents that match the selected filter immediately
+                    qApp->translate("tremotesf", "Start &Now")
+                );
+                QAction* const pauseAction = menu.addAction(
+                    QIcon::fromTheme("media-playback-pause"_L1),
+                    //: Context menu item to pause torrents that match the selected filter
+                    qApp->translate("tremotesf", "P&ause")
+                );
+
+                const QAction* const selectedAction = menu.exec(mapToGlobal(pos));
+                if (selectedAction == startAction) {
+                    mRpc->startTorrents(torrentIds);
+                } else if (selectedAction == startNowAction) {
+                    mRpc->startTorrentsNow(torrentIds);
+                } else if (selectedAction == pauseAction) {
+                    mRpc->pauseTorrents(torrentIds);
+                }
+            }
+
+            [[nodiscard]] virtual std::vector<int> torrentIdsForFilterIndex(const QModelIndex& index) const = 0;
+
             virtual void setTorrentsModelFilterFromIndex(const QModelIndex& index) = 0;
             virtual void setTorrentsModelFilterEnabled(bool enabled) = 0;
 
+            Rpc* mRpc{};
             TorrentsProxyModel* mTorrentsProxyModel;
             BaseTorrentsFiltersSettingsModel* mModel;
             BaseProxyModel* mProxyModel{};
@@ -166,6 +236,18 @@ namespace tremotesf {
             void setTorrentsModelFilterEnabled(bool enabled) override {
                 mTorrentsProxyModel->setStatusFilterEnabled(enabled);
             }
+
+            [[nodiscard]] std::vector<int> torrentIdsForFilterIndex(const QModelIndex& index) const override {
+                const auto filter =
+                    index.data(StatusFiltersModel::FilterRole).value<TorrentsProxyModel::StatusFilter>();
+                std::vector<int> ids{};
+                for (const auto& torrent : mRpc->torrents()) {
+                    if (TorrentsProxyModel::statusFilterAcceptsTorrent(torrent.get(), filter)) {
+                        ids.push_back(torrent->data().id);
+                    }
+                }
+                return ids;
+            }
         };
 
         class LabelsListView final : public BaseListView {
@@ -188,6 +270,17 @@ namespace tremotesf {
             void setTorrentsModelFilterEnabled(bool enabled) override {
                 mTorrentsProxyModel->setLabelFilterEnabled(enabled);
             }
+
+            [[nodiscard]] std::vector<int> torrentIdsForFilterIndex(const QModelIndex& index) const override {
+                const QString label = index.data(LabelsModel::LabelRole).toString();
+                std::vector<int> ids{};
+                for (const auto& torrent : mRpc->torrents()) {
+                    if (std::ranges::contains(torrent->data().labels, label)) {
+                        ids.push_back(torrent->data().id);
+                    }
+                }
+                return ids;
+            }
         };
 
         class TrackersListView final : public BaseListView {
@@ -209,6 +302,17 @@ namespace tremotesf {
 
             void setTorrentsModelFilterEnabled(bool enabled) override {
                 mTorrentsProxyModel->setTrackerFilterEnabled(enabled);
+            }
+
+            [[nodiscard]] std::vector<int> torrentIdsForFilterIndex(const QModelIndex& index) const override {
+                const QString site = index.data(AllTrackersModel::TrackerRole).toString();
+                std::vector<int> ids{};
+                for (const auto& torrent : mRpc->torrents()) {
+                    if (std::ranges::contains(torrent->data().trackers, site, &Tracker::site)) {
+                        ids.push_back(torrent->data().id);
+                    }
+                }
+                return ids;
             }
         };
 
@@ -233,6 +337,18 @@ namespace tremotesf {
 
             void setTorrentsModelFilterEnabled(bool enabled) override {
                 mTorrentsProxyModel->setDownloadDirectoryFilterEnabled(enabled);
+            }
+
+            [[nodiscard]] std::vector<int> torrentIdsForFilterIndex(const QModelIndex& index) const override {
+                const QString directory =
+                    index.data(static_cast<int>(DownloadDirectoriesModel::Role::Directory)).toString();
+                std::vector<int> ids{};
+                for (const auto& torrent : mRpc->torrents()) {
+                    if (torrent->data().downloadDirectory == directory) {
+                        ids.push_back(torrent->data().id);
+                    }
+                }
+                return ids;
             }
         };
     }
