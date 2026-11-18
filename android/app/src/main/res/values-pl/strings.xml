@@ -43,6 +43,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="no_torrents">Brak torrentów</string>
 
     <string name="torrents_all">Wszystkie (%d)</string>
+    <string name="torrents_completed">Ukończone (%d)</string>
+    <string name="torrents_active_download">Aktywne pobieranie (%d)</string>
+    <string name="torrents_active_upload">Aktywne wysyłanie (%d)</string>
+    <string name="torrents_inactive">Nieaktywne (%d)</string>
+    <string name="torrents_stopped">Zatrzymane (%d)</string>
+    <string name="torrents_waiting">Oczekujące (%d)</string>
     <string name="torrents_downloading">Pobierane (%d)</string>
     <string name="torrents_errored">Uszkodzone (%d)</string>
 

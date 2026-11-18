@@ -37,6 +37,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="no_torrents">Geen torrents</string>
 
     <string name="torrents_all">Alles (%d)</string>
+    <string name="torrents_completed">Voltooid (%d)</string>
+    <string name="torrents_active_download">Actieve download (%d)</string>
+    <string name="torrents_active_upload">Actieve upload (%d)</string>
+    <string name="torrents_inactive">Inactief (%d)</string>
+    <string name="torrents_stopped">Gestopt (%d)</string>
+    <string name="torrents_waiting">Wachtend (%d)</string>
     <string name="torrents_downloading">Downloaden (%d)</string>
     <string name="torrents_errored">Fouten (%d)</string>
 

@@ -30,6 +30,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="no_torrents">Không có torrent</string>
 
     <string name="torrents_all">Tất cả (%d)</string>
+    <string name="torrents_completed">Đã hoàn thành (%d)</string>
+    <string name="torrents_active_download">Đang tải xuống (%d)</string>
+    <string name="torrents_active_upload">Đang tải lên (%d)</string>
+    <string name="torrents_inactive">Không hoạt động (%d)</string>
+    <string name="torrents_stopped">Đã dừng (%d)</string>
+    <string name="torrents_waiting">Đang chờ (%d)</string>
     <string name="torrents_downloading">Đang tải về (%d)</string>
     <string name="torrents_errored">Bị lỗi (%d)</string>
 

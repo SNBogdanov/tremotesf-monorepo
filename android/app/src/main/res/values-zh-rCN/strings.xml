@@ -37,6 +37,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="no_torrents">无种子</string>
 
     <string name="torrents_all">全部(%d)</string>
+    <string name="torrents_completed">已完成 (%d)</string>
+    <string name="torrents_active_download">活动下载 (%d)</string>
+    <string name="torrents_active_upload">活动上传 (%d)</string>
+    <string name="torrents_inactive">非活动 (%d)</string>
+    <string name="torrents_stopped">已停止 (%d)</string>
+    <string name="torrents_waiting">等待中 (%d)</string>
     <string name="torrents_downloading">正在下载(%d)</string>
     <string name="torrents_errored">已出错(%d)</string>
 
