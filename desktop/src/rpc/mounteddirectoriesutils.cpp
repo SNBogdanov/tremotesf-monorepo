@@ -10,6 +10,7 @@
 
 #include <QFileInfo>
 #include <QStringBuilder>
+#include <QStringList>
 
 using namespace Qt::StringLiterals;
 
@@ -38,22 +39,32 @@ namespace tremotesf {
         if (!Servers::instance()->currentServerHasMountedDirectories()) {
             return false;
         }
-        return !localTorrentDownloadDirectoryPath(rpc, torrent).isEmpty();
+        return !localTorrentDownloadDirectoryPath(rpc, torrent).isEmpty()
+               || !localTorrentIncompleteDirectoryPath(rpc, torrent).isEmpty();
     }
 
     QString localTorrentDownloadDirectoryPath(const Rpc* rpc, const Torrent* torrent) {
         const auto serverSettings = rpc->serverSettings();
-        const bool incomplete = isTorrentDataIncomplete(torrent);
-        QString directory{};
-        if (incomplete && !torrent->data().incompleteDirectory.isEmpty()) {
-            // Per-torrent incomplete directory configured on the server
-            directory = torrent->data().incompleteDirectory;
-        } else if (incomplete && serverSettings->data().incompleteDirectoryEnabled) {
-            directory = serverSettings->data().incompleteDirectory;
-        } else {
-            directory = torrent->data().downloadDirectory;
-        }
+        QString directory = torrent->data().downloadDirectory;
         if (!rpc->isLocal() && !directory.isEmpty() && Servers::instance()->currentServerHasMountedDirectories()) {
+            directory = Servers::instance()->fromRemoteToLocalDirectory(directory, serverSettings);
+        }
+        return directory;
+    }
+
+    QString localTorrentIncompleteDirectoryPath(const Rpc* rpc, const Torrent* torrent) {
+        if (!isTorrentDataIncomplete(torrent)) {
+            return {};
+        }
+        const auto serverSettings = rpc->serverSettings();
+        QString directory = torrent->data().incompleteDirectory;
+        if (directory.isEmpty() && serverSettings->data().incompleteDirectoryEnabled) {
+            directory = serverSettings->data().incompleteDirectory;
+        }
+        if (directory.isEmpty()) {
+            return {};
+        }
+        if (!rpc->isLocal() && Servers::instance()->currentServerHasMountedDirectories()) {
             directory = Servers::instance()->fromRemoteToLocalDirectory(directory, serverSettings);
         }
         return directory;
@@ -61,20 +72,37 @@ namespace tremotesf {
 
     QString localTorrentRootFilePath(const Rpc* rpc, const Torrent* torrent) {
         const QString downloadDirectoryPath = localTorrentDownloadDirectoryPath(rpc, torrent);
-        if (downloadDirectoryPath.isEmpty()) {
-            return {};
-        }
-        const auto& torrentName = torrent->data().name;
-        QString rootFilePath = downloadDirectoryPath % '/' % torrentName;
+        const QString incompleteDirectoryPath = localTorrentIncompleteDirectoryPath(rpc, torrent);
 
-        if (rpc->serverSettings()->data().renameIncompleteFiles && isTorrentDataIncomplete(torrent)) {
-            const QString incompleteRootFilePath = rootFilePath % ".part"_L1;
-            // Don't return incomplete file path unless it exists because we don't know whether it's supposed to be a directory or a file,
-            // and in case of directory this path can't exist so we don't want to try to open it
-            if (QFileInfo::exists(incompleteRootFilePath)) {
-                return incompleteRootFilePath;
+        const bool renameIncompleteFiles = rpc->serverSettings()->data().renameIncompleteFiles;
+        const bool incomplete = isTorrentDataIncomplete(torrent);
+        const auto& torrentName = torrent->data().name;
+
+        QStringList candidates{};
+        const auto addCandidates = [&](const QString& directory) {
+            if (directory.isEmpty()) {
+                return;
+            }
+            const QString rootFilePath = directory % '/' % torrentName;
+            if (renameIncompleteFiles && incomplete) {
+                candidates.push_back(rootFilePath % ".part"_L1);
+            }
+            candidates.push_back(rootFilePath);
+        };
+        addCandidates(downloadDirectoryPath);
+        addCandidates(incompleteDirectoryPath);
+
+        for (const QString& candidate : candidates) {
+            if (QFileInfo::exists(candidate)) {
+                return candidate;
             }
         }
-        return rootFilePath;
+        if (!downloadDirectoryPath.isEmpty()) {
+            return downloadDirectoryPath % '/' % torrentName;
+        }
+        if (!incompleteDirectoryPath.isEmpty()) {
+            return incompleteDirectoryPath % '/' % torrentName;
+        }
+        return {};
     }
 }

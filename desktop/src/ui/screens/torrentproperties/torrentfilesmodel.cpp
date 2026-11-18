@@ -4,7 +4,9 @@
 
 #include "torrentfilesmodel.h"
 
+#include <QFileInfo>
 #include <QStringBuilder>
+#include <QStringList>
 
 #include "coroutines/threadpool.h"
 #include "log/log.h"
@@ -122,15 +124,35 @@ namespace tremotesf {
     }
 
     QString TorrentFilesModel::localFilePath(const QModelIndex& index) const {
+        const QString downloadDirectory = localTorrentDownloadDirectoryPath(mRpc, mTorrent);
+        const QString incompleteDirectory = localTorrentIncompleteDirectoryPath(mRpc, mTorrent);
         if (!index.isValid()) {
-            return localTorrentDownloadDirectoryPath(mRpc, mTorrent);
+            return !downloadDirectory.isEmpty() ? downloadDirectory : incompleteDirectory;
         }
         const auto* entry = static_cast<const TorrentFilesModelEntry*>(index.internalPointer());
-        QString path(entry->path());
-        if (!entry->isDirectory() && entry->progress() < 1 && mRpc->serverSettings()->data().renameIncompleteFiles) {
-            path += ".part"_L1;
+        const QString relativePath = entry->path();
+        const bool incompleteFile = !entry->isDirectory() && entry->progress() < 1
+                                    && mRpc->serverSettings()->data().renameIncompleteFiles;
+
+        QStringList candidates{};
+        const auto addCandidates = [&](const QString& directory) {
+            if (directory.isEmpty()) {
+                return;
+            }
+            if (incompleteFile) {
+                candidates.push_back(directory % '/' % relativePath % ".part"_L1);
+            }
+            candidates.push_back(directory % '/' % relativePath);
+        };
+        addCandidates(downloadDirectory);
+        addCandidates(incompleteDirectory);
+
+        for (const QString& candidate : candidates) {
+            if (QFileInfo::exists(candidate)) {
+                return candidate;
+            }
         }
-        return localTorrentDownloadDirectoryPath(mRpc, mTorrent) % '/' % path;
+        return candidates.isEmpty() ? QString{} : candidates.first();
     }
 
     bool TorrentFilesModel::isWanted(const QModelIndex& index) const {

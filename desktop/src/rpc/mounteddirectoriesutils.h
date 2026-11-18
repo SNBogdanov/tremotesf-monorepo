@@ -13,6 +13,7 @@ namespace tremotesf {
 
     bool isServerLocalOrTorrentIsMounted(const Rpc* rpc, const Torrent* torrent);
     QString localTorrentDownloadDirectoryPath(const Rpc* rpc, const Torrent* torrent);
+    QString localTorrentIncompleteDirectoryPath(const Rpc* rpc, const Torrent* torrent);
     QString localTorrentRootFilePath(const Rpc* rpc, const Torrent* torrent);
 }
 
