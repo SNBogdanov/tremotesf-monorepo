@@ -202,18 +202,13 @@ namespace tremotesf {
         auto topicLabel = new QLabel(this);
         topicLabel->setOpenExternalLinks(true);
         topicLabel->setTextFormat(Qt::RichText);
+        topicLabel->setWordWrap(true);
         topicLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
+        // Allow the field to shrink below its content size so that long topic names wrap instead of expanding the form
+        topicLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
         //: Torrent's topic name (metadata provided by server's fork)
         infoGroupBoxLayout->addRow(qApp->translate("tremotesf", "Topic:"), topicLabel);
         auto topicLabelLabel = infoGroupBoxLayout->labelForField(topicLabel);
-
-        auto topicUrlLabel = new QLabel(this);
-        topicUrlLabel->setOpenExternalLinks(true);
-        topicUrlLabel->setTextFormat(Qt::RichText);
-        topicUrlLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
-        //: Torrent's topic URL (metadata provided by server's fork)
-        infoGroupBoxLayout->addRow(qApp->translate("tremotesf", "Topic URL:"), topicUrlLabel);
-        auto topicUrlLabelLabel = infoGroupBoxLayout->labelForField(topicUrlLabel);
 
         auto labelsModel = new StringListModel({}, QIcon::fromTheme("tag"_L1), this);
         auto labelsProxyModel = new BaseProxyModel(labelsModel, Qt::DisplayRole, std::nullopt, this);
@@ -229,6 +224,12 @@ namespace tremotesf {
         auto labelsLabel = infoGroupBoxLayout->labelForField(labelsView);
 
         detailsTabLayout->addWidget(infoGroupBox);
+
+        if (horizontal) {
+            // Keep activity and information groups equally wide so that long values do not squeeze one of them
+            detailsTabLayout->setStretch(0, 1);
+            detailsTabLayout->setStretch(1, 1);
+        }
 
         if (!horizontal) {
             auto resizer = new KColumnResizer(this);
@@ -281,16 +282,14 @@ namespace tremotesf {
                 }
                 const auto& topicName = mTorrent->data().topicName;
                 const auto& topicUrl = mTorrent->data().topicUrl;
+                const auto topicText = topicName.isEmpty() ? topicUrl : topicName;
                 if (!topicUrl.isEmpty()) {
                     topicLabel->setText(
-                        QStringLiteral("<a href=\"%1\">%2</a>").arg(topicUrl.toHtmlEscaped(), topicName.toHtmlEscaped())
-                    );
-                    topicUrlLabel->setText(
-                        QStringLiteral("<a href=\"%1\">%1</a>").arg(topicUrl.toHtmlEscaped())
+                        QStringLiteral("<a href=\"%1\">%2</a>")
+                            .arg(topicUrl.toHtmlEscaped(), topicText.toHtmlEscaped())
                     );
                 } else {
-                    topicLabel->setText(topicName.toHtmlEscaped());
-                    topicUrlLabel->clear();
+                    topicLabel->setText(topicText.toHtmlEscaped());
                 }
                 labelsModel->setStringList(mTorrent->data().labels);
             } else {
@@ -315,7 +314,6 @@ namespace tremotesf {
                 creationDateLabel->clear();
                 commentTextEdit->clear();
                 topicLabel->clear();
-                topicUrlLabel->clear();
                 labelsModel->setStringList({});
             }
             const bool incompleteDirectoryVisible = mTorrent && !mTorrent->data().incompleteDirectory.isEmpty();
@@ -324,8 +322,6 @@ namespace tremotesf {
             const bool topicVisible = mTorrent && (!mTorrent->data().topicName.isEmpty() || !mTorrent->data().topicUrl.isEmpty());
             topicLabel->setVisible(topicVisible);
             topicLabelLabel->setVisible(topicVisible);
-            topicUrlLabel->setVisible(topicVisible);
-            topicUrlLabelLabel->setVisible(topicVisible);
             const bool labelsViewVisible = labelsModel->rowCount() > 0;
             labelsView->setVisible(labelsViewVisible);
             labelsLabel->setVisible(labelsViewVisible);
