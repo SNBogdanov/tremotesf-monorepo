@@ -15,14 +15,21 @@ namespace tremotesf::desktoputils {
 
     enum class StatusIcon {
         Active,
+        ActiveDownload,
+        ActiveUpload,
         Checking,
+        CriticalError,
         Downloading,
         Errored,
+        Inactive,
         Paused,
         Queued,
         Seeding,
         StalledDownloading,
-        StalledSeeding
+        StalledSeeding,
+        TrackerErrorDownloading,
+        TrackerErrorSeeding,
+        Waiting
     };
     const QIcon& statusIcon(StatusIcon icon);
 

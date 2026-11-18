@@ -48,6 +48,34 @@ namespace tremotesf::desktoputils {
             static const QIcon qicon(":/active.png"_L1);
             return qicon;
         }
+        case ActiveDownload: {
+            static const QIcon qicon(":/active-download.png"_L1);
+            return qicon;
+        }
+        case ActiveUpload: {
+            static const QIcon qicon(":/active-upload.png"_L1);
+            return qicon;
+        }
+        case CriticalError: {
+            static const QIcon qicon(":/critical-error.png"_L1);
+            return qicon;
+        }
+        case Inactive: {
+            static const QIcon qicon(":/inactive.png"_L1);
+            return qicon;
+        }
+        case TrackerErrorDownloading: {
+            static const QIcon qicon(":/tracker-error-downloading.png"_L1);
+            return qicon;
+        }
+        case TrackerErrorSeeding: {
+            static const QIcon qicon(":/tracker-error-seeding.png"_L1);
+            return qicon;
+        }
+        case Waiting: {
+            static const QIcon qicon(":/waiting.png"_L1);
+            return qicon;
+        }
         case Checking: {
             static const QIcon qicon(":/checking.png"_L1);
             return qicon;

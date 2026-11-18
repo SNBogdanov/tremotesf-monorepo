@@ -49,7 +49,25 @@ namespace tremotesf {
                 using enum desktoputils::StatusIcon;
 
                 if (torrent->data().error != TorrentData::Error::None) {
-                    return statusIcon(Errored);
+                    switch (torrent->data().error) {
+                    case TorrentData::Error::LocalError:
+                        return statusIcon(CriticalError);
+                    case TorrentData::Error::TrackerWarning:
+                    case TorrentData::Error::TrackerError:
+                        switch (torrent->data().status) {
+                        case TorrentData::Status::Downloading:
+                        case TorrentData::Status::QueuedForDownloading:
+                            return statusIcon(TrackerErrorDownloading);
+                        case TorrentData::Status::Seeding:
+                        case TorrentData::Status::QueuedForSeeding:
+                            return statusIcon(TrackerErrorSeeding);
+                        default:
+                            break;
+                        }
+                        break;
+                    case TorrentData::Error::None:
+                        break;
+                    }
                 }
                 switch (torrent->data().status) {
                 case TorrentData::Status::Paused:

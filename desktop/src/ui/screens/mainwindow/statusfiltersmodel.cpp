@@ -33,19 +33,21 @@ namespace tremotesf {
                 return desktoputils::standardDirIcon();
             }
             case StatusFilter::Downloading:
-            case StatusFilter::ActiveDownload:
                 return desktoputils::statusIcon(Downloading);
+            case StatusFilter::ActiveDownload:
+                return desktoputils::statusIcon(ActiveDownload);
             case StatusFilter::Completed:
-            case StatusFilter::ActiveUpload:
                 return desktoputils::statusIcon(Seeding);
+            case StatusFilter::ActiveUpload:
+                return desktoputils::statusIcon(ActiveUpload);
             case StatusFilter::Inactive:
-                return desktoputils::statusIcon(Queued);
+                return desktoputils::statusIcon(Inactive);
             case StatusFilter::Stopped:
                 return desktoputils::statusIcon(Paused);
             case StatusFilter::Errored:
-                return desktoputils::statusIcon(Errored);
+                return desktoputils::statusIcon(CriticalError);
             case StatusFilter::Waiting:
-                return desktoputils::statusIcon(Checking);
+                return desktoputils::statusIcon(Waiting);
             }
             break;
         }
