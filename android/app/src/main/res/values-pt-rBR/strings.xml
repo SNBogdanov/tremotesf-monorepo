@@ -43,11 +43,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="no_torrents">Sem torrents</string>
 
     <string name="torrents_all">Tudo (%d)</string>
-    <string name="torrents_active">Ativo (%d)</string>
     <string name="torrents_downloading">Baixando (%d)</string>
-    <string name="torrents_seeding">Semeando (%d)</string>
-    <string name="torrents_paused">Pausado (%d)</string>
-    <string name="torrents_checking">Verificando (%d)</string>
     <string name="torrents_errored">Com erros (%d)</string>
 
     <!-- e.g. "example.com (42)" -->

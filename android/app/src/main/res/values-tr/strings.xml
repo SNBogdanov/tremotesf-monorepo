@@ -37,11 +37,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="no_torrents">Torrentler yok</string>
 
     <string name="torrents_all">Hepsi (%d)</string>
-    <string name="torrents_active">Etkin (%d)</string>
     <string name="torrents_downloading">İndiriliyor (%d)</string>
-    <string name="torrents_seeding">Gönderiliyor (%d)</string>
-    <string name="torrents_paused">Durduruldu (%d)</string>
-    <string name="torrents_checking">Denetliyor (%d)</string>
     <string name="torrents_errored">Hatalı (%d)</string>
 
     <!-- e.g. "example.com (42)" -->

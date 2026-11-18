@@ -43,11 +43,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="no_torrents">토렌트 없음</string>
 
     <string name="torrents_all">모두 (%d)</string>
-    <string name="torrents_active">활성 (%d)</string>
     <string name="torrents_downloading">다운로드 (%d)</string>
-    <string name="torrents_seeding">시딩 (%d)</string>
-    <string name="torrents_paused">일시중지됨 (%d)</string>
-    <string name="torrents_checking">확인 (%d)</string>
     <string name="torrents_errored">오류 (%d)</string>
 
     <!-- e.g. "example.com (42)" -->
