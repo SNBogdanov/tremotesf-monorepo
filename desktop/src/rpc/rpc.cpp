@@ -789,7 +789,10 @@ namespace tremotesf {
         // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
         bool updateItem(std::unique_ptr<Torrent>& torrent, NewTorrent&& newTorrent) override {
             const bool wasFinished = torrent->data().isFinished();
-            const bool wasPaused = (torrent->data().status == TorrentData::Status::Paused);
+            const bool wasPaused = (
+                torrent->data().status == TorrentData::Status::Paused
+                || torrent->data().status == TorrentData::Status::PausedDueToSpace
+            );
             const auto oldSizeWhenDone = torrent->data().sizeWhenDone;
 
             bool changed{};

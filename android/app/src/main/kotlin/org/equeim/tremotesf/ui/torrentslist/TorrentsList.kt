@@ -424,7 +424,12 @@ private fun LazyItemScope.TorrentCompactListItem(
 private fun StatusIcon(status: TorrentStatus) {
     Icon(
         when (status) {
-            TorrentStatus.Paused -> Icons.Filled.Pause
+            TorrentStatus.Paused,
+            TorrentStatus.PausedDueToSpace -> Icons.Filled.Pause
+            TorrentStatus.WaitingForSpaceToMove -> Icons.Filled.ArrowDownward
+            TorrentStatus.RunningScript -> Icons.Filled.Refresh
+            TorrentStatus.Moving -> Icons.Filled.Share
+
             TorrentStatus.Downloading,
             TorrentStatus.QueuedForDownloading -> Icons.Filled.ArrowDownward
 
@@ -446,6 +451,14 @@ private fun Torrent.getStatusString(progressFormatter: NumberFormat): String {
         } else {
             stringResource(R.string.torrent_paused)
         }
+
+        TorrentStatus.PausedDueToSpace -> stringResource(R.string.torrent_paused_due_to_space)
+
+        TorrentStatus.WaitingForSpaceToMove -> stringResource(R.string.torrent_waiting_for_space_to_move)
+
+        TorrentStatus.RunningScript -> stringResource(R.string.torrent_running_script)
+
+        TorrentStatus.Moving -> stringResource(R.string.torrent_moving)
 
         TorrentStatus.Downloading -> if (isDownloadingStalled) {
             if (error != null) {

@@ -52,6 +52,7 @@ import org.equeim.tremotesf.rpc.performPeriodicRequest
 import org.equeim.tremotesf.rpc.performRecoveringRequestIntoStateFlow
 import org.equeim.tremotesf.rpc.requests.NormalizedRpcPath
 import org.equeim.tremotesf.rpc.requests.Torrent
+import org.equeim.tremotesf.rpc.requests.isPostProcessing
 import org.equeim.tremotesf.rpc.requests.TorrentStatus
 import org.equeim.tremotesf.rpc.requests.TransferRate
 import org.equeim.tremotesf.rpc.requests.getTorrentsList
@@ -468,7 +469,8 @@ class TorrentsListScreenViewModel(application: Application, savedStateHandle: Sa
         fun statusFilterAcceptsTorrent(torrent: Torrent, filterMode: StatusFilterMode): Boolean {
             return when (filterMode) {
                 StatusFilterMode.Active -> (torrent.status == TorrentStatus.Downloading && !torrent.isDownloadingStalled) ||
-                        (torrent.status == TorrentStatus.Seeding && !torrent.isSeedingStalled)
+                        (torrent.status == TorrentStatus.Seeding && !torrent.isSeedingStalled) ||
+                        torrent.status.isPostProcessing
 
                 StatusFilterMode.Downloading -> when (torrent.status) {
                     TorrentStatus.Downloading,
@@ -486,7 +488,8 @@ class TorrentsListScreenViewModel(application: Application, savedStateHandle: Sa
                     else -> false
                 }
 
-                StatusFilterMode.Paused -> (torrent.status == TorrentStatus.Paused)
+                StatusFilterMode.Paused -> (torrent.status == TorrentStatus.Paused ||
+                        torrent.status == TorrentStatus.PausedDueToSpace)
                 StatusFilterMode.Checking -> when (torrent.status) {
                     TorrentStatus.Checking, TorrentStatus.QueuedForChecking -> true
                     else -> false

@@ -53,6 +53,7 @@ namespace tremotesf {
                 }
                 switch (torrent->data().status) {
                 case TorrentData::Status::Paused:
+                case TorrentData::Status::PausedDueToSpace:
                     return statusIcon(Paused);
                 case TorrentData::Status::Seeding:
                     if (torrent->data().isSeedingStalled()) {
@@ -66,9 +67,12 @@ namespace tremotesf {
                     return statusIcon(Downloading);
                 case TorrentData::Status::QueuedForDownloading:
                 case TorrentData::Status::QueuedForSeeding:
+                case TorrentData::Status::WaitingForSpaceToMove:
                     return statusIcon(Queued);
                 case TorrentData::Status::Checking:
                 case TorrentData::Status::QueuedForChecking:
+                case TorrentData::Status::RunningScript:
+                case TorrentData::Status::Moving:
                     return statusIcon(Checking);
                 }
                 break;
@@ -148,6 +152,23 @@ namespace tremotesf {
                     }
                     //: Torrent status
                     return qApp->translate("tremotesf", "Queued for checking");
+                case TorrentData::Status::PausedDueToSpace:
+                    if (torrent->data().hasError()) {
+                        //: Torrent status while torrent also has an error. %1 is error string
+                        return qApp->translate("tremotesf", "Paused (insufficient free space) (%1)")
+                            .arg(torrent->data().errorString);
+                    }
+                    //: Torrent status
+                    return qApp->translate("tremotesf", "Paused (insufficient free space)");
+                case TorrentData::Status::WaitingForSpaceToMove:
+                    //: Torrent status
+                    return qApp->translate("tremotesf", "Waiting for free space to move data");
+                case TorrentData::Status::RunningScript:
+                    //: Torrent status
+                    return qApp->translate("tremotesf", "Running script");
+                case TorrentData::Status::Moving:
+                    //: Torrent status
+                    return qApp->translate("tremotesf", "Moving data");
                 }
                 break;
             }

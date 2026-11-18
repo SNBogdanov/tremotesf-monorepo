@@ -343,6 +343,10 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <string name="torrent_paused">Paused</string>
     <string name="torrent_paused_with_error">Paused (%s)</string>
+    <string name="torrent_paused_due_to_space">Paused (insufficient free space)</string>
+    <string name="torrent_waiting_for_space_to_move">Waiting for free space to move data</string>
+    <string name="torrent_running_script">Running script</string>
+    <string name="torrent_moving">Moving data</string>
     <plurals name="torrent_downloading">
         <item quantity="one">Downloading from %d peer</item>
         <item quantity="other">Downloading from %d peers</item>

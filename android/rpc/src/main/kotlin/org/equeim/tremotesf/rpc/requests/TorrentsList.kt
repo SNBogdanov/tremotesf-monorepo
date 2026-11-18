@@ -108,7 +108,7 @@ data class Torrent(
     @SerialName("labels")
     val labels: List<String> = emptyList(),
 ) : RpcTorrentFinishedState {
-    override val isFinished: Boolean get() = leftUntilDone.bytes == 0L
+    override val isFinished: Boolean get() = leftUntilDone.bytes == 0L && !status.isPostProcessing
     val isDownloadingStalled: Boolean get() = peersSendingToUsCount == 0 && webSeedersSendingToUsCount == 0
     val isSeedingStalled: Boolean get() = peersGettingFromUsCount == 0
 

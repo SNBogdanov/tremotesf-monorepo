@@ -938,7 +938,8 @@ namespace tremotesf {
             if (selectedRows.size() == 1) {
                 const auto torrent =
                     mTorrentsModel.torrentAtIndex(mTorrentsProxyModel.mapToSource(selectedRows.first()));
-                if (torrent->data().status == TorrentData::Status::Paused) {
+                if (torrent->data().status == TorrentData::Status::Paused
+                    || torrent->data().status == TorrentData::Status::PausedDueToSpace) {
                     mPauseTorrentAction->setEnabled(false);
                 } else {
                     mStartTorrentAction->setEnabled(false);

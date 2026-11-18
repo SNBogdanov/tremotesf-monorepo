@@ -217,7 +217,11 @@ namespace tremotesf {
                 EnumMapping(TorrentData::Status::QueuedForDownloading, 3),
                 EnumMapping(TorrentData::Status::Downloading, 4),
                 EnumMapping(TorrentData::Status::QueuedForSeeding, 5),
-                EnumMapping(TorrentData::Status::Seeding, 6)
+                EnumMapping(TorrentData::Status::Seeding, 6),
+                EnumMapping(TorrentData::Status::PausedDueToSpace, 7),
+                EnumMapping(TorrentData::Status::WaitingForSpaceToMove, 8),
+                EnumMapping(TorrentData::Status::RunningScript, 9),
+                EnumMapping(TorrentData::Status::Moving, 10)
             }
         );
 

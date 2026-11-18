@@ -36,7 +36,11 @@ namespace tremotesf {
             QueuedForDownloading,
             Downloading,
             QueuedForSeeding,
-            Seeding
+            Seeding,
+            PausedDueToSpace,
+            WaitingForSpaceToMove,
+            RunningScript,
+            Moving
         };
         Q_ENUM(Status)
 
@@ -123,7 +127,20 @@ namespace tremotesf {
         std::vector<Tracker> trackers{};
 
         [[nodiscard]] bool hasError() const { return error != Error::None; }
-        [[nodiscard]] bool isFinished() const { return leftUntilDone == 0; }
+        [[nodiscard]] bool isFinished() const {
+            if (leftUntilDone != 0) {
+                return false;
+            }
+            // Torrent may have all data but still be post-processing it (moving files or running a done script)
+            switch (status) {
+            case Status::WaitingForSpaceToMove:
+            case Status::RunningScript:
+            case Status::Moving:
+                return false;
+            default:
+                return true;
+            }
+        }
         [[nodiscard]] bool isDownloadingStalled() const {
             return (peersSendingToUsCount == 0 && webSeedersSendingToUsCount == 0);
         }

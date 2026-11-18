@@ -87,7 +87,20 @@ enum class TorrentStatus(override val rpcValue: Int) : RpcEnum {
     QueuedForDownloading(3),
     Downloading(4),
     QueuedForSeeding(5),
-    Seeding(6);
+    Seeding(6),
+    PausedDueToSpace(7),
+    WaitingForSpaceToMove(8),
+    RunningScript(9),
+    Moving(10);
 
     internal object Serializer : RpcEnum.Serializer<TorrentStatus>(TorrentStatus::class)
 }
+
+/**
+ * Torrent has all the data but the server is still moving it or running a done script,
+ * so it must not be treated as finished yet.
+ */
+val TorrentStatus.isPostProcessing: Boolean
+    get() = this == TorrentStatus.WaitingForSpaceToMove ||
+            this == TorrentStatus.RunningScript ||
+            this == TorrentStatus.Moving

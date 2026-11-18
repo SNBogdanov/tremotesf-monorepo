@@ -37,8 +37,10 @@ data class TorrentFinishedState(
     override val sizeWhenDone: FileSize,
     @SerialName("name")
     override val name: String,
+    @SerialName("status")
+    val status: TorrentStatus,
 ) : RpcTorrentFinishedState {
-    override val isFinished: Boolean get() = leftUntilDone.bytes == 0L
+    override val isFinished: Boolean get() = leftUntilDone.bytes == 0L && !status.isPostProcessing
 }
 
 private val FIELDS = TorrentFinishedState.serializer().descriptor.elementNames.toList()
