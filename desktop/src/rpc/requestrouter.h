@@ -17,6 +17,7 @@
 #include <QSslCertificate>
 #include <QSslKey>
 #include <QString>
+#include <QStringList>
 
 #include "coroutines/coroutinefwd.h"
 
@@ -70,6 +71,9 @@ namespace tremotesf::impl {
         void setConfiguration(RequestsConfiguration configuration);
         void resetConfiguration();
 
+        /// Sets features supported by the client that are sent to the server in each request
+        void setClientFeatures(const QStringList& features);
+
         struct Response {
             QJsonObject arguments{};
             bool success{};
@@ -91,11 +95,14 @@ namespace tremotesf::impl {
         Coroutine<Response>
         onRequestError(NetworkReplyUniquePtr reply, QList<QSslError> sslErrors, NetworkRequestMetadata metadata);
 
+        void updateClientFeaturesHeader();
+
         QNetworkAccessManager* mNetwork{};
         QThreadPool* mThreadPool{};
 
         std::optional<RequestsConfiguration> mConfiguration{};
         QHttpHeaders mRequestHeaders{};
+        QStringList mClientFeatures{};
         QSslConfiguration mSslConfiguration{};
         QList<QSslError> mExpectedSslErrors{};
 

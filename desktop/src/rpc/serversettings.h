@@ -6,6 +6,7 @@
 #define TREMOTESF_RPC_SERVERSETTINGS_H
 
 #include <QObject>
+#include <QStringList>
 #include <QTime>
 
 #include "pathutils.h"
@@ -41,9 +42,11 @@ namespace tremotesf {
         [[nodiscard]] bool hasTableMode() const;
         [[nodiscard]] bool hasTrackerListProperty() const;
         [[nodiscard]] bool hasLabelsProperty() const;
+        [[nodiscard]] bool hasForkFeature(QLatin1String feature) const;
 
         int rpcVersion = 0;
         int minimumRpcVersion = 0;
+        QStringList forkFeatures;
 
         QString configDirectory;
         PathOs pathOs = PathOs::Unix;

@@ -166,6 +166,9 @@ open class RpcClient(
                 .apply {
                     configuration.credentials?.let { addHeader(AUTHORIZATION_HEADER, it) }
                     sessionId?.let { addHeader(SESSION_ID_HEADER, it) }
+                    if (serverCapabilities?.supportsStatusV2 == true) {
+                        addHeader(CLIENT_FEATURES_HEADER, "status/v2")
+                    }
                 }.build()
         )
         return suspendCancellableCoroutine { continuation ->
@@ -227,7 +230,11 @@ open class RpcClient(
             ServerCapabilities.ServerOs.Windows
         }
         Timber.d("Assuming that server's OS is $serverOs")
-        val capabilities = ServerCapabilities(serverVersionResponse.arguments.rpcVersion, serverOs)
+        val capabilities = ServerCapabilities(
+            rpcVersion = serverVersionResponse.arguments.rpcVersion,
+            serverOs = serverOs,
+            forkFeatures = serverVersionResponse.arguments.forkFeatures,
+        )
         Timber.d("Successfully checked server capabilities: $capabilities")
         serverCapabilitiesResult.value = Result.success(capabilities)
         return capabilities

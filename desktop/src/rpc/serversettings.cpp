@@ -107,6 +107,10 @@ namespace tremotesf {
 
     bool ServerSettingsData::hasLabelsProperty() const { return (rpcVersion >= 16); }
 
+    bool ServerSettingsData::hasForkFeature(QLatin1String feature) const {
+        return forkFeatures.contains(feature.toString());
+    }
+
     ServerSettings::ServerSettings(Rpc* rpc, QObject* parent) : QObject(parent), mRpc(rpc), mSaveOnSet(true) {}
 
     void ServerSettings::setDownloadDirectory(const QString& directory) {
@@ -392,6 +396,12 @@ namespace tremotesf {
 
         mData.rpcVersion = serverSettings.value("rpc-version"_L1).toInt();
         mData.minimumRpcVersion = serverSettings.value("rpc-version-minimum"_L1).toInt();
+
+        QStringList forkFeatures;
+        for (const auto& feature : serverSettings.value("fork_features"_L1).toArray()) {
+            forkFeatures.append(feature.toString());
+        }
+        setChanged(mData.forkFeatures, std::move(forkFeatures), changed);
 
         if (const auto newConfigDir = serverSettings.value("config-dir"_L1).toString();
             newConfigDir != mData.configDirectory) {

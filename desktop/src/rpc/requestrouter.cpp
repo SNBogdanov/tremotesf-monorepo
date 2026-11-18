@@ -91,6 +91,7 @@ namespace tremotesf::impl {
 
     namespace {
         constexpr auto sessionIdHeader = "X-Transmission-Session-Id"_L1;
+        constexpr auto clientFeaturesHeader = "X-Transmission-Client-Features"_L1;
 
         QJsonObject getReplyArguments(const QJsonObject& parseResult) {
             return parseResult.value("arguments"_L1).toObject();
@@ -198,6 +199,7 @@ namespace tremotesf::impl {
 
         mRequestHeaders.clear();
         mRequestHeaders.append(QHttpHeaders::WellKnownHeader::ContentType, "application/json"_L1);
+        updateClientFeaturesHeader();
 
         mNetwork->setProxy(mConfiguration->proxy);
         mNetwork->clearAccessCache();
@@ -311,6 +313,22 @@ namespace tremotesf::impl {
         mExpectedSslErrors.clear();
         mNetwork->setProxy(QNetworkProxy::NoProxy);
         mNetwork->clearAccessCache();
+    }
+
+    void RequestRouter::setClientFeatures(const QStringList& features) {
+        if (mClientFeatures == features) {
+            return;
+        }
+        debug().log("Setting client features: {}", features.join(", "));
+        mClientFeatures = features;
+        updateClientFeaturesHeader();
+    }
+
+    void RequestRouter::updateClientFeaturesHeader() {
+        mRequestHeaders.removeAll(clientFeaturesHeader);
+        if (!mClientFeatures.isEmpty()) {
+            mRequestHeaders.append(clientFeaturesHeader, mClientFeatures.join(", ").toLatin1());
+        }
     }
 
     QByteArrayView RequestRouter::sessionId() const { return mRequestHeaders.value(sessionIdHeader); }

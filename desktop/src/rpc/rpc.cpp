@@ -736,6 +736,13 @@ namespace tremotesf {
         const auto response = co_await mRequestRouter->postRequest("session-get"_L1, R"({"method":"session-get"})"_ba);
         if (response.success) {
             mServerSettings->update(response.arguments);
+
+            QStringList clientFeatures;
+            if (mServerSettings->data().hasForkFeature("status/v2"_L1)) {
+                clientFeatures.append("status/v2"_L1);
+            }
+            mRequestRouter->setClientFeatures(clientFeatures);
+
             if (mServerSettings->data().hasTableMode()) {
                 mGetTorrentsRequestData = RequestRouter::makeRequestData(
                     "torrent-get"_L1,

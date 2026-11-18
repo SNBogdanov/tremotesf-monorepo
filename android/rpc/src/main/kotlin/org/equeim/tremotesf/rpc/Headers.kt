@@ -7,6 +7,7 @@ package org.equeim.tremotesf.rpc
 internal const val SESSION_ID_HEADER = "X-Transmission-Session-Id"
 internal const val AUTHORIZATION_HEADER = "Authorization"
 internal const val PROXY_AUTHORIZATION_HEADER = "Proxy-Authorization"
+internal const val CLIENT_FEATURES_HEADER = "X-Transmission-Client-Features"
 
 fun Pair<String, String>.redactHeader(): Pair<String, String> = when (first) {
     AUTHORIZATION_HEADER, PROXY_AUTHORIZATION_HEADER -> first to REDACTED_VALUE
