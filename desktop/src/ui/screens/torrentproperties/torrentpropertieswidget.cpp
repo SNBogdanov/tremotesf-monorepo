@@ -226,8 +226,8 @@ namespace tremotesf {
         detailsTabLayout->addWidget(infoGroupBox);
 
         if (horizontal) {
-            // Keep activity and information groups equally wide so that long values do not squeeze one of them
-            detailsTabLayout->setStretch(0, 1);
+            // Give extra width to the information group; activity group keeps its natural width
+            detailsTabLayout->setStretch(0, 0);
             detailsTabLayout->setStretch(1, 1);
         }
 
