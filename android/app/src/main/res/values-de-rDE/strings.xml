@@ -531,4 +531,28 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="maintainer">Betreuer</string>
     <string name="contributor">Mitwirkender</string>
 
+    <string name="torrent_paused_due_to_space">Angehalten (nicht genügend freier Speicherplatz)</string>
+    <string name="torrent_waiting_for_space_to_move">Warten auf freien Speicherplatz zum Verschieben der Daten</string>
+    <string name="torrent_running_script">Skript wird ausgeführt</string>
+    <string name="torrent_moving">Daten werden verschoben</string>
+    <string name="topic">Thema</string>
+    <string name="topic_url">Themen-URL</string>
+    <string name="enable_auto_priority">Automatische Priorität aktivieren</string>
+    <string name="disable_auto_priority">Automatische Priorität deaktivieren</string>
+    <string name="torrent_auto_priority_error">Automatische Priorität konnte nicht geändert werden</string>
+    <string name="auto_priority">Torrents automatisch priorisieren</string>
+    <string name="auto_priority_max_high">Maximale Anzahl Torrents mit hoher Priorität</string>
+    <string name="queue_move_to_end">Inaktive Downloads an das Ende der Warteschlange verschieben</string>
+    <string name="min_free_space">Mindestens freier Speicherplatz (path=size, eine Regel pro Zeile)</string>
+    <string name="min_free_space_resume_margin">Zusätzlicher freier Speicherplatz zum Fortsetzen</string>
+    <string name="move_completed_torrents">Abgeschlossene Torrents verschieben</string>
+    <string name="move_partial_files">Teilweise geladene Dateien beim Verschieben mitnehmen</string>
+    <string name="force_finish_partial_files">Teilweise geladene Dateien erzwingend abschließen</string>
+    <string name="script_torrent_done_remove_torrent">Fertig-Skript entfernt den Torrent</string>
+    <string name="script_torrent_done_remove_temp_files">Fertig-Skript entfernt temporäre Dateien</string>
+    <string name="script_torrent_done_remove_all_files">Fertig-Skript entfernt alle Dateien</string>
+    <string name="set_incomplete_directory">Unvollständigen Ordner festlegen</string>
+    <string name="incomplete_directory">Unvollständiger Ordner</string>
+    <string name="move_incomplete_data">Vorhandene unvollständige Daten verschieben</string>
+    <string name="torrent_set_incomplete_dir_error">Unvollständiger Ordner konnte nicht geändert werden</string>
     </resources>

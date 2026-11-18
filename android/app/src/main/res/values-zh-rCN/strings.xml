@@ -462,4 +462,28 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <string name="no_web_seeders">暂无 Web 源(,,#ﾟДﾟ) ヽ </string>
 
+    <string name="torrent_paused_due_to_space">已暂停（可用空间不足）</string>
+    <string name="torrent_waiting_for_space_to_move">等待可用空间以移动数据</string>
+    <string name="torrent_running_script">正在运行脚本</string>
+    <string name="torrent_moving">正在移动数据</string>
+    <string name="topic">主题</string>
+    <string name="topic_url">主题链接</string>
+    <string name="enable_auto_priority">启用自动优先级</string>
+    <string name="disable_auto_priority">禁用自动优先级</string>
+    <string name="torrent_auto_priority_error">无法更改自动优先级</string>
+    <string name="auto_priority">自动为种子设置优先级</string>
+    <string name="auto_priority_max_high">高优先级种子数量上限</string>
+    <string name="queue_move_to_end">将不活跃的下载移到队列末尾</string>
+    <string name="min_free_space">最小可用空间（每行一个 path=size 规则）</string>
+    <string name="min_free_space_resume_margin">恢复所需的可用空间余量</string>
+    <string name="move_completed_torrents">移动已完成的种子</string>
+    <string name="move_partial_files">在更改位置时移动部分文件</string>
+    <string name="force_finish_partial_files">强制完成部分文件</string>
+    <string name="script_torrent_done_remove_torrent">完成脚本删除种子</string>
+    <string name="script_torrent_done_remove_temp_files">完成脚本删除临时文件</string>
+    <string name="script_torrent_done_remove_all_files">完成脚本删除所有文件</string>
+    <string name="set_incomplete_directory">设置未完成目录</string>
+    <string name="incomplete_directory">未完成目录</string>
+    <string name="move_incomplete_data">移动现有的未完成数据</string>
+    <string name="torrent_set_incomplete_dir_error">无法更改未完成目录</string>
     </resources>

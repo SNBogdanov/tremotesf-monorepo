@@ -588,4 +588,28 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="sort_order">Порядок сортировки:</string>
     <string name="ascending">По возрастанию</string>
     <string name="descending">По убыванию</string>
+    <string name="torrent_paused_due_to_space">Приостановлено (недостаточно свободного места)</string>
+    <string name="torrent_waiting_for_space_to_move">Ожидание свободного места для переноса данных</string>
+    <string name="torrent_running_script">Выполняется скрипт</string>
+    <string name="torrent_moving">Перенос данных</string>
+    <string name="topic">Тема</string>
+    <string name="topic_url">Ссылка на тему</string>
+    <string name="enable_auto_priority">Включить автоматический приоритет</string>
+    <string name="disable_auto_priority">Отключить автоматический приоритет</string>
+    <string name="torrent_auto_priority_error">Не удалось изменить автоматический приоритет</string>
+    <string name="auto_priority">Автоматически приоритизировать торренты</string>
+    <string name="auto_priority_max_high">Максимум торрентов с высоким приоритетом</string>
+    <string name="queue_move_to_end">Переносить неактивные загрузки в конец очереди</string>
+    <string name="min_free_space">Минимум свободного места (path=size, по одному правилу на строку)</string>
+    <string name="min_free_space_resume_margin">Запас свободного места для возобновления</string>
+    <string name="move_completed_torrents">Перемещать завершённые торренты</string>
+    <string name="move_partial_files">Перемещать частичные файлы при смене каталога</string>
+    <string name="force_finish_partial_files">Принудительно завершать частичные файлы</string>
+    <string name="script_torrent_done_remove_torrent">Скрипт завершения удаляет торрент</string>
+    <string name="script_torrent_done_remove_temp_files">Скрипт завершения удаляет временные файлы</string>
+    <string name="script_torrent_done_remove_all_files">Скрипт завершения удаляет все файлы</string>
+    <string name="set_incomplete_directory">Задать каталог незавершённых</string>
+    <string name="incomplete_directory">Каталог незавершённых</string>
+    <string name="move_incomplete_data">Переместить существующие незавершённые данные</string>
+    <string name="torrent_set_incomplete_dir_error">Не удалось изменить каталог незавершённых</string>
 </resources>

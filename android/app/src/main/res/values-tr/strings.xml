@@ -387,4 +387,28 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="proxy_type_default">Varsayılan</string>
     <string name="date_time_with_relative">%1$s (%2$s)</string>
 
+    <string name="torrent_paused_due_to_space">Duraklatıldı (yetersiz boş alan)</string>
+    <string name="torrent_waiting_for_space_to_move">Verileri taşımak için boş alan bekleniyor</string>
+    <string name="torrent_running_script">Betik çalışıyor</string>
+    <string name="torrent_moving">Veriler taşınıyor</string>
+    <string name="topic">Konu</string>
+    <string name="topic_url">Konu URL\'si</string>
+    <string name="enable_auto_priority">Otomatik önceliği etkinleştir</string>
+    <string name="disable_auto_priority">Otomatik önceliği devre dışı bırak</string>
+    <string name="torrent_auto_priority_error">Otomatik öncelik değiştirilemedi</string>
+    <string name="auto_priority">Torrentleri otomatik olarak önceliklendir</string>
+    <string name="auto_priority_max_high">Yüksek öncelikli torrent sayısı üst sınırı</string>
+    <string name="queue_move_to_end">Etkin olmayan indirmeleri kuyruğun sonuna taşı</string>
+    <string name="min_free_space">En düşük boş alan (path=size, satır başına bir kural)</string>
+    <string name="min_free_space_resume_margin">Devam etmek için boş alan payı</string>
+    <string name="move_completed_torrents">Tamamlanan torrentleri taşı</string>
+    <string name="move_partial_files">Taşırken kısmi dosyaları da taşı</string>
+    <string name="force_finish_partial_files">Kısmi dosyaları zorla tamamla</string>
+    <string name="script_torrent_done_remove_torrent">Tamamlanma betiği torrenti kaldırır</string>
+    <string name="script_torrent_done_remove_temp_files">Tamamlanma betiği geçici dosyaları kaldırır</string>
+    <string name="script_torrent_done_remove_all_files">Tamamlanma betiği tüm dosyaları kaldırır</string>
+    <string name="set_incomplete_directory">Tamamlanmamış dizinini ayarla</string>
+    <string name="incomplete_directory">Tamamlanmamış dizini</string>
+    <string name="move_incomplete_data">Mevcut tamamlanmamış verileri taşı</string>
+    <string name="torrent_set_incomplete_dir_error">Tamamlanmamış dizini değiştirilemedi</string>
     </resources>

@@ -282,4 +282,28 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="connection_settings">Cài đặt kết nối</string>
 
     <string name="proxy_type_default">Mặc định</string>
+    <string name="torrent_paused_due_to_space">Tạm dừng (không đủ dung lượng trống)</string>
+    <string name="torrent_waiting_for_space_to_move">Đang chờ dung lượng trống để di chuyển dữ liệu</string>
+    <string name="torrent_running_script">Đang chạy tập lệnh</string>
+    <string name="torrent_moving">Đang di chuyển dữ liệu</string>
+    <string name="topic">Chủ đề</string>
+    <string name="topic_url">URL chủ đề</string>
+    <string name="enable_auto_priority">Bật ưu tiên tự động</string>
+    <string name="disable_auto_priority">Tắt ưu tiên tự động</string>
+    <string name="torrent_auto_priority_error">Không thể thay đổi ưu tiên tự động</string>
+    <string name="auto_priority">Tự động ưu tiên torrent</string>
+    <string name="auto_priority_max_high">Số torrent ưu tiên cao tối đa</string>
+    <string name="queue_move_to_end">Di chuyển tải xuống không hoạt động xuống cuối hàng đợi</string>
+    <string name="min_free_space">Dung lượng trống tối thiểu (path=size, mỗi dòng một quy tắc)</string>
+    <string name="min_free_space_resume_margin">Khoảng dự trữ dung lượng trống để tiếp tục</string>
+    <string name="move_completed_torrents">Di chuyển torrent đã hoàn thành</string>
+    <string name="move_partial_files">Di chuyển tệp một phần khi di dời</string>
+    <string name="force_finish_partial_files">Buộc hoàn thành tệp một phần</string>
+    <string name="script_torrent_done_remove_torrent">Tập lệnh hoàn tất xóa torrent</string>
+    <string name="script_torrent_done_remove_temp_files">Tập lệnh hoàn tất xóa tệp tạm</string>
+    <string name="script_torrent_done_remove_all_files">Tập lệnh hoàn tất xóa tất cả tệp</string>
+    <string name="set_incomplete_directory">Đặt thư mục chưa hoàn thành</string>
+    <string name="incomplete_directory">Thư mục chưa hoàn thành</string>
+    <string name="move_incomplete_data">Di chuyển dữ liệu chưa hoàn thành hiện có</string>
+    <string name="torrent_set_incomplete_dir_error">Không thể thay đổi thư mục chưa hoàn thành</string>
     </resources>

@@ -423,4 +423,28 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="request_location_permission">Permetti accesso alla posizione</string>
     <string name="date_time_with_relative">%1$s (%2$s)</string>
 
+    <string name="torrent_paused_due_to_space">In pausa (spazio libero insufficiente)</string>
+    <string name="torrent_waiting_for_space_to_move">In attesa di spazio libero per spostare i dati</string>
+    <string name="torrent_running_script">Script in esecuzione</string>
+    <string name="torrent_moving">Spostamento dati</string>
+    <string name="topic">Argomento</string>
+    <string name="topic_url">URL argomento</string>
+    <string name="enable_auto_priority">Abilita priorità automatica</string>
+    <string name="disable_auto_priority">Disabilita priorità automatica</string>
+    <string name="torrent_auto_priority_error">Impossibile modificare la priorità automatica</string>
+    <string name="auto_priority">Assegna automaticamente la priorità ai torrent</string>
+    <string name="auto_priority_max_high">Numero massimo di torrent con priorità alta</string>
+    <string name="queue_move_to_end">Sposta i download inattivi in fondo alla coda</string>
+    <string name="min_free_space">Spazio libero minimo (path=size, una regola per riga)</string>
+    <string name="min_free_space_resume_margin">Margine di spazio libero per riprendere</string>
+    <string name="move_completed_torrents">Sposta i torrent completati</string>
+    <string name="move_partial_files">Sposta i file parziali durante lo spostamento</string>
+    <string name="force_finish_partial_files">Forza il completamento dei file parziali</string>
+    <string name="script_torrent_done_remove_torrent">Lo script di fine rimuove il torrent</string>
+    <string name="script_torrent_done_remove_temp_files">Lo script di fine rimuove i file temporanei</string>
+    <string name="script_torrent_done_remove_all_files">Lo script di fine rimuove tutti i file</string>
+    <string name="set_incomplete_directory">Imposta cartella dei file incompleti</string>
+    <string name="incomplete_directory">Cartella dei file incompleti</string>
+    <string name="move_incomplete_data">Sposta i dati incompleti esistenti</string>
+    <string name="torrent_set_incomplete_dir_error">Impossibile modificare la cartella dei file incompleti</string>
     </resources>

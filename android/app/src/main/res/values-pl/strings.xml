@@ -559,4 +559,28 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="maintainer">Opiekun</string>
     <string name="contributor">Kontrybutor</string>
 
+    <string name="torrent_paused_due_to_space">Wstrzymano (za mało wolnego miejsca)</string>
+    <string name="torrent_waiting_for_space_to_move">Oczekiwanie na wolne miejsce do przeniesienia danych</string>
+    <string name="torrent_running_script">Uruchomiono skrypt</string>
+    <string name="torrent_moving">Przenoszenie danych</string>
+    <string name="topic">Temat</string>
+    <string name="topic_url">Adres tematu</string>
+    <string name="enable_auto_priority">Włącz automatyczny priorytet</string>
+    <string name="disable_auto_priority">Wyłącz automatyczny priorytet</string>
+    <string name="torrent_auto_priority_error">Nie udało się zmienić automatycznego priorytetu</string>
+    <string name="auto_priority">Automatycznie nadawaj priorytety torrentom</string>
+    <string name="auto_priority_max_high">Maksymalna liczba torrentów o wysokim priorytecie</string>
+    <string name="queue_move_to_end">Przenoś nieaktywne pobierania na koniec kolejki</string>
+    <string name="min_free_space">Minimalne wolne miejsce (path=size, jedna reguła w wierszu)</string>
+    <string name="min_free_space_resume_margin">Zapas wolnego miejsca do wznowienia</string>
+    <string name="move_completed_torrents">Przenoś ukończone torrenty</string>
+    <string name="move_partial_files">Przenoś pliki częściowe przy zmianie lokalizacji</string>
+    <string name="force_finish_partial_files">Wymuś ukończenie plików częściowych</string>
+    <string name="script_torrent_done_remove_torrent">Skrypt po ukończeniu usuwa torrent</string>
+    <string name="script_torrent_done_remove_temp_files">Skrypt po ukończeniu usuwa pliki tymczasowe</string>
+    <string name="script_torrent_done_remove_all_files">Skrypt po ukończeniu usuwa wszystkie pliki</string>
+    <string name="set_incomplete_directory">Ustaw katalog nieukończonych</string>
+    <string name="incomplete_directory">Katalog nieukończonych</string>
+    <string name="move_incomplete_data">Przenieś istniejące nieukończone dane</string>
+    <string name="torrent_set_incomplete_dir_error">Nie udało się zmienić katalogu nieukończonych</string>
     </resources>

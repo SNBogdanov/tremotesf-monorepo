@@ -355,4 +355,28 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="prefs_delete_files_title">Delete files on the hard disk when removing torrent</string>
 
     <string name="alternative_speed_limits">Alternative speed limits</string>
+    <string name="torrent_paused_due_to_space">Paused (insufficient free space)</string>
+    <string name="torrent_waiting_for_space_to_move">Waiting for free space to move data</string>
+    <string name="torrent_running_script">Running script</string>
+    <string name="torrent_moving">Moving data</string>
+    <string name="topic">Topic</string>
+    <string name="topic_url">Topic URL</string>
+    <string name="enable_auto_priority">Enable automatic priority</string>
+    <string name="disable_auto_priority">Disable automatic priority</string>
+    <string name="torrent_auto_priority_error">Failed to change automatic priority</string>
+    <string name="auto_priority">Automatically prioritize torrents</string>
+    <string name="auto_priority_max_high">Maximum torrents with high priority</string>
+    <string name="queue_move_to_end">Move inactive downloads to the end of the queue</string>
+    <string name="min_free_space">Minimum free space (path=size per line)</string>
+    <string name="min_free_space_resume_margin">Minimum free space resume margin</string>
+    <string name="move_completed_torrents">Move completed torrents</string>
+    <string name="move_partial_files">Move partial files when relocating</string>
+    <string name="force_finish_partial_files">Force finish partial files</string>
+    <string name="script_torrent_done_remove_torrent">Done script removes torrent</string>
+    <string name="script_torrent_done_remove_temp_files">Done script removes temporary files</string>
+    <string name="script_torrent_done_remove_all_files">Done script removes all files</string>
+    <string name="set_incomplete_directory">Set incomplete directory</string>
+    <string name="incomplete_directory">Incomplete directory</string>
+    <string name="move_incomplete_data">Move existing incomplete data</string>
+    <string name="torrent_set_incomplete_dir_error">Failed to change incomplete directory</string>
 </resources>

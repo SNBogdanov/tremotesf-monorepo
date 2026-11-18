@@ -514,4 +514,28 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="maintainer">유지 관리자</string>
     <string name="contributor">기여자</string>
 
+    <string name="torrent_paused_due_to_space">일시 중지됨 (여유 공간 부족)</string>
+    <string name="torrent_waiting_for_space_to_move">데이터 이동을 위한 여유 공간 대기 중</string>
+    <string name="torrent_running_script">스크립트 실행 중</string>
+    <string name="torrent_moving">데이터 이동 중</string>
+    <string name="topic">주제</string>
+    <string name="topic_url">주제 URL</string>
+    <string name="enable_auto_priority">자동 우선순위 사용</string>
+    <string name="disable_auto_priority">자동 우선순위 사용 안 함</string>
+    <string name="torrent_auto_priority_error">자동 우선순위를 변경하지 못했습니다</string>
+    <string name="auto_priority">토렌트 자동 우선순위 지정</string>
+    <string name="auto_priority_max_high">높은 우선순위 토렌트 최대 수</string>
+    <string name="queue_move_to_end">비활성 다운로드를 대기열 끝으로 이동</string>
+    <string name="min_free_space">최소 여유 공간 (줄마다 path=size)</string>
+    <string name="min_free_space_resume_margin">다시 시작할 여유 공간 여유분</string>
+    <string name="move_completed_torrents">완료된 토렌트 이동</string>
+    <string name="move_partial_files">이동할 때 부분 파일도 함께 이동</string>
+    <string name="force_finish_partial_files">부분 파일 강제 완료</string>
+    <string name="script_torrent_done_remove_torrent">완료 스크립트가 토렌트를 제거함</string>
+    <string name="script_torrent_done_remove_temp_files">완료 스크립트가 임시 파일을 제거함</string>
+    <string name="script_torrent_done_remove_all_files">완료 스크립트가 모든 파일을 제거함</string>
+    <string name="set_incomplete_directory">미완성 폴더 설정</string>
+    <string name="incomplete_directory">미완성 폴더</string>
+    <string name="move_incomplete_data">기존 미완성 데이터 이동</string>
+    <string name="torrent_set_incomplete_dir_error">미완성 폴더를 변경하지 못했습니다</string>
     </resources>
