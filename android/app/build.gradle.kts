@@ -31,7 +31,8 @@ android {
     namespace = "org.equeim.tremotesf"
 
     defaultConfig {
-        applicationId = "org.equeim.tremotesf"
+        // Distinct application ID so that this build can be installed alongside the official Tremotesf
+        applicationId = "org.equeim.tremotesf.parallel"
         versionCode = 4063
         versionName = "2.13.1"
     }

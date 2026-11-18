@@ -5,7 +5,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name" translatable="false">Tremotesf</string>
+    <string name="app_name" translatable="false">Tremotesf (parallel)</string>
 
     <string name="disconnected">Disconnected</string>
     <string name="connecting">Connecting\u2026</string>

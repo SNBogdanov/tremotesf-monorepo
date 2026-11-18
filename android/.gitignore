@@ -7,6 +7,9 @@
 /captures
 /local.properties
 /keystore.properties
+/keystore.jks
+*.jks
+*.keystore
 /app/fdroid
 /app/google
 .gradle
