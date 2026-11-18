@@ -12,11 +12,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -136,12 +139,18 @@ fun TorrentsList(
     val progressFormatter = rememberNumberFormat { DecimalFormat("0.#") }
 
     val layoutDirection = LocalLayoutDirection.current
+    // Scaffold does not include the navigation bar inset in content padding when a bottom bar is present
+    // (https://issuetracker.google.com/issues/428740551), so list items would otherwise scroll under
+    // the system buttons.
+    val navigationBarsBottomPadding =
+        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val listPadding = PaddingValues(
         start = innerPadding.calculateStartPadding(layoutDirection),
         top = innerPadding.calculateTopPadding(),
         end = innerPadding.calculateEndPadding(layoutDirection),
         // Account for selection panel
-        bottom = innerPadding.calculateBottomPadding() + Dimens.PaddingForSelectionPanel
+        bottom = innerPadding.calculateBottomPadding() + navigationBarsBottomPadding +
+                Dimens.PaddingForSelectionPanel
     )
 
     Box {
