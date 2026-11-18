@@ -16,6 +16,8 @@ namespace tremotesf {
     void setupIconTheme() {
         QIcon::setThemeSearchPaths({resolveExternalBundledResourcesPath("icons"_L1)});
         QIcon::setThemeName(TREMOTESF_BUNDLED_ICON_THEME ""_L1);
+        // Fall back to Breeze for icons that the color theme does not provide (e.g. file type icons)
+        QIcon::setFallbackThemeName("breeze"_L1);
         QApplication::setStyle(new RecoloringSvgIconStyle(qApp));
     }
 }

@@ -45,40 +45,40 @@ namespace tremotesf::desktoputils {
         using enum StatusIcon;
         switch (icon) {
         case Active: {
-            static const QIcon qicon(":/active.svg"_L1);
+            static const QIcon qicon(":/active.png"_L1);
             return qicon;
         }
         case Checking: {
-            static const QIcon qicon(":/checking.svg"_L1);
+            static const QIcon qicon(":/checking.png"_L1);
             return qicon;
         }
         case Downloading: {
-            static const QIcon qicon(":/downloading.svg"_L1);
+            static const QIcon qicon(":/downloading.png"_L1);
             return qicon;
         }
         case Errored: {
-            static const QIcon qicon(":/errored.svg"_L1);
+            static const QIcon qicon(":/errored.png"_L1);
             return qicon;
         }
         case Paused: {
-            static const QIcon qicon(":/paused.svg"_L1);
+            static const QIcon qicon(":/paused.png"_L1);
             return qicon;
         }
         case Queued: {
-            static const QIcon qicon(":/queued.svg"_L1);
+            static const QIcon qicon(":/queued.png"_L1);
             return qicon;
         }
         case Seeding: {
-            static const QIcon qicon(":/seeding.svg"_L1);
+            static const QIcon qicon(":/seeding.png"_L1);
             return qicon;
         }
         case StalledDownloading: {
-            static const QIcon qicon(":/stalled-downloading.svg"_L1);
+            static const QIcon qicon(":/stalled-downloading.png"_L1);
             return qicon;
         }
 
         case StalledSeeding: {
-            static const QIcon qicon(":/stalled-seeding.svg"_L1);
+            static const QIcon qicon(":/stalled-seeding.png"_L1);
             return qicon;
         }
         }
@@ -89,15 +89,15 @@ namespace tremotesf::desktoputils {
     const QIcon& priorityIcon(Priority priority) {
         switch (priority) {
         case Priority::High: {
-            static const QIcon qicon(":/priority-high.svg"_L1);
+            static const QIcon qicon(":/priority-high.png"_L1);
             return qicon;
         }
         case Priority::Normal: {
-            static const QIcon qicon(":/priority-normal.svg"_L1);
+            static const QIcon qicon(":/priority-normal.png"_L1);
             return qicon;
         }
         case Priority::Low: {
-            static const QIcon qicon(":/priority-low.svg"_L1);
+            static const QIcon qicon(":/priority-low.png"_L1);
             return qicon;
         }
         }

@@ -242,9 +242,9 @@ namespace tremotesf {
 
     void MainWindowStatusBar::updateAltSpeedLimitIcon() {
         if (isPaletteDark()) {
-            mAltSpeedLimitsAction->setIcon(QIcon(":/turtle-dark.svg"));
+            mAltSpeedLimitsAction->setIcon(QIcon(":/speedometer.png"));
         } else {
-            mAltSpeedLimitsAction->setIcon(QIcon(":/turtle.svg"));
+            mAltSpeedLimitsAction->setIcon(QIcon(":/speedometer.png"));
         }
     }
 

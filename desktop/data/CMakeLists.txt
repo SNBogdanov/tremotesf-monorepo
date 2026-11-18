@@ -38,6 +38,7 @@ elseif (WIN32 OR APPLE)
     message(STATUS "Building for Windows or macOS, deploying icon themes")
 
     install(DIRECTORY "icons/hicolor" DESTINATION "${TREMOTESF_EXTERNAL_RESOURCES_PATH}/icons" PATTERN ".DS_Store" EXCLUDE)
+    install(DIRECTORY "icons/color" DESTINATION "${TREMOTESF_EXTERNAL_RESOURCES_PATH}/icons" PATTERN ".DS_Store" EXCLUDE)
 
     set(hicolor_download_path "${CMAKE_CURRENT_BINARY_DIR}/hicolor/index.theme")
     if (NOT EXISTS "${hicolor_download_path}")
@@ -82,7 +83,7 @@ elseif (WIN32 OR APPLE)
     install(CODE "set(TREMOTESF_EXTERNAL_RESOURCES_PATH [=[${TREMOTESF_EXTERNAL_RESOURCES_PATH}]=])")
     install(SCRIPT InstallBreezeIcons.cmake)
 
-    target_compile_definitions(tremotesf PRIVATE TREMOTESF_BUNDLED_ICON_THEME="breeze")
+    target_compile_definitions(tremotesf PRIVATE TREMOTESF_BUNDLED_ICON_THEME="color")
 endif()
 
 if (APPLE)
