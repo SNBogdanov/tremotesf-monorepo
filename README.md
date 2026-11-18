@@ -22,10 +22,14 @@
 
 ```bash
 git fetch upstream-desktop master
-git merge -s ours --no-commit upstream-desktop/master
-git read-tree --prefix=desktop/ -u upstream-desktop/master
-git commit -m "Update desktop/ from upstream"
+git merge -X subtree=desktop upstream-desktop/master -m "Update desktop/ from upstream"
 ```
+
+Для Android — то же самое с `upstream-android` и `-X subtree=android`.
+
+Рецепт `git merge -s ours --no-commit` + `git read-tree --prefix=<каталог>/ -u` годится
+только для *первоначального* добавления каталога; на уже существующем префиксе он
+падает с `Entry '<путь>' overlaps with '<путь>'. Cannot bind.`
 
 ## Сабмодули
 
