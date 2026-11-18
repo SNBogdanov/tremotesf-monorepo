@@ -2461,5 +2461,141 @@ Filter option of torrents list's label filter. %1 is label, %L2 is number of tor
         <source>New label...</source>
         <translation>Новая метка...</translation>
     </message>
+    <message>
+        <source>Paused (insufficient free space)</source>
+        <translation>Приостановлено (недостаточно свободного места)</translation>
+    </message>
+    <message>
+        <source>Paused (insufficient free space) (%1)</source>
+        <translation>Приостановлено (недостаточно свободного места) (%1)</translation>
+    </message>
+    <message>
+        <source>Waiting for free space to move data</source>
+        <translation>Ожидание свободного места для переноса данных</translation>
+    </message>
+    <message>
+        <source>Running script</source>
+        <translation>Выполняется скрипт</translation>
+    </message>
+    <message>
+        <source>Moving data</source>
+        <translation>Перенос данных</translation>
+    </message>
+    <message>
+        <source>Topic:</source>
+        <translation>Тема:</translation>
+    </message>
+    <message>
+        <source>Topic URL:</source>
+        <translation>Ссылка на тему:</translation>
+    </message>
+    <message>
+        <source>Automatic priority</source>
+        <translation>Автоматический приоритет</translation>
+    </message>
+    <message>
+        <source>Automatically prioritize torrents</source>
+        <translation>Автоматически приоритизировать торренты</translation>
+    </message>
+    <message>
+        <source>Maximum torrents with high priority:</source>
+        <translation>Максимум торрентов с высоким приоритетом:</translation>
+    </message>
+    <message>
+        <source>Sort torrents by:</source>
+        <translation>Сортировать торренты по:</translation>
+    </message>
+    <message>
+        <source>Id</source>
+        <translation>Id</translation>
+    </message>
+    <message>
+        <source>Move inactive downloads to the end of the queue:</source>
+        <translation>Переносить неактивные загрузки в конец очереди:</translation>
+    </message>
+    <message>
+        <source>Minimum free space:</source>
+        <translation>Минимум свободного места:</translation>
+    </message>
+    <message>
+        <source>One &quot;path=size&quot; rule per line, for example /downloads=5G</source>
+        <translation>Одно правило &quot;путь=размер&quot; на строку, например /downloads=5G</translation>
+    </message>
+    <message>
+        <source>Minimum free space resume margin:</source>
+        <translation>Запас свободного места для возобновления:</translation>
+    </message>
+    <message>
+        <source>Extra free space required above the limit before resuming torrents</source>
+        <translation>Дополнительное свободное место сверх лимита, необходимое для возобновления торрентов</translation>
+    </message>
+    <message>
+        <source>Move completed torrents</source>
+        <translation>Перемещать завершённые торренты</translation>
+    </message>
+    <message>
+        <source>Move partial files when relocating</source>
+        <translation>Перемещать частичные файлы при смене каталога</translation>
+    </message>
+    <message>
+        <source>Force finish partial files</source>
+        <translation>Принудительно завершать частичные файлы</translation>
+    </message>
+    <message>
+        <source>Done script removes torrent</source>
+        <translation>Скрипт завершения удаляет торрент</translation>
+    </message>
+    <message>
+        <source>Done script removes temporary files</source>
+        <translation>Скрипт завершения удаляет временные файлы</translation>
+    </message>
+    <message>
+        <source>Done script removes all files</source>
+        <translation>Скрипт завершения удаляет все файлы</translation>
+    </message>
+    <message>
+        <source>Set &amp;Incomplete Directory</source>
+        <translation>Задать &amp;каталог незавершённых</translation>
+    </message>
+    <message>
+        <source>Set Incomplete Directory</source>
+        <translation>Задать каталог незавершённых</translation>
+    </message>
+    <message>
+        <source>Incomplete directory:</source>
+        <translation>Каталог незавершённых:</translation>
+    </message>
+    <message>
+        <source>Move existing incomplete data</source>
+        <translation>Переместить существующие незавершённые данные</translation>
+    </message>
+    <message>
+        <source>Completed (%L1)</source>
+        <translation>Завершено (%L1)</translation>
+    </message>
+    <message>
+        <source>Active download (%L1)</source>
+        <translation>Активная загрузка (%L1)</translation>
+    </message>
+    <message>
+        <source>Active upload (%L1)</source>
+        <translation>Активная раздача (%L1)</translation>
+    </message>
+    <message>
+        <source>Inactive (%L1)</source>
+        <translation>Неактивные (%L1)</translation>
+    </message>
+    <message>
+        <source>Stopped (%L1)</source>
+        <translation>Остановлено (%L1)</translation>
+    </message>
+    <message>
+        <source>Error (%L1)</source>
+        <translation>Ошибка (%L1)</translation>
+    </message>
+    <message>
+        <source>Waiting (%L1)</source>
+        <translation>Ожидание (%L1)</translation>
+    </message>
 </context>
 </TS>
