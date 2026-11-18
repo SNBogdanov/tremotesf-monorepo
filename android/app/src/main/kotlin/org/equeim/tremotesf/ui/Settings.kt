@@ -93,7 +93,7 @@ object Settings {
                 }
                 if (
                     (preferences.getString(colorTheme.key, null) == ColorTheme.System.prefsValue)
-                    && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+                    && Build.VERSION.SDK_INT < Build.VERSION_CODES.S
                 ) {
                     val newValue = COLOR_THEME_DEFAULT_VALUE.prefsValue
                     Timber.e("Dynamic colors are not supported, setting ${colorTheme.key} value to $newValue")
