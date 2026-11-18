@@ -14,6 +14,23 @@
 using namespace Qt::StringLiterals;
 
 namespace tremotesf {
+    namespace {
+        // Data can stay in the incomplete (temporary) directory even when everything is downloaded:
+        // the server keeps it there until it has enough free space to move it to the download directory.
+        bool isTorrentDataIncomplete(const Torrent* torrent) {
+            if (torrent->data().leftUntilDone > 0) {
+                return true;
+            }
+            switch (torrent->data().status) {
+            case TorrentData::Status::PausedDueToSpace:
+            case TorrentData::Status::WaitingForSpaceToMove:
+                return true;
+            default:
+                return false;
+            }
+        }
+    }
+
     bool isServerLocalOrTorrentIsMounted(const Rpc* rpc, const Torrent* torrent) {
         if (rpc->isLocal()) {
             return true;
@@ -26,9 +43,12 @@ namespace tremotesf {
 
     QString localTorrentDownloadDirectoryPath(const Rpc* rpc, const Torrent* torrent) {
         const auto serverSettings = rpc->serverSettings();
-        const bool incompleteDirectoryEnabled = serverSettings->data().incompleteDirectoryEnabled;
+        const bool incomplete = isTorrentDataIncomplete(torrent);
         QString directory{};
-        if (incompleteDirectoryEnabled && torrent->data().leftUntilDone > 0) {
+        if (incomplete && !torrent->data().incompleteDirectory.isEmpty()) {
+            // Per-torrent incomplete directory configured on the server
+            directory = torrent->data().incompleteDirectory;
+        } else if (incomplete && serverSettings->data().incompleteDirectoryEnabled) {
             directory = serverSettings->data().incompleteDirectory;
         } else {
             directory = torrent->data().downloadDirectory;
@@ -47,7 +67,7 @@ namespace tremotesf {
         const auto& torrentName = torrent->data().name;
         QString rootFilePath = downloadDirectoryPath % '/' % torrentName;
 
-        if (rpc->serverSettings()->data().renameIncompleteFiles && torrent->data().leftUntilDone > 0) {
+        if (rpc->serverSettings()->data().renameIncompleteFiles && isTorrentDataIncomplete(torrent)) {
             const QString incompleteRootFilePath = rootFilePath % ".part"_L1;
             // Don't return incomplete file path unless it exists because we don't know whether it's supposed to be a directory or a file,
             // and in case of directory this path can't exist so we don't want to try to open it
