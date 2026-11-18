@@ -32,6 +32,9 @@ import org.equeim.tremotesf.rpc.requests.serversettings.setServerIdleSeedingLimi
 import org.equeim.tremotesf.rpc.requests.serversettings.setServerIdleSeedingLimited
 import org.equeim.tremotesf.rpc.requests.serversettings.setServerRatioLimit
 import org.equeim.tremotesf.rpc.requests.serversettings.setServerRatioLimited
+import org.equeim.tremotesf.rpc.requests.serversettings.setScriptTorrentDoneRemoveAllFilesEnabled
+import org.equeim.tremotesf.rpc.requests.serversettings.setScriptTorrentDoneRemoveTempFilesEnabled
+import org.equeim.tremotesf.rpc.requests.serversettings.setScriptTorrentDoneRemoveTorrentEnabled
 import org.equeim.tremotesf.ui.Destination
 import org.equeim.tremotesf.ui.NavController
 import org.equeim.tremotesf.ui.ScreenPreview
@@ -57,6 +60,9 @@ data object ServerSettingsSeedingDestination : Destination {
             ratioLimit = model.ratioLimit,
             idleSeedingLimited = model.idleSeedingLimited,
             idleSeedingLimit = model.idleSeedingLimit,
+            scriptTorrentDoneRemoveTorrentEnabled = model.scriptTorrentDoneRemoveTorrentEnabled,
+            scriptTorrentDoneRemoveTempFilesEnabled = model.scriptTorrentDoneRemoveTempFilesEnabled,
+            scriptTorrentDoneRemoveAllFilesEnabled = model.scriptTorrentDoneRemoveAllFilesEnabled,
             backgroundRpcRequestsErrors = GlobalRpcClient.backgroundRpcRequestsErrors
         )
     }
@@ -73,12 +79,21 @@ class SeedingScreenViewModel(application: Application) : AndroidViewModel(applic
         ServerSettingsBooleanProperty(RpcClient::setServerIdleSeedingLimited)
     val idleSeedingLimit: TremotesfIntegerNumberInputFieldState =
         ServerSettingsIntegerNumberInputFieldState { setServerIdleSeedingLimit(it.minutes) }
+    val scriptTorrentDoneRemoveTorrentEnabled: ServerSettingsProperty<Boolean> =
+        ServerSettingsBooleanProperty(RpcClient::setScriptTorrentDoneRemoveTorrentEnabled)
+    val scriptTorrentDoneRemoveTempFilesEnabled: ServerSettingsProperty<Boolean> =
+        ServerSettingsBooleanProperty(RpcClient::setScriptTorrentDoneRemoveTempFilesEnabled)
+    val scriptTorrentDoneRemoveAllFilesEnabled: ServerSettingsProperty<Boolean> =
+        ServerSettingsBooleanProperty(RpcClient::setScriptTorrentDoneRemoveAllFilesEnabled)
 
     private fun setInitialState(settings: SeedingServerSettings) {
         ratioLimited.reset(settings.ratioLimited)
         ratioLimit.reset(settings.ratioLimit)
         idleSeedingLimited.reset(settings.idleSeedingLimited)
         idleSeedingLimit.reset(settings.idleSeedingLimit.inWholeMinutes)
+        scriptTorrentDoneRemoveTorrentEnabled.reset(settings.scriptTorrentDoneRemoveTorrentEnabled)
+        scriptTorrentDoneRemoveTempFilesEnabled.reset(settings.scriptTorrentDoneRemoveTempFilesEnabled)
+        scriptTorrentDoneRemoveAllFilesEnabled.reset(settings.scriptTorrentDoneRemoveAllFilesEnabled)
     }
 }
 
@@ -90,6 +105,9 @@ private fun ServerSettingsSeedingScreen(
     ratioLimit: TremotesfDecimalNumberInputFieldState,
     idleSeedingLimited: ServerSettingsProperty<Boolean>,
     idleSeedingLimit: TremotesfIntegerNumberInputFieldState,
+    scriptTorrentDoneRemoveTorrentEnabled: ServerSettingsProperty<Boolean>,
+    scriptTorrentDoneRemoveTempFilesEnabled: ServerSettingsProperty<Boolean>,
+    scriptTorrentDoneRemoveAllFilesEnabled: ServerSettingsProperty<Boolean>,
     backgroundRpcRequestsErrors: ReceiveChannel<GlobalRpcClient.BackgroundRpcRequestError>
 ) {
     ServerSettingsCategory(
@@ -126,6 +144,27 @@ private fun ServerSettingsSeedingScreen(
             enabled = idleSeedingLimited.value,
             suffix = R.string.text_field_suffix_minutes
         )
+        TremotesfSwitchWithText(
+            checked = scriptTorrentDoneRemoveTorrentEnabled.value,
+            text = R.string.script_torrent_done_remove_torrent,
+            onCheckedChange = scriptTorrentDoneRemoveTorrentEnabled::update,
+            modifier = Modifier.fillMaxWidth(),
+            horizontalContentPadding = horizontalPadding
+        )
+        TremotesfSwitchWithText(
+            checked = scriptTorrentDoneRemoveTempFilesEnabled.value,
+            text = R.string.script_torrent_done_remove_temp_files,
+            onCheckedChange = scriptTorrentDoneRemoveTempFilesEnabled::update,
+            modifier = Modifier.fillMaxWidth(),
+            horizontalContentPadding = horizontalPadding
+        )
+        TremotesfSwitchWithText(
+            checked = scriptTorrentDoneRemoveAllFilesEnabled.value,
+            text = R.string.script_torrent_done_remove_all_files,
+            onCheckedChange = scriptTorrentDoneRemoveAllFilesEnabled::update,
+            modifier = Modifier.fillMaxWidth(),
+            horizontalContentPadding = horizontalPadding
+        )
     }
 }
 
@@ -139,6 +178,9 @@ private fun ServerSettingsSeedingScreenPreview() = ScreenPreview {
         ratioLimit = rememberTremotesfDecimalNumberInputFieldState(),
         idleSeedingLimited = remember { ServerSettingsBooleanProperty {} },
         idleSeedingLimit = rememberTremotesfIntegerNumberInputFieldState(),
+        scriptTorrentDoneRemoveTorrentEnabled = remember { ServerSettingsBooleanProperty {} },
+        scriptTorrentDoneRemoveTempFilesEnabled = remember { ServerSettingsBooleanProperty {} },
+        scriptTorrentDoneRemoveAllFilesEnabled = remember { ServerSettingsBooleanProperty {} },
         backgroundRpcRequestsErrors = remember { Channel() }
     )
 }

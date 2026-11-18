@@ -17,6 +17,8 @@
 #include <QHBoxLayout>
 #include <QIcon>
 #include <QLabel>
+#include <QLineEdit>
+#include <QPlainTextEdit>
 #include <QTimeEdit>
 #include <QVBoxLayout>
 
@@ -112,6 +114,21 @@ namespace tremotesf {
         );
         settings->setQueueMoveToEndEnabled(mQueueMoveToEndCheckBox->isChecked());
         settings->setQueueMoveToEndMinutes(mQueueMoveToEndMinutesSpinBox->value());
+        QStringList minFreeSpaceEntries;
+        for (const auto& line : mMinFreeSpaceEdit->toPlainText().split('\n')) {
+            const auto trimmed = line.trimmed();
+            if (!trimmed.isEmpty()) {
+                minFreeSpaceEntries.append(trimmed);
+            }
+        }
+        settings->setMinFreeSpace(minFreeSpaceEntries);
+        settings->setMinFreeSpaceResumeMargin(mMinFreeSpaceResumeMarginEdit->text());
+        settings->setMoveCompletedTorrentsEnabled(mMoveCompletedTorrentsCheckBox->isChecked());
+        settings->setMovePartialFilesEnabled(mMovePartialFilesCheckBox->isChecked());
+        settings->setForceFinishPartialFilesEnabled(mForceFinishPartialFilesCheckBox->isChecked());
+        settings->setScriptTorrentDoneRemoveTorrentEnabled(mScriptTorrentDoneRemoveTorrentCheckBox->isChecked());
+        settings->setScriptTorrentDoneRemoveTempFilesEnabled(mScriptTorrentDoneRemoveTempFilesCheckBox->isChecked());
+        settings->setScriptTorrentDoneRemoveAllFilesEnabled(mScriptTorrentDoneRemoveAllFilesCheckBox->isChecked());
 
         settings->setDownloadSpeedLimited(mDownloadSpeedLimitCheckBox->isChecked());
         settings->setDownloadSpeedLimit(mDownloadSpeedLimitSpinBox->value());
@@ -214,6 +231,32 @@ namespace tremotesf {
         incompleteDirectoryWidgetLayout->addSpacing(28);
         incompleteDirectoryWidgetLayout->addWidget(mIncompleteDirectoryWidget);
 
+        mMinFreeSpaceEdit = new QPlainTextEdit(this);
+        mMinFreeSpaceEdit->setToolTip(
+            qApp->translate("tremotesf", "One \"path=size\" rule per line, for example /downloads=5G")
+        );
+        downloadingPageLayout->addRow(qApp->translate("tremotesf", "Minimum free space:"), mMinFreeSpaceEdit);
+
+        mMinFreeSpaceResumeMarginEdit = new QLineEdit(this);
+        mMinFreeSpaceResumeMarginEdit->setToolTip(
+            qApp->translate("tremotesf", "Extra free space required above the limit before resuming torrents")
+        );
+        downloadingPageLayout->addRow(
+            qApp->translate("tremotesf", "Minimum free space resume margin:"),
+            mMinFreeSpaceResumeMarginEdit
+        );
+
+        mMoveCompletedTorrentsCheckBox =
+            new QCheckBox(qApp->translate("tremotesf", "Move completed torrents"), this);
+        downloadingPageLayout->addRow(mMoveCompletedTorrentsCheckBox);
+
+        mMovePartialFilesCheckBox = new QCheckBox(qApp->translate("tremotesf", "Move partial files when relocating"), this);
+        downloadingPageLayout->addRow(mMovePartialFilesCheckBox);
+
+        mForceFinishPartialFilesCheckBox =
+            new QCheckBox(qApp->translate("tremotesf", "Force finish partial files"), this);
+        downloadingPageLayout->addRow(mForceFinishPartialFilesCheckBox);
+
         // Seeding page
         mSeedingPageWidget = new QWidget(this);
         KPageWidgetItem* seedingPageItem = pageWidget->addPage(
@@ -250,7 +293,19 @@ namespace tremotesf {
         );
         seedingPageLayout->addWidget(mIdleSeedingLimitSpinBox, 3, 1, Qt::AlignTop);
 
-        seedingPageLayout->setRowStretch(3, 1);
+        mScriptTorrentDoneRemoveTorrentCheckBox =
+            new QCheckBox(qApp->translate("tremotesf", "Done script removes torrent"), this);
+        seedingPageLayout->addWidget(mScriptTorrentDoneRemoveTorrentCheckBox, 4, 0, 1, 2, Qt::AlignTop);
+
+        mScriptTorrentDoneRemoveTempFilesCheckBox =
+            new QCheckBox(qApp->translate("tremotesf", "Done script removes temporary files"), this);
+        seedingPageLayout->addWidget(mScriptTorrentDoneRemoveTempFilesCheckBox, 5, 0, 1, 2, Qt::AlignTop);
+
+        mScriptTorrentDoneRemoveAllFilesCheckBox =
+            new QCheckBox(qApp->translate("tremotesf", "Done script removes all files"), this);
+        seedingPageLayout->addWidget(mScriptTorrentDoneRemoveAllFilesCheckBox, 6, 0, 1, 2, Qt::AlignTop);
+
+        seedingPageLayout->setRowStretch(6, 1);
         seedingPageLayout->setColumnStretch(1, 1);
         seedingPageLayout->setColumnMinimumWidth(0, 28 - seedingPageLayout->spacing());
 
@@ -660,6 +715,17 @@ namespace tremotesf {
         }
         mQueueMoveToEndCheckBox->setChecked(settings->data().queueMoveToEndEnabled);
         mQueueMoveToEndMinutesSpinBox->setValue(settings->data().queueMoveToEndMinutes);
+
+        mMinFreeSpaceEdit->setPlainText(settings->data().minFreeSpace.join('\n'));
+        mMinFreeSpaceResumeMarginEdit->setText(settings->data().minFreeSpaceResumeMargin);
+        mMoveCompletedTorrentsCheckBox->setChecked(settings->data().moveCompletedTorrentsEnabled);
+        mMovePartialFilesCheckBox->setChecked(settings->data().movePartialFilesEnabled);
+        mForceFinishPartialFilesCheckBox->setChecked(settings->data().forceFinishPartialFilesEnabled);
+        mScriptTorrentDoneRemoveTorrentCheckBox->setChecked(settings->data().scriptTorrentDoneRemoveTorrentEnabled);
+        mScriptTorrentDoneRemoveTempFilesCheckBox->setChecked(
+            settings->data().scriptTorrentDoneRemoveTempFilesEnabled
+        );
+        mScriptTorrentDoneRemoveAllFilesCheckBox->setChecked(settings->data().scriptTorrentDoneRemoveAllFilesEnabled);
 
         mDownloadSpeedLimitCheckBox->setChecked(settings->data().downloadSpeedLimited);
         mDownloadSpeedLimitSpinBox->setValue(settings->data().downloadSpeedLimit);

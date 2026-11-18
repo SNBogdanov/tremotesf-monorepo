@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2017-2026 Alexey Rochev <equeim@gmail.com>
+﻿// SPDX-FileCopyrightText: 2017-2026 Alexey Rochev <equeim@gmail.com>
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -55,6 +55,21 @@ suspend fun RpcClient.setIncompleteDirectoryEnabled(value: Boolean) =
 suspend fun RpcClient.setIncompleteDirectory(value: String) =
     setSessionProperty("incomplete-dir", NotNormalizedRpcPath(value))
 
+suspend fun RpcClient.setMinFreeSpace(value: List<String>) =
+    setSessionProperty("min-free-space", value)
+
+suspend fun RpcClient.setMinFreeSpaceResumeMargin(value: String) =
+    setSessionProperty("min-free-space-resume-margin", value)
+
+suspend fun RpcClient.setMoveCompletedTorrentsEnabled(value: Boolean) =
+    setSessionProperty("move_completed_torrents_enabled", value)
+
+suspend fun RpcClient.setMovePartialFilesEnabled(value: Boolean) =
+    setSessionProperty("move_partial_files_enabled", value)
+
+suspend fun RpcClient.setForceFinishPartialFilesEnabled(value: Boolean) =
+    setSessionProperty("force_finish_partial_files_enabled", value)
+
 @Serializable
 data class DownloadingServerSettings(
     @Contextual
@@ -69,6 +84,16 @@ data class DownloadingServerSettings(
     @Contextual
     @SerialName("incomplete-dir")
     val incompleteDirectory: NormalizedRpcPath,
+    @SerialName("min-free-space")
+    val minFreeSpace: List<String> = emptyList(),
+    @SerialName("min-free-space-resume-margin")
+    val minFreeSpaceResumeMargin: String = "",
+    @SerialName("move_completed_torrents_enabled")
+    val moveCompletedTorrentsEnabled: Boolean = false,
+    @SerialName("move_partial_files_enabled")
+    val movePartialFilesEnabled: Boolean = false,
+    @SerialName("force_finish_partial_files_enabled")
+    val forceFinishPartialFilesEnabled: Boolean = false,
 )
 
 private val DOWNLOADING_SERVER_SETTINGS_REQUEST_BODY =

@@ -145,6 +145,67 @@ namespace tremotesf {
             QCheckBox* const mMoveFilesCheckBox;
         };
 
+        class SetIncompleteDirectoryDialog final : public QDialog {
+            Q_OBJECT
+
+        public:
+            explicit SetIncompleteDirectoryDialog(const QString& incompleteDirectory, Rpc* rpc, QWidget* parent = nullptr)
+                : QDialog(parent),
+                  mDirectoryWidget(new TorrentDownloadDirectoryDirectorySelectionWidget(this)),
+                  mMoveDataCheckBox(
+                      //: Check box label
+                      new QCheckBox(qApp->translate("tremotesf", "Move existing incomplete data"), this)
+                  ) {
+                //: Dialog title for changing torrent's incomplete directory
+                setWindowTitle(qApp->translate("tremotesf", "Set Incomplete Directory"));
+
+                auto layout = new QVBoxLayout(this);
+                layout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+
+                auto label = new QLabel(qApp->translate("tremotesf", "Incomplete directory:"), this);
+                label->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+                layout->addWidget(label);
+
+                mDirectoryWidget->setup(incompleteDirectory, rpc);
+                mDirectoryWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+                layout->addWidget(mDirectoryWidget);
+
+                mMoveDataCheckBox->setChecked(true);
+                layout->addWidget(mMoveDataCheckBox);
+
+                auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+                QObject::connect(dialogButtonBox, &QDialogButtonBox::accepted, this, [this] { accept(); });
+                QObject::connect(dialogButtonBox, &QDialogButtonBox::rejected, this, &SetIncompleteDirectoryDialog::reject);
+
+                QObject::connect(
+                    mDirectoryWidget,
+                    &RemoteDirectorySelectionWidget::pathChanged,
+                    this,
+                    [dialogButtonBox, this] {
+                        dialogButtonBox->button(QDialogButtonBox::Ok)->setEnabled(!mDirectoryWidget->path().isEmpty());
+                    }
+                );
+
+                layout->addWidget(dialogButtonBox);
+
+                QObject::connect(rpc, &Rpc::connectedChanged, this, [rpc, this] {
+                    if (!rpc->isConnected()) {
+                        reject();
+                    }
+                });
+
+                resize(sizeHint().expandedTo(QSize(720, 0)));
+            }
+
+            [[nodiscard]] QString incompleteDirectory() const { return mDirectoryWidget->path(); }
+
+            [[nodiscard]] bool moveData() const { return mMoveDataCheckBox->isChecked(); }
+
+        private:
+            TorrentDownloadDirectoryDirectorySelectionWidget* const mDirectoryWidget;
+            QCheckBox* const mMoveDataCheckBox;
+        };
+
 #ifndef Q_OS_MACOS
         bool isAllowedToHide(const QWidget* window) {
             static constexpr std::array classNames{
@@ -445,6 +506,7 @@ namespace tremotesf {
         QAction* mRemoveTorrentAction{};
 
         QAction* mRenameTorrentAction{};
+        QAction* mSetIncompleteDirectoryAction{};
 
         QAction* mOpenTorrentFilesAction{};
         QAction* mOpenTorrentDownloadDirectoryAction{};
@@ -617,6 +679,35 @@ namespace tremotesf {
                     });
                     dialog->show();
                 }
+            });
+
+            mSetIncompleteDirectoryAction = mTorrentMenu->addAction(
+                QIcon::fromTheme("folder-download"_L1),
+                //: Torrent's context menu item
+                qApp->translate("tremotesf", "Set &Incomplete Directory")
+            );
+            mSetIncompleteDirectoryAction->setVisible(false);
+            QObject::connect(mSetIncompleteDirectoryAction, &QAction::triggered, this, [this] {
+                if (!mTorrentsView.selectionModel()->hasSelection()) {
+                    return;
+                }
+                const QModelIndexList indexes(
+                    mTorrentsProxyModel.sourceIndexes(mTorrentsView.selectionModel()->selectedRows())
+                );
+                auto dialog = new SetIncompleteDirectoryDialog(
+                    mTorrentsModel.torrentAtIndex(indexes.first())->data().incompleteDirectory,
+                    mViewModel.rpc(),
+                    mWindow
+                );
+                dialog->setAttribute(Qt::WA_DeleteOnClose);
+                QObject::connect(dialog, &SetIncompleteDirectoryDialog::accepted, this, [indexes, dialog, this] {
+                    mViewModel.rpc()->setTorrentsIncompleteDirectory(
+                        mTorrentsModel.idsFromIndexes(indexes),
+                        dialog->incompleteDirectory(),
+                        dialog->moveData()
+                    );
+                });
+                dialog->show();
             });
 
             mRenameTorrentAction = mTorrentMenu->addAction(
@@ -951,6 +1042,9 @@ namespace tremotesf {
             mAutoPriorityAction->setChecked(false);
             mAutoPriorityAction->setVisible(
                 mViewModel.rpc()->serverSettings()->data().hasForkFeature("auto_priority/v1"_L1)
+            );
+            mSetIncompleteDirectoryAction->setVisible(
+                mViewModel.rpc()->serverSettings()->data().hasForkFeature("per_torrent_incomplete_dir/v1"_L1)
             );
 
             const QModelIndexList selectedRows = mTorrentsView.selectionModel()->selectedRows();

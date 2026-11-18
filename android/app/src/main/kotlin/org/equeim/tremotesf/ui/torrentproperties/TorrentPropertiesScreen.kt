@@ -68,6 +68,7 @@ import org.equeim.tremotesf.ui.ShowRpcErrorsSnackbar
 import org.equeim.tremotesf.ui.TorrentRenameDialog
 import org.equeim.tremotesf.ui.TorrentsRemoveDialog
 import org.equeim.tremotesf.ui.TorrentsSetLocationDialogDestination
+import org.equeim.tremotesf.ui.TorrentsSetIncompleteDirDialogDestination
 import org.equeim.tremotesf.ui.components.TremotesfIconButtonWithTooltip
 import org.equeim.tremotesf.ui.components.TremotesfIconButtonWithTooltipAndMenu
 import org.equeim.tremotesf.ui.components.TremotesfScreenContentWithPlaceholder
@@ -107,6 +108,14 @@ data class TorrentPropertiesDestination(val torrentHashString: String) : Destina
                     )
                 )
             },
+            navigateToSetIncompleteDirDialog = { incompleteDir ->
+                navController.navigateTo(
+                    TorrentsSetIncompleteDirDialogDestination(
+                        torrentHashString = torrentHashString,
+                        incompleteDirectory = incompleteDir
+                    )
+                )
+            },
 
             torrentDetails = model.torrentDetails.collectAsStateWithLifecycle(),
             shouldShowLabels = model.shouldShowLabels.collectAsStateWithLifecycle(),
@@ -135,6 +144,7 @@ private fun TorrentPropertiesScreen(
     navigateUp: () -> Unit,
     navigateToLabelsEditDialog: (enabledLabels: List<String>) -> Unit,
     navigateToSetLocationDialog: (location: String) -> Unit,
+    navigateToSetIncompleteDirDialog: (incompleteDirectory: String) -> Unit,
 
     torrentDetails: State<RpcRequestState<TorrentDetails>>,
     shouldShowLabels: State<Boolean>,
@@ -201,7 +211,8 @@ private fun TorrentPropertiesScreen(
                             shouldShowLabels = shouldShowLabels,
                             torrentOperations = torrentOperations,
                             navigateToLabelsEditDialog = navigateToLabelsEditDialog,
-                            navigateToSetLocationDialog = navigateToSetLocationDialog
+                            navigateToSetLocationDialog = navigateToSetLocationDialog,
+                            navigateToSetIncompleteDirDialog = navigateToSetIncompleteDirDialog
                         )
                     }
                 }
@@ -311,7 +322,8 @@ private fun TopAppBarMenuActions(
     shouldShowLabels: State<Boolean>,
     torrentOperations: TorrentOperations,
     navigateToLabelsEditDialog: () -> Unit,
-    navigateToSetLocationDialog: () -> Unit
+    navigateToSetLocationDialog: () -> Unit,
+    navigateToSetIncompleteDirDialog: (incompleteDirectory: String) -> Unit
 ) {
     val paused = remember {
         derivedStateOf { torrentDetails.value?.status == TorrentStatus.Paused }
@@ -362,6 +374,13 @@ private fun TopAppBarMenuActions(
             text = { Text(stringResource(R.string.set_location)) },
             onClick = {
                 navigateToSetLocationDialog()
+                dismiss()
+            }
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.set_incomplete_directory)) },
+            onClick = {
+                torrentDetails.value?.let { navigateToSetIncompleteDirDialog(it.incompleteDirectory) }
                 dismiss()
             }
         )

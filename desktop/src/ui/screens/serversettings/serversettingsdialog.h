@@ -11,6 +11,8 @@ class QCheckBox;
 class QComboBox;
 class QDoubleSpinBox;
 class QGroupBox;
+class QLineEdit;
+class QPlainTextEdit;
 class QSpinBox;
 class QTimeEdit;
 
@@ -60,6 +62,16 @@ namespace tremotesf {
         QComboBox* mAutoPrioritySortComboBox = nullptr;
         QCheckBox* mQueueMoveToEndCheckBox = nullptr;
         QSpinBox* mQueueMoveToEndMinutesSpinBox = nullptr;
+
+        QPlainTextEdit* mMinFreeSpaceEdit = nullptr;
+        QLineEdit* mMinFreeSpaceResumeMarginEdit = nullptr;
+        QCheckBox* mMoveCompletedTorrentsCheckBox = nullptr;
+        QCheckBox* mMovePartialFilesCheckBox = nullptr;
+        QCheckBox* mForceFinishPartialFilesCheckBox = nullptr;
+
+        QCheckBox* mScriptTorrentDoneRemoveTorrentCheckBox = nullptr;
+        QCheckBox* mScriptTorrentDoneRemoveTempFilesCheckBox = nullptr;
+        QCheckBox* mScriptTorrentDoneRemoveAllFilesCheckBox = nullptr;
 
         QWidget* mSpeedPageWidget = nullptr;
         QCheckBox* mDownloadSpeedLimitCheckBox = nullptr;

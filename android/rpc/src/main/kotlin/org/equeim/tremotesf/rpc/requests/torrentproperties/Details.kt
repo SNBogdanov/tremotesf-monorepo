@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2017-2026 Alexey Rochev <equeim@gmail.com>
+﻿// SPDX-FileCopyrightText: 2017-2026 Alexey Rochev <equeim@gmail.com>
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -96,6 +96,8 @@ data class TorrentDetails(
     val topicUrl: String = "",
     @SerialName("auto_priority")
     val hasAutoPriority: Boolean = false,
+    @SerialName("incomplete-dir")
+    val incompleteDirectory: String = "",
 
     @SerialName("trackerStats")
     val trackerStats: List<TrackerStats>,

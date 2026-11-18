@@ -59,6 +59,9 @@ internal enum class RpcMethod {
     @SerialName("torrent-remove")
     TorrentRemove,
 
+    @SerialName("torrent_set_incomplete_dir")
+    TorrentSetIncompleteDir,
+
     @SerialName("session-get")
     SessionGet,
 

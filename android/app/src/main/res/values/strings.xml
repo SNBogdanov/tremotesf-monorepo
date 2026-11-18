@@ -253,6 +253,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <string name="server_settings_downloading">Downloading</string>
     <string name="server_settings_seeding">Seeding</string>
+    <string name="min_free_space">Minimum free space (path=size per line)</string>
+    <string name="min_free_space_resume_margin">Minimum free space resume margin</string>
+    <string name="move_completed_torrents">Move completed torrents</string>
+    <string name="move_partial_files">Move partial files when relocating</string>
+    <string name="force_finish_partial_files">Force finish partial files</string>
+    <string name="script_torrent_done_remove_torrent">Done script removes torrent</string>
+    <string name="script_torrent_done_remove_temp_files">Done script removes temporary files</string>
+    <string name="script_torrent_done_remove_all_files">Done script removes all files</string>
     <string name="server_settings_queue">Queue</string>
     <string name="server_settings_speed">Speed</string>
     <string name="server_settings_network">Network</string>
@@ -417,6 +425,10 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <string name="set_location">Set location</string>
     <string name="move_files">Move files from current directory</string>
+    <string name="set_incomplete_directory">Set incomplete directory</string>
+    <string name="incomplete_directory">Incomplete directory</string>
+    <string name="move_incomplete_data">Move existing incomplete data</string>
+    <string name="torrent_set_incomplete_dir_error">Failed to change incomplete directory</string>
 
     <string name="rename">Rename</string>
 

@@ -170,6 +170,7 @@ namespace tremotesf {
         void setSessionProperty(QString property, QJsonValue value);
         void setSessionProperties(QJsonObject properties);
         void setTorrentProperty(int id, QString property, QJsonValue value, bool updateIfSuccessful = false);
+        void setTorrentsIncompleteDirectory(std::span<const int> ids, QString directory, bool move);
         void setTorrentsLocation(std::span<const int> ids, QString location, bool moveFiles);
         void setTorrentsLabels(std::span<const int> ids, std::span<const QString> labels);
         void getTorrentFiles(int torrentId);

@@ -122,6 +122,7 @@ namespace tremotesf {
         QDateTime creationDate{{}, {}, QTimeZone::utc()};
         QString topicName{};
         QString topicUrl{};
+        QString incompleteDirectory{};
         Priority bandwidthPriority{};
         bool honorSessionLimits;
 
@@ -188,6 +189,7 @@ namespace tremotesf {
         void setHonorSessionLimits(bool honor);
         void setBandwidthPriority(TorrentData::Priority priority);
         void setAutoPriority(bool enabled);
+        void setIncompleteDirectory(const QString& directory, bool move);
         void setIdleSeedingLimitMode(TorrentData::IdleSeedingLimitMode mode);
         void setIdleSeedingLimit(int limit);
 

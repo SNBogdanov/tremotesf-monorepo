@@ -75,6 +75,7 @@ namespace tremotesf {
         TrackerStats,
         Labels,
         AutoPriority,
+        IncompleteDirectory,
         TopicName,
         TopicUrl,
 
@@ -180,6 +181,8 @@ namespace tremotesf {
                 return "labels"_L1;
             case TorrentData::UpdateKey::AutoPriority:
                 return "auto_priority"_L1;
+            case TorrentData::UpdateKey::IncompleteDirectory:
+                return "incomplete-dir"_L1;
             case TorrentData::UpdateKey::TopicName:
                 return "topic_name"_L1;
             case TorrentData::UpdateKey::TopicUrl:
@@ -488,6 +491,13 @@ namespace tremotesf {
         case TorrentData::UpdateKey::AutoPriority:
             setChanged(autoPriority, value.toBool(), changed);
             return;
+        case TorrentData::UpdateKey::IncompleteDirectory:
+            setChanged(
+                incompleteDirectory,
+                normalizePath(value.toString(), rpc->serverSettings()->data().pathOs),
+                changed
+            );
+            return;
         case TorrentData::UpdateKey::TopicName:
             setChanged(topicName, value.toString(), changed);
             return;
@@ -542,6 +552,10 @@ namespace tremotesf {
                 continue;
             }
             if (key == TorrentData::UpdateKey::AutoPriority && !serverSettings->data().hasForkFeature("auto_priority/v1"_L1)) {
+                continue;
+            }
+            if (key == TorrentData::UpdateKey::IncompleteDirectory
+                && !serverSettings->data().hasForkFeature("per_torrent_incomplete_dir/v1"_L1)) {
                 continue;
             }
             if (key == TorrentData::UpdateKey::TopicName && !serverSettings->data().hasForkFeature("topic_name/v1"_L1)) {
@@ -621,6 +635,11 @@ namespace tremotesf {
     void Torrent::setAutoPriority(bool enabled) {
         mData.autoPriority = enabled;
         mRpc->setTorrentProperty(mData.id, updateKeyString(TorrentData::UpdateKey::AutoPriority), enabled);
+    }
+
+    void Torrent::setIncompleteDirectory(const QString& directory, bool move) {
+        mData.incompleteDirectory = directory;
+        mRpc->setTorrentsIncompleteDirectory({&mData.id, 1}, directory, move);
     }
 
     void Torrent::setBandwidthPriority(TorrentData::Priority priority) {

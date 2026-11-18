@@ -502,6 +502,13 @@ namespace tremotesf {
         ));
     }
 
+    void Rpc::setTorrentsIncompleteDirectory(std::span<const int> ids, QString directory, bool move) {
+        mBackgroundRequestsCoroutineScope.launch(postRequest(
+            "torrent_set_incomplete_dir"_L1,
+            {{u"ids"_s, toJsonArray(ids)}, {u"incomplete_dir"_s, std::move(directory)}, {u"move"_s, move}}
+        ));
+    }
+
     void Rpc::setTorrentsLabels(std::span<const int> ids, std::span<const QString> labels) {
         mBackgroundRequestsCoroutineScope.launch(
             postRequest("torrent-set"_L1, {{u"ids"_s, toJsonArray(ids)}, {u"labels"_s, toJsonArray(labels)}})

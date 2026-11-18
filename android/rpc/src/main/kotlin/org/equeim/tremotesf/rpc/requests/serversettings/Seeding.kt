@@ -48,6 +48,15 @@ suspend fun RpcClient.setServerIdleSeedingLimited(value: Boolean) =
 suspend fun RpcClient.setServerIdleSeedingLimit(value: Duration) =
     setSessionProperty("idle-seeding-limit", value, MinutesToDurationSerializer)
 
+suspend fun RpcClient.setScriptTorrentDoneRemoveTorrentEnabled(value: Boolean) =
+    setSessionProperty("script_torrent_done_remove_torrent_enabled", value)
+
+suspend fun RpcClient.setScriptTorrentDoneRemoveTempFilesEnabled(value: Boolean) =
+    setSessionProperty("script_torrent_done_remove_temp_files_enabled", value)
+
+suspend fun RpcClient.setScriptTorrentDoneRemoveAllFilesEnabled(value: Boolean) =
+    setSessionProperty("script_torrent_done_remove_all_files_enabled", value)
+
 @Serializable
 data class SeedingServerSettings(
     @SerialName("seedRatioLimited")
@@ -59,6 +68,12 @@ data class SeedingServerSettings(
     @Serializable(MinutesToDurationSerializer::class)
     @SerialName("idle-seeding-limit")
     val idleSeedingLimit: Duration,
+    @SerialName("script_torrent_done_remove_torrent_enabled")
+    val scriptTorrentDoneRemoveTorrentEnabled: Boolean = false,
+    @SerialName("script_torrent_done_remove_temp_files_enabled")
+    val scriptTorrentDoneRemoveTempFilesEnabled: Boolean = false,
+    @SerialName("script_torrent_done_remove_all_files_enabled")
+    val scriptTorrentDoneRemoveAllFilesEnabled: Boolean = false,
 )
 
 private val SEEDING_SERVER_SETTINGS_REQUEST_BODY = createStaticRpcRequestBody(

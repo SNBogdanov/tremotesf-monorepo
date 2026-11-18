@@ -4,6 +4,7 @@
 
 #include "serversettings.h"
 
+#include <QJsonArray>
 #include <QJsonObject>
 
 #include "jsonutils.h"
@@ -41,6 +42,15 @@ namespace tremotesf {
         constexpr auto autoPrioritySortKey = "auto_priority_sort"_L1;
         constexpr auto queueMoveToEndEnabledKey = "queue_move_to_end_enabled"_L1;
         constexpr auto queueMoveToEndMinutesKey = "queue_move_to_end_minutes"_L1;
+
+        constexpr auto minFreeSpaceKey = "min-free-space"_L1;
+        constexpr auto minFreeSpaceResumeMarginKey = "min-free-space-resume-margin"_L1;
+        constexpr auto moveCompletedTorrentsEnabledKey = "move_completed_torrents_enabled"_L1;
+        constexpr auto movePartialFilesEnabledKey = "move_partial_files_enabled"_L1;
+        constexpr auto forceFinishPartialFilesEnabledKey = "force_finish_partial_files_enabled"_L1;
+        constexpr auto scriptTorrentDoneRemoveTorrentEnabledKey = "script_torrent_done_remove_torrent_enabled"_L1;
+        constexpr auto scriptTorrentDoneRemoveTempFilesEnabledKey = "script_torrent_done_remove_temp_files_enabled"_L1;
+        constexpr auto scriptTorrentDoneRemoveAllFilesEnabledKey = "script_torrent_done_remove_all_files_enabled"_L1;
 
         constexpr auto downloadSpeedLimitedKey = "speed-limit-down-enabled"_L1;
         constexpr auto downloadSpeedLimitKey = "speed-limit-down"_L1;
@@ -278,6 +288,65 @@ namespace tremotesf {
         }
     }
 
+    void ServerSettings::setMinFreeSpace(const QStringList& entries) {
+        mData.minFreeSpace = entries;
+        if (mSaveOnSet) {
+            mRpc->setSessionProperty(minFreeSpaceKey, QJsonArray::fromStringList(mData.minFreeSpace));
+        }
+    }
+
+    void ServerSettings::setMinFreeSpaceResumeMargin(const QString& margin) {
+        mData.minFreeSpaceResumeMargin = margin;
+        if (mSaveOnSet) {
+            mRpc->setSessionProperty(minFreeSpaceResumeMarginKey, mData.minFreeSpaceResumeMargin);
+        }
+    }
+
+    void ServerSettings::setMoveCompletedTorrentsEnabled(bool enabled) {
+        mData.moveCompletedTorrentsEnabled = enabled;
+        if (mSaveOnSet) {
+            mRpc->setSessionProperty(moveCompletedTorrentsEnabledKey, mData.moveCompletedTorrentsEnabled);
+        }
+    }
+
+    void ServerSettings::setMovePartialFilesEnabled(bool enabled) {
+        mData.movePartialFilesEnabled = enabled;
+        if (mSaveOnSet) {
+            mRpc->setSessionProperty(movePartialFilesEnabledKey, mData.movePartialFilesEnabled);
+        }
+    }
+
+    void ServerSettings::setForceFinishPartialFilesEnabled(bool enabled) {
+        mData.forceFinishPartialFilesEnabled = enabled;
+        if (mSaveOnSet) {
+            mRpc->setSessionProperty(forceFinishPartialFilesEnabledKey, mData.forceFinishPartialFilesEnabled);
+        }
+    }
+
+    void ServerSettings::setScriptTorrentDoneRemoveTorrentEnabled(bool enabled) {
+        mData.scriptTorrentDoneRemoveTorrentEnabled = enabled;
+        if (mSaveOnSet) {
+            mRpc->setSessionProperty(scriptTorrentDoneRemoveTorrentEnabledKey, mData.scriptTorrentDoneRemoveTorrentEnabled);
+        }
+    }
+
+    void ServerSettings::setScriptTorrentDoneRemoveTempFilesEnabled(bool enabled) {
+        mData.scriptTorrentDoneRemoveTempFilesEnabled = enabled;
+        if (mSaveOnSet) {
+            mRpc->setSessionProperty(
+                scriptTorrentDoneRemoveTempFilesEnabledKey,
+                mData.scriptTorrentDoneRemoveTempFilesEnabled
+            );
+        }
+    }
+
+    void ServerSettings::setScriptTorrentDoneRemoveAllFilesEnabled(bool enabled) {
+        mData.scriptTorrentDoneRemoveAllFilesEnabled = enabled;
+        if (mSaveOnSet) {
+            mRpc->setSessionProperty(scriptTorrentDoneRemoveAllFilesEnabledKey, mData.scriptTorrentDoneRemoveAllFilesEnabled);
+        }
+    }
+
     void ServerSettings::setDownloadSpeedLimited(bool limited) {
         mData.downloadSpeedLimited = limited;
         if (mSaveOnSet) {
@@ -447,7 +516,7 @@ namespace tremotesf {
         mData.minimumRpcVersion = serverSettings.value("rpc-version-minimum"_L1).toInt();
 
         QStringList forkFeatures;
-        for (const auto& feature : serverSettings.value("fork_features"_L1).toArray()) {
+        for (const auto& feature : serverSettings.value("fork-features"_L1).toArray()) {
             forkFeatures.append(feature.toString());
         }
         setChanged(mData.forkFeatures, std::move(forkFeatures), changed);
@@ -501,6 +570,43 @@ namespace tremotesf {
         );
         setChanged(mData.queueMoveToEndEnabled, serverSettings.value(queueMoveToEndEnabledKey).toBool(), changed);
         setChanged(mData.queueMoveToEndMinutes, serverSettings.value(queueMoveToEndMinutesKey).toInt(), changed);
+
+        setChanged(
+            mData.minFreeSpace,
+            serverSettings.value(minFreeSpaceKey).toVariant().toStringList(),
+            changed
+        );
+        setChanged(
+            mData.minFreeSpaceResumeMargin,
+            serverSettings.value(minFreeSpaceResumeMarginKey).toString(),
+            changed
+        );
+        setChanged(
+            mData.moveCompletedTorrentsEnabled,
+            serverSettings.value(moveCompletedTorrentsEnabledKey).toBool(),
+            changed
+        );
+        setChanged(mData.movePartialFilesEnabled, serverSettings.value(movePartialFilesEnabledKey).toBool(), changed);
+        setChanged(
+            mData.forceFinishPartialFilesEnabled,
+            serverSettings.value(forceFinishPartialFilesEnabledKey).toBool(),
+            changed
+        );
+        setChanged(
+            mData.scriptTorrentDoneRemoveTorrentEnabled,
+            serverSettings.value(scriptTorrentDoneRemoveTorrentEnabledKey).toBool(),
+            changed
+        );
+        setChanged(
+            mData.scriptTorrentDoneRemoveTempFilesEnabled,
+            serverSettings.value(scriptTorrentDoneRemoveTempFilesEnabledKey).toBool(),
+            changed
+        );
+        setChanged(
+            mData.scriptTorrentDoneRemoveAllFilesEnabled,
+            serverSettings.value(scriptTorrentDoneRemoveAllFilesEnabledKey).toBool(),
+            changed
+        );
 
         setChanged(mData.downloadSpeedLimited, serverSettings.value(downloadSpeedLimitedKey).toBool(), changed);
         setChanged(mData.downloadSpeedLimit, serverSettings.value(downloadSpeedLimitKey).toInt(), changed);

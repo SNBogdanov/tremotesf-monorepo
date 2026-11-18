@@ -33,8 +33,13 @@ import org.equeim.tremotesf.rpc.performRecoveringRequestIntoStateFlow
 import org.equeim.tremotesf.rpc.requests.serversettings.DownloadingServerSettings
 import org.equeim.tremotesf.rpc.requests.serversettings.getDownloadingServerSettings
 import org.equeim.tremotesf.rpc.requests.serversettings.setDownloadDirectory
+import org.equeim.tremotesf.rpc.requests.serversettings.setForceFinishPartialFilesEnabled
 import org.equeim.tremotesf.rpc.requests.serversettings.setIncompleteDirectory
 import org.equeim.tremotesf.rpc.requests.serversettings.setIncompleteDirectoryEnabled
+import org.equeim.tremotesf.rpc.requests.serversettings.setMinFreeSpace
+import org.equeim.tremotesf.rpc.requests.serversettings.setMinFreeSpaceResumeMargin
+import org.equeim.tremotesf.rpc.requests.serversettings.setMoveCompletedTorrentsEnabled
+import org.equeim.tremotesf.rpc.requests.serversettings.setMovePartialFilesEnabled
 import org.equeim.tremotesf.rpc.requests.serversettings.setRenameIncompleteFiles
 import org.equeim.tremotesf.rpc.requests.serversettings.setStartAddedTorrents
 import org.equeim.tremotesf.rpc.toNativeSeparators
@@ -56,6 +61,11 @@ data object ServerSettingsDownloadingDestination : Destination {
             renameIncompleteTorrents = model.renameIncompleteFiles,
             incompleteDirectoryEnabled = model.incompleteDirectoryEnabled,
             incompleteDirectory = model.incompleteDirectory,
+            minFreeSpace = model.minFreeSpace,
+            minFreeSpaceResumeMargin = model.minFreeSpaceResumeMargin,
+            moveCompletedTorrentsEnabled = model.moveCompletedTorrentsEnabled,
+            movePartialFilesEnabled = model.movePartialFilesEnabled,
+            forceFinishPartialFilesEnabled = model.forceFinishPartialFilesEnabled,
             backgroundRpcRequestsErrors = GlobalRpcClient.backgroundRpcRequestsErrors
         )
     }
@@ -77,6 +87,17 @@ class DownloadingScreenViewModel : ViewModel() {
         ServerSettingsBooleanProperty(RpcClient::setIncompleteDirectoryEnabled)
     val incompleteDirectory: ServerSettingsProperty<String> =
         ServerSettingsStringProperty(RpcClient::setIncompleteDirectory)
+    val minFreeSpace: ServerSettingsProperty<String> = ServerSettingsStringProperty { value ->
+        setMinFreeSpace(value.lines().map(String::trim).filter(String::isNotEmpty))
+    }
+    val minFreeSpaceResumeMargin: ServerSettingsProperty<String> =
+        ServerSettingsStringProperty(RpcClient::setMinFreeSpaceResumeMargin)
+    val moveCompletedTorrentsEnabled: ServerSettingsProperty<Boolean> =
+        ServerSettingsBooleanProperty(RpcClient::setMoveCompletedTorrentsEnabled)
+    val movePartialFilesEnabled: ServerSettingsProperty<Boolean> =
+        ServerSettingsBooleanProperty(RpcClient::setMovePartialFilesEnabled)
+    val forceFinishPartialFilesEnabled: ServerSettingsProperty<Boolean> =
+        ServerSettingsBooleanProperty(RpcClient::setForceFinishPartialFilesEnabled)
 
     private fun setInitialState(settings: DownloadingServerSettings) {
         downloadDirectory.reset(settings.downloadDirectory.toNativeSeparators())
@@ -84,6 +105,11 @@ class DownloadingScreenViewModel : ViewModel() {
         renameIncompleteFiles.reset(settings.renameIncompleteFiles)
         incompleteDirectoryEnabled.reset(settings.incompleteDirectoryEnabled)
         incompleteDirectory.reset(settings.incompleteDirectory.toNativeSeparators())
+        minFreeSpace.reset(settings.minFreeSpace.joinToString("\n"))
+        minFreeSpaceResumeMargin.reset(settings.minFreeSpaceResumeMargin)
+        moveCompletedTorrentsEnabled.reset(settings.moveCompletedTorrentsEnabled)
+        movePartialFilesEnabled.reset(settings.movePartialFilesEnabled)
+        forceFinishPartialFilesEnabled.reset(settings.forceFinishPartialFilesEnabled)
     }
 }
 
@@ -96,6 +122,11 @@ private fun ServerSettingsDownloadingScreen(
     renameIncompleteTorrents: ServerSettingsProperty<Boolean>,
     incompleteDirectoryEnabled: ServerSettingsProperty<Boolean>,
     incompleteDirectory: ServerSettingsProperty<String>,
+    minFreeSpace: ServerSettingsProperty<String>,
+    minFreeSpaceResumeMargin: ServerSettingsProperty<String>,
+    moveCompletedTorrentsEnabled: ServerSettingsProperty<Boolean>,
+    movePartialFilesEnabled: ServerSettingsProperty<Boolean>,
+    forceFinishPartialFilesEnabled: ServerSettingsProperty<Boolean>,
     backgroundRpcRequestsErrors: ReceiveChannel<GlobalRpcClient.BackgroundRpcRequestError>
 ) {
     ServerSettingsCategory(
@@ -145,6 +176,46 @@ private fun ServerSettingsDownloadingScreen(
                 .fillMaxWidth()
                 .padding(horizontal = horizontalPadding)
         )
+        OutlinedTextField(
+            value = minFreeSpace.value,
+            onValueChange = minFreeSpace::update,
+            label = { Text(stringResource(R.string.min_free_space)) },
+            singleLine = false,
+            minLines = 2,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = horizontalPadding)
+        )
+        OutlinedTextField(
+            value = minFreeSpaceResumeMargin.value,
+            onValueChange = minFreeSpaceResumeMargin::update,
+            label = { Text(stringResource(R.string.min_free_space_resume_margin)) },
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = horizontalPadding)
+        )
+        TremotesfSwitchWithText(
+            checked = moveCompletedTorrentsEnabled.value,
+            text = R.string.move_completed_torrents,
+            onCheckedChange = moveCompletedTorrentsEnabled::update,
+            modifier = Modifier.fillMaxWidth(),
+            horizontalContentPadding = horizontalPadding
+        )
+        TremotesfSwitchWithText(
+            checked = movePartialFilesEnabled.value,
+            text = R.string.move_partial_files,
+            onCheckedChange = movePartialFilesEnabled::update,
+            modifier = Modifier.fillMaxWidth(),
+            horizontalContentPadding = horizontalPadding
+        )
+        TremotesfSwitchWithText(
+            checked = forceFinishPartialFilesEnabled.value,
+            text = R.string.force_finish_partial_files,
+            onCheckedChange = forceFinishPartialFilesEnabled::update,
+            modifier = Modifier.fillMaxWidth(),
+            horizontalContentPadding = horizontalPadding
+        )
     }
 }
 
@@ -159,6 +230,11 @@ private fun ServerSettingsDownloadingScreenPreview() = ScreenPreview {
         renameIncompleteTorrents = remember { ServerSettingsBooleanProperty {} },
         incompleteDirectoryEnabled = remember { ServerSettingsBooleanProperty {} },
         incompleteDirectory = remember { ServerSettingsStringProperty {} },
+        minFreeSpace = remember { ServerSettingsStringProperty {} },
+        minFreeSpaceResumeMargin = remember { ServerSettingsStringProperty {} },
+        moveCompletedTorrentsEnabled = remember { ServerSettingsBooleanProperty {} },
+        movePartialFilesEnabled = remember { ServerSettingsBooleanProperty {} },
+        forceFinishPartialFilesEnabled = remember { ServerSettingsBooleanProperty {} },
         backgroundRpcRequestsErrors = remember { Channel() }
     )
 }

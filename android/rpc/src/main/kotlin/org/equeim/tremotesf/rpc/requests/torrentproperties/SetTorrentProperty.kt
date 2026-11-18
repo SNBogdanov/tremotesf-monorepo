@@ -55,6 +55,22 @@ suspend fun RpcClient.setTorrentPeersLimit(torrentHashString: String, value: Lon
 suspend fun RpcClient.setTorrentAutoPriority(torrentHashString: String, value: Boolean) =
     setTorrentProperty(torrentHashString, "auto_priority", value)
 
+suspend fun RpcClient.setTorrentIncompleteDirectory(
+    torrentHashString: String,
+    directory: String,
+    move: Boolean
+) {
+    performRequest<Unit, _>(
+        org.equeim.tremotesf.rpc.requests.RpcMethod.TorrentSetIncompleteDir,
+        buildJsonObject {
+            put("ids", json.encodeToJsonElement(listOf(torrentHashString)))
+            put("incomplete_dir", json.encodeToJsonElement(directory))
+            put("move", json.encodeToJsonElement(move))
+        },
+        "setTorrentIncompleteDirectory"
+    )
+}
+
 suspend fun RpcClient.setTorrentFilesWanted(torrentHashString: String, fileIndices: List<Int>, wanted: Boolean) =
     setTorrentProperty(torrentHashString, if (wanted) "files-wanted" else "files-unwanted", fileIndices)
 

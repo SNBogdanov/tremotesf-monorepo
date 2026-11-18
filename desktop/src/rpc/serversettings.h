@@ -79,6 +79,15 @@ namespace tremotesf {
         bool queueMoveToEndEnabled = false;
         int queueMoveToEndMinutes = 0;
 
+        QStringList minFreeSpace;
+        QString minFreeSpaceResumeMargin;
+        bool moveCompletedTorrentsEnabled = false;
+        bool movePartialFilesEnabled = false;
+        bool forceFinishPartialFilesEnabled = false;
+        bool scriptTorrentDoneRemoveTorrentEnabled = false;
+        bool scriptTorrentDoneRemoveTempFilesEnabled = false;
+        bool scriptTorrentDoneRemoveAllFilesEnabled = false;
+
         bool downloadSpeedLimited = false;
         int downloadSpeedLimit = 0;
         bool uploadSpeedLimited = false;
@@ -133,6 +142,15 @@ namespace tremotesf {
         void setAutoPrioritySort(ServerSettingsData::AutoPrioritySort sort);
         void setQueueMoveToEndEnabled(bool enabled);
         void setQueueMoveToEndMinutes(int minutes);
+
+        void setMinFreeSpace(const QStringList& entries);
+        void setMinFreeSpaceResumeMargin(const QString& margin);
+        void setMoveCompletedTorrentsEnabled(bool enabled);
+        void setMovePartialFilesEnabled(bool enabled);
+        void setForceFinishPartialFilesEnabled(bool enabled);
+        void setScriptTorrentDoneRemoveTorrentEnabled(bool enabled);
+        void setScriptTorrentDoneRemoveTempFilesEnabled(bool enabled);
+        void setScriptTorrentDoneRemoveAllFilesEnabled(bool enabled);
 
         void setDownloadSpeedLimited(bool limited);
         void setDownloadSpeedLimit(int limit);

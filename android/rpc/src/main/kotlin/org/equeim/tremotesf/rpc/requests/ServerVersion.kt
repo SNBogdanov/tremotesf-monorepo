@@ -21,6 +21,6 @@ internal data class ServerVersionResponseArguments(
     val minimumRpcVersion: Int,
     @SerialName("version")
     val version: String,
-    @SerialName("fork_features")
+    @SerialName("fork-features")
     val forkFeatures: List<String> = emptyList(),
 )
