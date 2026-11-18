@@ -175,6 +175,14 @@ namespace tremotesf {
         locationLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
         //: Torrent's download directory
         infoGroupBoxLayout->addRow(qApp->translate("tremotesf", "Location:"), locationLabel);
+        auto incompleteDirectoryLabel = new QLabel(this);
+        incompleteDirectoryLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        //: Torrent's temporary directory for incomplete data
+        infoGroupBoxLayout->addRow(
+            qApp->translate("tremotesf", "Incomplete directory:"),
+            incompleteDirectoryLabel
+        );
+        auto incompleteDirectoryLabelLabel = infoGroupBoxLayout->labelForField(incompleteDirectoryLabel);
         auto hashLabel = new QLabel(this);
         hashLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
         //: Torrent's hash string
@@ -259,6 +267,9 @@ namespace tremotesf {
                 locationLabel->setText(
                     toNativeSeparators(mTorrent->data().downloadDirectory, mRpc->serverSettings()->data().pathOs)
                 );
+                incompleteDirectoryLabel->setText(
+                    toNativeSeparators(mTorrent->data().incompleteDirectory, mRpc->serverSettings()->data().pathOs)
+                );
                 hashLabel->setText(mTorrent->data().hashString);
                 creatorLabel->setText(mTorrent->data().creator);
                 creationDateLabel->setText(
@@ -298,6 +309,7 @@ namespace tremotesf {
                 lastActivityLabel->clear();
                 totalSizeLabel->clear();
                 locationLabel->clear();
+                incompleteDirectoryLabel->clear();
                 hashLabel->clear();
                 creatorLabel->clear();
                 creationDateLabel->clear();
@@ -306,6 +318,9 @@ namespace tremotesf {
                 topicUrlLabel->clear();
                 labelsModel->setStringList({});
             }
+            const bool incompleteDirectoryVisible = mTorrent && !mTorrent->data().incompleteDirectory.isEmpty();
+            incompleteDirectoryLabel->setVisible(incompleteDirectoryVisible);
+            incompleteDirectoryLabelLabel->setVisible(incompleteDirectoryVisible);
             const bool topicVisible = mTorrent && (!mTorrent->data().topicName.isEmpty() || !mTorrent->data().topicUrl.isEmpty());
             topicLabel->setVisible(topicVisible);
             topicLabelLabel->setVisible(topicVisible);

@@ -139,6 +139,13 @@ fun DetailsTab(
                 Text(torrentDetails.downloadDirectory.toNativeSeparators())
             }
 
+            if (torrentDetails.incompleteDirectory.isNotBlank()) {
+                Text(stringResource(R.string.incomplete_directory))
+                SelectionContainer {
+                    Text(torrentDetails.incompleteDirectory)
+                }
+            }
+
             Text(stringResource(R.string.hash))
             SelectionContainer {
                 Text(torrentDetails.hashString)
