@@ -94,6 +94,8 @@ data class TorrentDetails(
     val topicName: String = "",
     @SerialName("topic_url")
     val topicUrl: String = "",
+    @SerialName("auto_priority")
+    val hasAutoPriority: Boolean = false,
 
     @SerialName("trackerStats")
     val trackerStats: List<TrackerStats>,

@@ -74,6 +74,7 @@ namespace tremotesf {
         Comment,
         TrackerStats,
         Labels,
+        AutoPriority,
         TopicName,
         TopicUrl,
 
@@ -177,6 +178,8 @@ namespace tremotesf {
                 return "trackerStats"_L1;
             case TorrentData::UpdateKey::Labels:
                 return "labels"_L1;
+            case TorrentData::UpdateKey::AutoPriority:
+                return "auto_priority"_L1;
             case TorrentData::UpdateKey::TopicName:
                 return "topic_name"_L1;
             case TorrentData::UpdateKey::TopicUrl:
@@ -482,6 +485,9 @@ namespace tremotesf {
             );
             return;
         }
+        case TorrentData::UpdateKey::AutoPriority:
+            setChanged(autoPriority, value.toBool(), changed);
+            return;
         case TorrentData::UpdateKey::TopicName:
             setChanged(topicName, value.toString(), changed);
             return;
@@ -533,6 +539,9 @@ namespace tremotesf {
         QJsonArray fields{};
         for (auto key : allUpdateKeys) {
             if (key == TorrentData::UpdateKey::Labels && !serverSettings->data().hasLabelsProperty()) {
+                continue;
+            }
+            if (key == TorrentData::UpdateKey::AutoPriority && !serverSettings->data().hasForkFeature("auto_priority/v1"_L1)) {
                 continue;
             }
             if (key == TorrentData::UpdateKey::TopicName && !serverSettings->data().hasForkFeature("topic_name/v1"_L1)) {
@@ -607,6 +616,11 @@ namespace tremotesf {
     void Torrent::setHonorSessionLimits(bool honor) {
         mData.honorSessionLimits = honor;
         mRpc->setTorrentProperty(mData.id, updateKeyString(TorrentData::UpdateKey::HonorSessionLimits), honor);
+    }
+
+    void Torrent::setAutoPriority(bool enabled) {
+        mData.autoPriority = enabled;
+        mRpc->setTorrentProperty(mData.id, updateKeyString(TorrentData::UpdateKey::AutoPriority), enabled);
     }
 
     void Torrent::setBandwidthPriority(TorrentData::Priority priority) {

@@ -55,6 +55,11 @@ namespace tremotesf {
         QSpinBox* mMaximumActiveUploadsSpinBox = nullptr;
         QCheckBox* mIdleQueueLimitCheckBox = nullptr;
         QSpinBox* mIdleQueueLimitSpinBox = nullptr;
+        QCheckBox* mAutoPriorityCheckBox = nullptr;
+        QSpinBox* mAutoPriorityMaxHighSpinBox = nullptr;
+        QComboBox* mAutoPrioritySortComboBox = nullptr;
+        QCheckBox* mQueueMoveToEndCheckBox = nullptr;
+        QSpinBox* mQueueMoveToEndMinutesSpinBox = nullptr;
 
         QWidget* mSpeedPageWidget = nullptr;
         QCheckBox* mDownloadSpeedLimitCheckBox = nullptr;

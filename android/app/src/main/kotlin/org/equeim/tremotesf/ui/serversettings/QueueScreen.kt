@@ -28,10 +28,14 @@ import org.equeim.tremotesf.rpc.RpcRequestState
 import org.equeim.tremotesf.rpc.performRecoveringRequestIntoStateFlow
 import org.equeim.tremotesf.rpc.requests.serversettings.QueueServerSettings
 import org.equeim.tremotesf.rpc.requests.serversettings.getQueueServerSettings
+import org.equeim.tremotesf.rpc.requests.serversettings.setAutoPriorityEnabled
+import org.equeim.tremotesf.rpc.requests.serversettings.setAutoPriorityMaxHigh
 import org.equeim.tremotesf.rpc.requests.serversettings.setDownloadQueueEnabled
 import org.equeim.tremotesf.rpc.requests.serversettings.setDownloadQueueSize
 import org.equeim.tremotesf.rpc.requests.serversettings.setIgnoreQueueIfIdle
 import org.equeim.tremotesf.rpc.requests.serversettings.setIgnoreQueueIfIdleFor
+import org.equeim.tremotesf.rpc.requests.serversettings.setQueueMoveToEndEnabled
+import org.equeim.tremotesf.rpc.requests.serversettings.setQueueMoveToEndMinutes
 import org.equeim.tremotesf.rpc.requests.serversettings.setSeedQueueEnabled
 import org.equeim.tremotesf.rpc.requests.serversettings.setSeedQueueSize
 import org.equeim.tremotesf.ui.Destination
@@ -59,6 +63,10 @@ data object ServerSettingsQueueDestination : Destination {
             seedQueueSize = model.seedQueueSize,
             ignoreQueueIfIdle = model.ignoreQueueIfIdle,
             ignoreQueueIfIdleFor = model.ignoreQueueIfIdleFor,
+            autoPriorityEnabled = model.autoPriorityEnabled,
+            autoPriorityMaxHigh = model.autoPriorityMaxHigh,
+            queueMoveToEndEnabled = model.queueMoveToEndEnabled,
+            queueMoveToEndMinutes = model.queueMoveToEndMinutes,
             backgroundRpcRequestsErrors = GlobalRpcClient.backgroundRpcRequestsErrors
         )
     }
@@ -86,6 +94,18 @@ class QueueScreenViewModel(application: Application) : AndroidViewModel(applicat
     val ignoreQueueIfIdleFor: TremotesfIntegerNumberInputFieldState =
         ServerSettingsIntegerNumberInputFieldState { setIgnoreQueueIfIdleFor(it.minutes) }
 
+    val autoPriorityEnabled: ServerSettingsProperty<Boolean> =
+        ServerSettingsBooleanProperty(RpcClient::setAutoPriorityEnabled)
+
+    val autoPriorityMaxHigh: TremotesfIntegerNumberInputFieldState =
+        ServerSettingsIntegerNumberInputFieldState(RpcClient::setAutoPriorityMaxHigh)
+
+    val queueMoveToEndEnabled: ServerSettingsProperty<Boolean> =
+        ServerSettingsBooleanProperty(RpcClient::setQueueMoveToEndEnabled)
+
+    val queueMoveToEndMinutes: TremotesfIntegerNumberInputFieldState =
+        ServerSettingsIntegerNumberInputFieldState { setQueueMoveToEndMinutes(it.minutes) }
+
     private fun setInitialState(settings: QueueServerSettings) {
         downloadQueueEnabled.reset(settings.downloadQueueEnabled)
         downloadQueueSize.reset(settings.downloadQueueSize)
@@ -93,6 +113,10 @@ class QueueScreenViewModel(application: Application) : AndroidViewModel(applicat
         seedQueueSize.reset(settings.seedQueueSize)
         ignoreQueueIfIdle.reset(settings.ignoreQueueIfIdle)
         ignoreQueueIfIdleFor.reset(settings.ignoreQueueIfIdleFor.inWholeMinutes)
+        autoPriorityEnabled.reset(settings.autoPriorityEnabled)
+        autoPriorityMaxHigh.reset(settings.autoPriorityMaxHigh)
+        queueMoveToEndEnabled.reset(settings.queueMoveToEndEnabled)
+        queueMoveToEndMinutes.reset(settings.queueMoveToEndMinutes.inWholeMinutes)
     }
 }
 
@@ -106,6 +130,10 @@ private fun ServerSettingsQueueScreen(
     seedQueueSize: TremotesfIntegerNumberInputFieldState,
     ignoreQueueIfIdle: ServerSettingsProperty<Boolean>,
     ignoreQueueIfIdleFor: TremotesfIntegerNumberInputFieldState,
+    autoPriorityEnabled: ServerSettingsProperty<Boolean>,
+    autoPriorityMaxHigh: TremotesfIntegerNumberInputFieldState,
+    queueMoveToEndEnabled: ServerSettingsProperty<Boolean>,
+    queueMoveToEndMinutes: TremotesfIntegerNumberInputFieldState,
     backgroundRpcRequestsErrors: ReceiveChannel<GlobalRpcClient.BackgroundRpcRequestError>
 ) {
     ServerSettingsCategory(
@@ -155,6 +183,34 @@ private fun ServerSettingsQueueScreen(
             enabled = ignoreQueueIfIdle.value,
             suffix = R.string.text_field_suffix_minutes
         )
+        TremotesfSwitchWithText(
+            checked = autoPriorityEnabled.value,
+            text = R.string.auto_priority,
+            onCheckedChange = autoPriorityEnabled::update,
+            modifier = Modifier.fillMaxWidth(),
+            horizontalContentPadding = horizontalPadding
+        )
+        TremotesfNumberInputField(
+            state = autoPriorityMaxHigh,
+            range = NON_NEGATIVE_INTEGERS_RANGE,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = horizontalPadding),
+            enabled = autoPriorityEnabled.value,
+            label = R.string.auto_priority_max_high
+        )
+        TremotesfSwitchWithText(
+            checked = queueMoveToEndEnabled.value,
+            text = R.string.queue_move_to_end,
+            onCheckedChange = queueMoveToEndEnabled::update,
+            modifier = Modifier.fillMaxWidth(),
+            horizontalContentPadding = horizontalPadding
+        )
+        TremotesfNumberInputField(
+            state = queueMoveToEndMinutes,
+            range = UNSIGNED_16BIT_RANGE,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = horizontalPadding),
+            enabled = queueMoveToEndEnabled.value,
+            suffix = R.string.text_field_suffix_minutes
+        )
     }
 }
 
@@ -170,6 +226,10 @@ private fun ServerSettingsQueueScreenPreview() = ScreenPreview {
         seedQueueSize = rememberTremotesfIntegerNumberInputFieldState(),
         ignoreQueueIfIdle = remember { ServerSettingsBooleanProperty {} },
         ignoreQueueIfIdleFor = rememberTremotesfIntegerNumberInputFieldState(),
+        autoPriorityEnabled = remember { ServerSettingsBooleanProperty {} },
+        autoPriorityMaxHigh = rememberTremotesfIntegerNumberInputFieldState(),
+        queueMoveToEndEnabled = remember { ServerSettingsBooleanProperty {} },
+        queueMoveToEndMinutes = rememberTremotesfIntegerNumberInputFieldState(),
         backgroundRpcRequestsErrors = remember { Channel() }
     )
 }

@@ -131,6 +131,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="topic_url">Topic URL</string>
     <string name="labels">Labels</string>
     <string name="edit_labels">Edit labels</string>
+    <string name="enable_auto_priority">Enable automatic priority</string>
+    <string name="disable_auto_priority">Disable automatic priority</string>
+    <string name="torrent_auto_priority_error">Failed to change automatic priority</string>
     <string name="no_labels">No labels</string>
     <string name="new_label">New label</string>
     <string name="set_labels_error">Failed to update torrent\'s labels: %1$s</string>
@@ -260,6 +263,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="maximum_active_downloads">Maximum active downloads</string>
     <string name="maximum_active_uploads">Maximum active uploads</string>
     <string name="ignore_queue">Ignore queue position if idle for</string>
+    <string name="auto_priority">Automatically prioritize torrents</string>
+    <string name="auto_priority_max_high">Maximum torrents with high priority</string>
+    <string name="queue_move_to_end">Move inactive downloads to the end of the queue</string>
     <string name="alternative_limits">Alternative limits</string>
     <string name="enable">Enable</string>
     <string name="text_field_suffix_kbps">kB/s</string>

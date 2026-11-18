@@ -44,6 +44,7 @@
 #include "log/log.h"
 #include "rpc/serverstats.h"
 #include "rpc/mounteddirectoriesutils.h"
+#include "rpc/serversettings.h"
 #include "rpc/torrent.h"
 #include "rpc/servers.h"
 
@@ -451,6 +452,7 @@ namespace tremotesf {
         QAction* mHighPriorityAction{};
         QAction* mNormalPriorityAction{};
         QAction* mLowPriorityAction{};
+        QAction* mAutoPriorityAction{};
 
         std::vector<QAction*> mConnectionDependentActions;
 
@@ -795,6 +797,19 @@ namespace tremotesf {
             );
             mLowPriorityAction->setCheckable(true);
             priorityGroup->addAction(mLowPriorityAction);
+
+            mAutoPriorityAction = mTorrentMenu->addAction(
+                //: Torrent's context menu item
+                qApp->translate("tremotesf", "Automatic priority")
+            );
+            mAutoPriorityAction->setCheckable(true);
+            mAutoPriorityAction->setVisible(false);
+            QObject::connect(mAutoPriorityAction, &QAction::triggered, this, [this](bool checked) {
+                for (const auto& index :
+                     mTorrentsProxyModel.sourceIndexes(mTorrentsView.selectionModel()->selectedRows())) {
+                    mTorrentsModel.torrentAtIndex(index)->setAutoPriority(checked);
+                }
+            });
         }
 
         QAction* createQuitAction() {
@@ -933,6 +948,10 @@ namespace tremotesf {
             mHighPriorityAction->setChecked(false);
             mNormalPriorityAction->setChecked(false);
             mLowPriorityAction->setChecked(false);
+            mAutoPriorityAction->setChecked(false);
+            mAutoPriorityAction->setVisible(
+                mViewModel.rpc()->serverSettings()->data().hasForkFeature("auto_priority/v1"_L1)
+            );
 
             const QModelIndexList selectedRows = mTorrentsView.selectionModel()->selectedRows();
             if (selectedRows.size() == 1) {
@@ -956,6 +975,7 @@ namespace tremotesf {
                     mLowPriorityAction->setChecked(true);
                     break;
                 }
+                mAutoPriorityAction->setChecked(torrent->data().autoPriority);
             } else {
                 mRenameTorrentAction->setEnabled(false);
             }

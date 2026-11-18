@@ -14,6 +14,7 @@ import org.equeim.tremotesf.rpc.requests.RequestWithFields
 import org.equeim.tremotesf.rpc.requests.RpcMethod
 import org.equeim.tremotesf.rpc.requests.createStaticRpcRequestBody
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * @throws RpcRequestError
@@ -60,6 +61,18 @@ suspend fun RpcClient.setIgnoreQueueIfIdle(value: Boolean) =
 suspend fun RpcClient.setIgnoreQueueIfIdleFor(value: Duration) =
     setSessionProperty("queue-stalled-minutes", value, MinutesToDurationSerializer)
 
+suspend fun RpcClient.setAutoPriorityEnabled(value: Boolean) =
+    setSessionProperty("auto_priority_enabled", value)
+
+suspend fun RpcClient.setAutoPriorityMaxHigh(value: Long) =
+    setSessionProperty("auto_priority_max_high", value)
+
+suspend fun RpcClient.setQueueMoveToEndEnabled(value: Boolean) =
+    setSessionProperty("queue_move_to_end_enabled", value)
+
+suspend fun RpcClient.setQueueMoveToEndMinutes(value: Duration) =
+    setSessionProperty("queue_move_to_end_minutes", value, MinutesToDurationSerializer)
+
 @Serializable
 data class QueueServerSettings(
     @SerialName("download-queue-enabled")
@@ -75,6 +88,15 @@ data class QueueServerSettings(
     @Serializable(MinutesToDurationSerializer::class)
     @SerialName("queue-stalled-minutes")
     val ignoreQueueIfIdleFor: Duration,
+    @SerialName("auto_priority_enabled")
+    val autoPriorityEnabled: Boolean = false,
+    @SerialName("auto_priority_max_high")
+    val autoPriorityMaxHigh: Long = 3,
+    @SerialName("queue_move_to_end_enabled")
+    val queueMoveToEndEnabled: Boolean = false,
+    @Serializable(MinutesToDurationSerializer::class)
+    @SerialName("queue_move_to_end_minutes")
+    val queueMoveToEndMinutes: Duration = 30.minutes,
 )
 
 private val QUEUE_SERVER_SETTINGS_REQUEST_BODY = createStaticRpcRequestBody(

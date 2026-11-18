@@ -54,6 +54,7 @@ import org.equeim.tremotesf.rpc.requests.torrentproperties.getTorrentPeers
 import org.equeim.tremotesf.rpc.requests.torrentproperties.getTorrentTrackers
 import org.equeim.tremotesf.rpc.requests.torrentproperties.getTorrentWebSeeders
 import org.equeim.tremotesf.rpc.requests.torrentproperties.removeTorrentTrackers
+import org.equeim.tremotesf.rpc.requests.torrentproperties.setTorrentAutoPriority
 import org.equeim.tremotesf.rpc.requests.torrentproperties.renameTorrentFile
 import org.equeim.tremotesf.rpc.requests.torrentproperties.replaceTorrentTracker
 import org.equeim.tremotesf.rpc.requests.torrentproperties.setTorrentBandwidthPriority
@@ -180,6 +181,12 @@ class TorrentPropertiesScreenViewModel(
                     trackerIds = trackerIds,
                     allTrackers = trackers
                 )
+            }
+        }
+
+        override fun setAutoPriority(enabled: Boolean) {
+            performRequestAndRefresh(R.string.torrent_auto_priority_error, detailsRefreshRequests) {
+                setTorrentAutoPriority(it.hashString, enabled)
             }
         }
 
@@ -389,6 +396,7 @@ interface TorrentOperations {
     fun addTrackers(announceUrls: List<String>)
     fun replaceTracker(trackerId: Int, newAnnounceUrl: String)
     fun removeTrackers(trackerIds: List<Int>)
+    fun setAutoPriority(enabled: Boolean)
 }
 
 val TORRENT_OPERATIONS_FOR_PREVIEW: TorrentOperations by lazy {
@@ -403,6 +411,7 @@ val TORRENT_OPERATIONS_FOR_PREVIEW: TorrentOperations by lazy {
         override fun addTrackers(announceUrls: List<String>) = Unit
         override fun replaceTracker(trackerId: Int, newAnnounceUrl: String) = Unit
         override fun removeTrackers(trackerIds: List<Int>) = Unit
+        override fun setAutoPriority(enabled: Boolean) = Unit
     }
 }
 

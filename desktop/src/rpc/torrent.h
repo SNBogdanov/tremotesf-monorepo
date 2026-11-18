@@ -109,6 +109,7 @@ namespace tremotesf {
 
         int peersLimit{};
 
+        bool autoPriority{};
         QDateTime addedDate{{}, {}, QTimeZone::utc()};
         QDateTime activityDate{{}, {}, QTimeZone::utc()};
         QDateTime doneDate{{}, {}, QTimeZone::utc()};
@@ -186,6 +187,7 @@ namespace tremotesf {
         void setPeersLimit(int limit);
         void setHonorSessionLimits(bool honor);
         void setBandwidthPriority(TorrentData::Priority priority);
+        void setAutoPriority(bool enabled);
         void setIdleSeedingLimitMode(TorrentData::IdleSeedingLimitMode mode);
         void setIdleSeedingLimit(int limit);
 

@@ -105,6 +105,13 @@ namespace tremotesf {
         settings->setSeedQueueSize(mMaximumActiveUploadsSpinBox->value());
         settings->setIdleQueueLimited(mIdleQueueLimitCheckBox->isChecked());
         settings->setIdleQueueLimit(mIdleQueueLimitSpinBox->value());
+        settings->setAutoPriorityEnabled(mAutoPriorityCheckBox->isChecked());
+        settings->setAutoPriorityMaxHigh(mAutoPriorityMaxHighSpinBox->value());
+        settings->setAutoPrioritySort(
+            mAutoPrioritySortComboBox->currentData().value<ServerSettingsData::AutoPrioritySort>()
+        );
+        settings->setQueueMoveToEndEnabled(mQueueMoveToEndCheckBox->isChecked());
+        settings->setQueueMoveToEndMinutes(mQueueMoveToEndMinutesSpinBox->value());
 
         settings->setDownloadSpeedLimited(mDownloadSpeedLimitCheckBox->isChecked());
         settings->setDownloadSpeedLimit(mDownloadSpeedLimitSpinBox->value());
@@ -299,7 +306,63 @@ namespace tremotesf {
         QObject::connect(mIdleQueueLimitCheckBox, &QCheckBox::toggled, mIdleQueueLimitSpinBox, &QSpinBox::setEnabled);
         queuePageLayout->addWidget(mIdleQueueLimitSpinBox, 5, 1, Qt::AlignTop);
 
-        queuePageLayout->setRowStretch(5, 1);
+        mAutoPriorityCheckBox =
+            new QCheckBox(qApp->translate("tremotesf", "Automatically prioritize torrents"), this);
+        queuePageLayout->addWidget(mAutoPriorityCheckBox, 6, 0, 1, 2, Qt::AlignTop);
+
+        queuePageLayout->addWidget(
+            new QLabel(qApp->translate("tremotesf", "Maximum torrents with high priority:"), this),
+            7,
+            0,
+            Qt::AlignTop
+        );
+
+        mAutoPriorityMaxHighSpinBox = new QSpinBox(this);
+        mAutoPriorityMaxHighSpinBox->setEnabled(false);
+        setSpinBoxLimits(mAutoPriorityMaxHighSpinBox, nonNegativeIntegersRange);
+        QObject::connect(
+            mAutoPriorityCheckBox,
+            &QCheckBox::toggled,
+            mAutoPriorityMaxHighSpinBox,
+            &QSpinBox::setEnabled
+        );
+        queuePageLayout->addWidget(mAutoPriorityMaxHighSpinBox, 7, 1, Qt::AlignTop);
+
+        queuePageLayout->addWidget(new QLabel(qApp->translate("tremotesf", "Sort torrents by:"), this), 8, 0, Qt::AlignTop);
+
+        mAutoPrioritySortComboBox = new QComboBox(this);
+        mAutoPrioritySortComboBox->addItem(
+            qApp->translate("tremotesf", "Id"),
+            QVariant::fromValue(ServerSettingsData::AutoPrioritySort::Id)
+        );
+        mAutoPrioritySortComboBox->addItem(
+            qApp->translate("tremotesf", "Name"),
+            QVariant::fromValue(ServerSettingsData::AutoPrioritySort::Name)
+        );
+        mAutoPrioritySortComboBox->addItem(
+            qApp->translate("tremotesf", "Size"),
+            QVariant::fromValue(ServerSettingsData::AutoPrioritySort::Size)
+        );
+        queuePageLayout->addWidget(mAutoPrioritySortComboBox, 8, 1, Qt::AlignTop);
+
+        mQueueMoveToEndCheckBox =
+            new QCheckBox(qApp->translate("tremotesf", "Move inactive downloads to the end of the queue:"), this);
+        queuePageLayout->addWidget(mQueueMoveToEndCheckBox, 9, 0, 1, 2, Qt::AlignTop);
+
+        mQueueMoveToEndMinutesSpinBox = new QSpinBox(this);
+        mQueueMoveToEndMinutesSpinBox->setEnabled(false);
+        setSpinBoxLimits(mQueueMoveToEndMinutesSpinBox, minutesRange);
+        //: Suffix that is added to input field with number of minutes, e.g. "5 min"
+        mQueueMoveToEndMinutesSpinBox->setSuffix(qApp->translate("tremotesf", " min"));
+        QObject::connect(
+            mQueueMoveToEndCheckBox,
+            &QCheckBox::toggled,
+            mQueueMoveToEndMinutesSpinBox,
+            &QSpinBox::setEnabled
+        );
+        queuePageLayout->addWidget(mQueueMoveToEndMinutesSpinBox, 10, 1, Qt::AlignTop);
+
+        queuePageLayout->setRowStretch(10, 1);
         queuePageLayout->setColumnStretch(1, 1);
         queuePageLayout->setColumnMinimumWidth(0, 28 - queuePageLayout->spacing());
 
@@ -585,6 +648,18 @@ namespace tremotesf {
         mMaximumActiveUploadsSpinBox->setValue(settings->data().seedQueueSize);
         mIdleQueueLimitCheckBox->setChecked(settings->data().idleQueueLimited);
         mIdleQueueLimitSpinBox->setValue(settings->data().idleQueueLimit);
+
+        mAutoPriorityCheckBox->setChecked(settings->data().autoPriorityEnabled);
+        mAutoPriorityMaxHighSpinBox->setValue(settings->data().autoPriorityMaxHigh);
+        for (int i = 0, max = mAutoPrioritySortComboBox->count(); i < max; i++) {
+            if (mAutoPrioritySortComboBox->itemData(i).value<ServerSettingsData::AutoPrioritySort>()
+                == settings->data().autoPrioritySort) {
+                mAutoPrioritySortComboBox->setCurrentIndex(i);
+                break;
+            }
+        }
+        mQueueMoveToEndCheckBox->setChecked(settings->data().queueMoveToEndEnabled);
+        mQueueMoveToEndMinutesSpinBox->setValue(settings->data().queueMoveToEndMinutes);
 
         mDownloadSpeedLimitCheckBox->setChecked(settings->data().downloadSpeedLimited);
         mDownloadSpeedLimitSpinBox->setValue(settings->data().downloadSpeedLimit);

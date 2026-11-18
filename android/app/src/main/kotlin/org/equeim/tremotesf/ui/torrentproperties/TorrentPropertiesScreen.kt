@@ -382,6 +382,23 @@ private fun TopAppBarMenuActions(
             )
         }
         DropdownMenuItem(
+            text = {
+                Text(
+                    stringResource(
+                        if (torrentDetails.value?.hasAutoPriority == true) {
+                            R.string.disable_auto_priority
+                        } else {
+                            R.string.enable_auto_priority
+                        }
+                    )
+                )
+            },
+            onClick = {
+                torrentDetails.value?.let { torrentOperations.setAutoPriority(!it.hasAutoPriority) }
+                dismiss()
+            }
+        )
+        DropdownMenuItem(
             text = { Text(stringResource(R.string.remove)) },
             onClick = {
                 showRemoveDialog = true

@@ -36,6 +36,12 @@ namespace tremotesf {
         constexpr auto idleQueueLimitedKey = "queue-stalled-enabled"_L1;
         constexpr auto idleQueueLimitKey = "queue-stalled-minutes"_L1;
 
+        constexpr auto autoPriorityEnabledKey = "auto_priority_enabled"_L1;
+        constexpr auto autoPriorityMaxHighKey = "auto_priority_max_high"_L1;
+        constexpr auto autoPrioritySortKey = "auto_priority_sort"_L1;
+        constexpr auto queueMoveToEndEnabledKey = "queue_move_to_end_enabled"_L1;
+        constexpr auto queueMoveToEndMinutesKey = "queue_move_to_end_minutes"_L1;
+
         constexpr auto downloadSpeedLimitedKey = "speed-limit-down-enabled"_L1;
         constexpr auto downloadSpeedLimitKey = "speed-limit-down"_L1;
         constexpr auto uploadSpeedLimitedKey = "speed-limit-up-enabled"_L1;
@@ -91,6 +97,14 @@ namespace tremotesf {
                 EnumMapping(ServerSettingsData::EncryptionMode::Allowed, "tolerated"_L1),
                 EnumMapping(ServerSettingsData::EncryptionMode::Preferred, "preferred"_L1),
                 EnumMapping(ServerSettingsData::EncryptionMode::Required, "required"_L1)
+            }
+        );
+
+        constexpr auto autoPrioritySortMapper = EnumMapper(
+            std::array{
+                EnumMapping(ServerSettingsData::AutoPrioritySort::Id, 0),
+                EnumMapping(ServerSettingsData::AutoPrioritySort::Name, 1),
+                EnumMapping(ServerSettingsData::AutoPrioritySort::Size, 2)
             }
         );
     }
@@ -226,6 +240,41 @@ namespace tremotesf {
         mData.idleQueueLimit = limit;
         if (mSaveOnSet) {
             mRpc->setSessionProperty(idleQueueLimitKey, mData.idleQueueLimit);
+        }
+    }
+
+    void ServerSettings::setAutoPriorityEnabled(bool enabled) {
+        mData.autoPriorityEnabled = enabled;
+        if (mSaveOnSet) {
+            mRpc->setSessionProperty(autoPriorityEnabledKey, mData.autoPriorityEnabled);
+        }
+    }
+
+    void ServerSettings::setAutoPriorityMaxHigh(int count) {
+        mData.autoPriorityMaxHigh = count;
+        if (mSaveOnSet) {
+            mRpc->setSessionProperty(autoPriorityMaxHighKey, mData.autoPriorityMaxHigh);
+        }
+    }
+
+    void ServerSettings::setAutoPrioritySort(ServerSettingsData::AutoPrioritySort sort) {
+        mData.autoPrioritySort = sort;
+        if (mSaveOnSet) {
+            mRpc->setSessionProperty(autoPrioritySortKey, autoPrioritySortMapper.toJsonConstant(sort));
+        }
+    }
+
+    void ServerSettings::setQueueMoveToEndEnabled(bool enabled) {
+        mData.queueMoveToEndEnabled = enabled;
+        if (mSaveOnSet) {
+            mRpc->setSessionProperty(queueMoveToEndEnabledKey, mData.queueMoveToEndEnabled);
+        }
+    }
+
+    void ServerSettings::setQueueMoveToEndMinutes(int minutes) {
+        mData.queueMoveToEndMinutes = minutes;
+        if (mSaveOnSet) {
+            mRpc->setSessionProperty(queueMoveToEndMinutesKey, mData.queueMoveToEndMinutes);
         }
     }
 
@@ -442,6 +491,16 @@ namespace tremotesf {
         setChanged(mData.seedQueueSize, serverSettings.value(seedQueueSizeKey).toInt(), changed);
         setChanged(mData.idleQueueLimited, serverSettings.value(idleQueueLimitedKey).toBool(), changed);
         setChanged(mData.idleQueueLimit, serverSettings.value(idleQueueLimitKey).toInt(), changed);
+
+        setChanged(mData.autoPriorityEnabled, serverSettings.value(autoPriorityEnabledKey).toBool(), changed);
+        setChanged(mData.autoPriorityMaxHigh, serverSettings.value(autoPriorityMaxHighKey).toInt(), changed);
+        setChanged(
+            mData.autoPrioritySort,
+            autoPrioritySortMapper.fromJsonValue(serverSettings.value(autoPrioritySortKey), autoPrioritySortKey),
+            changed
+        );
+        setChanged(mData.queueMoveToEndEnabled, serverSettings.value(queueMoveToEndEnabledKey).toBool(), changed);
+        setChanged(mData.queueMoveToEndMinutes, serverSettings.value(queueMoveToEndMinutesKey).toInt(), changed);
 
         setChanged(mData.downloadSpeedLimited, serverSettings.value(downloadSpeedLimitedKey).toBool(), changed);
         setChanged(mData.downloadSpeedLimit, serverSettings.value(downloadSpeedLimitKey).toInt(), changed);

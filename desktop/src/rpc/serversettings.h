@@ -36,6 +36,9 @@ namespace tremotesf {
         enum class EncryptionMode { Allowed, Preferred, Required };
         Q_ENUM(EncryptionMode)
 
+        enum class AutoPrioritySort { Id, Name, Size };
+        Q_ENUM(AutoPrioritySort)
+
         [[nodiscard]] bool canRenameFiles() const;
         [[nodiscard]] bool canShowFreeSpaceForPath() const;
         [[nodiscard]] bool hasSessionIdFile() const;
@@ -69,6 +72,12 @@ namespace tremotesf {
         int seedQueueSize = 0;
         bool idleQueueLimited = false;
         int idleQueueLimit = 0;
+
+        bool autoPriorityEnabled = false;
+        int autoPriorityMaxHigh = 0;
+        AutoPrioritySort autoPrioritySort{};
+        bool queueMoveToEndEnabled = false;
+        int queueMoveToEndMinutes = 0;
 
         bool downloadSpeedLimited = false;
         int downloadSpeedLimit = 0;
@@ -118,6 +127,12 @@ namespace tremotesf {
         void setSeedQueueSize(int size);
         void setIdleQueueLimited(bool limited);
         void setIdleQueueLimit(int limit);
+
+        void setAutoPriorityEnabled(bool enabled);
+        void setAutoPriorityMaxHigh(int count);
+        void setAutoPrioritySort(ServerSettingsData::AutoPrioritySort sort);
+        void setQueueMoveToEndEnabled(bool enabled);
+        void setQueueMoveToEndMinutes(int minutes);
 
         void setDownloadSpeedLimited(bool limited);
         void setDownloadSpeedLimit(int limit);
