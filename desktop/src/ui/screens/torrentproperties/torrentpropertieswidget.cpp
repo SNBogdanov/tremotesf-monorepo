@@ -163,6 +163,12 @@ namespace tremotesf {
         );
         auto lastActivityLabel = new QLabel(this);
         activityGroupBoxLayout->addRow(qApp->translate("tremotesf", "Last activity:"), lastActivityLabel);
+        auto errorLabel = new QLabel(this);
+        errorLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        errorLabel->setWordWrap(true);
+        //: Torrent's error
+        activityGroupBoxLayout->addRow(qApp->translate("tremotesf", "Error:"), errorLabel);
+        auto errorLabelLabel = activityGroupBoxLayout->labelForField(errorLabel);
         detailsTabLayout->addWidget(activityGroupBox);
 
         //: Torrent's details tab section
@@ -263,6 +269,7 @@ namespace tremotesf {
                 lastActivityLabel->setText(
                     formatutils::formatDateTime(mTorrent->data().activityDate.toLocalTime(), QLocale::LongFormat)
                 );
+                errorLabel->setText(mTorrent->data().errorString);
 
                 totalSizeLabel->setText(formatutils::formatByteSize(mTorrent->data().totalSize));
                 locationLabel->setText(
@@ -306,6 +313,7 @@ namespace tremotesf {
                 webSeedersSendingToUsLabel->clear();
                 peersGettingFromUsLabel->clear();
                 lastActivityLabel->clear();
+                errorLabel->clear();
                 totalSizeLabel->clear();
                 locationLabel->clear();
                 incompleteDirectoryLabel->clear();
@@ -319,6 +327,9 @@ namespace tremotesf {
             const bool incompleteDirectoryVisible = mTorrent && !mTorrent->data().incompleteDirectory.isEmpty();
             incompleteDirectoryLabel->setVisible(incompleteDirectoryVisible);
             incompleteDirectoryLabelLabel->setVisible(incompleteDirectoryVisible);
+            const bool errorVisible = mTorrent && mTorrent->data().hasError() && !mTorrent->data().errorString.isEmpty();
+            errorLabel->setVisible(errorVisible);
+            errorLabelLabel->setVisible(errorVisible);
             const bool topicVisible = mTorrent && (!mTorrent->data().topicName.isEmpty() || !mTorrent->data().topicUrl.isEmpty());
             topicLabel->setVisible(topicVisible);
             topicLabelLabel->setVisible(topicVisible);

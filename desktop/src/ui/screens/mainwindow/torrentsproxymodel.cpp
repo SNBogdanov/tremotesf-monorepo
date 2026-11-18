@@ -136,13 +136,21 @@ namespace tremotesf {
         const bool active = (data.downloadSpeed != 0 || data.uploadSpeed != 0);
         const bool stopped = (data.status == TorrentData::Status::Paused);
         const bool finished = (data.status == TorrentData::Status::Seeding
-                               || (stopped && data.leftUntilDone == 0));
+                               || (stopped && data.leftUntilDone == 0 && data.sizeWhenDone != 0));
         // Server does not report tracker/local errors for torrents that are not running
         const bool errorsOnlyForRunningTorrents = (
             data.status == TorrentData::Status::QueuedForDownloading
             || data.status == TorrentData::Status::Downloading
             || data.status == TorrentData::Status::QueuedForSeeding
             || data.status == TorrentData::Status::Seeding
+        );
+        const bool hasTrackerError = (
+            data.error == TorrentData::Error::TrackerWarning || data.error == TorrentData::Error::TrackerError
+        );
+        // Tracker errors are not shown for queued torrents, they keep their queue icon
+        const bool hasShownTrackerError = (
+            hasTrackerError
+            && (data.status == TorrentData::Status::Downloading || data.status == TorrentData::Status::Seeding)
         );
         switch (filter) {
         case All:
@@ -160,7 +168,8 @@ namespace tremotesf {
         case Stopped:
             return stopped;
         case Errored:
-            return data.hasError() && errorsOnlyForRunningTorrents;
+            return hasShownTrackerError
+                   || (data.error == TorrentData::Error::LocalError && errorsOnlyForRunningTorrents);
         case Waiting:
             switch (data.status) {
             case TorrentData::Status::QueuedForChecking:

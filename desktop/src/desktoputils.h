@@ -14,19 +14,19 @@ namespace tremotesf::desktoputils {
     constexpr int defaultDbusTimeout = 2000; // 2 seconds
 
     enum class StatusIcon {
-        Active,
         ActiveDownload,
         ActiveUpload,
+        All,
+        CheckWaiting,
         Checking,
         CriticalError,
+        Done,
         Downloading,
-        Errored,
         Inactive,
         Paused,
-        Queued,
+        QueuedForDownloading,
+        QueuedForSeeding,
         Seeding,
-        StalledDownloading,
-        StalledSeeding,
         TrackerErrorDownloading,
         TrackerErrorSeeding,
         Waiting

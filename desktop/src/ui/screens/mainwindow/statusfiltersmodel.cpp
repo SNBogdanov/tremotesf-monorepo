@@ -30,7 +30,7 @@ namespace tremotesf {
 
             switch (item.filter) {
             case StatusFilter::All: {
-                return desktoputils::standardDirIcon();
+                return desktoputils::statusIcon(All);
             }
             case StatusFilter::Downloading:
                 return desktoputils::statusIcon(Downloading);

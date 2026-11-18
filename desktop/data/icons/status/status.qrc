@@ -6,23 +6,23 @@ SPDX-License-Identifier: CC0-1.0
 
 <RCC>
     <qresource prefix="/">
-        <file>active.png</file>
         <file>active-download.png</file>
         <file>active-upload.png</file>
+        <file>all.png</file>
+        <file>check-waiting.png</file>
         <file>checking.png</file>
         <file>critical-error.png</file>
+        <file>done.png</file>
         <file>downloading.png</file>
-        <file>errored.png</file>
         <file>inactive.png</file>
         <file>paused.png</file>
         <file>priority-high.png</file>
         <file>priority-low.png</file>
         <file>priority-normal.png</file>
-        <file>queued.png</file>
+        <file>queued-download.png</file>
+        <file>queued-seed.png</file>
         <file>seeding.png</file>
         <file>speedometer.png</file>
-        <file>stalled-downloading.png</file>
-        <file>stalled-seeding.png</file>
         <file>tracker-error-downloading.png</file>
         <file>tracker-error-seeding.png</file>
         <file>waiting.png</file>

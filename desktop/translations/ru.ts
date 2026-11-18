@@ -815,34 +815,15 @@ Seeding idle limit mode (global settings/stop if idle for/unlimited)</extracomme
         <translation>Загружено</translation>
     </message>
     <message>
-        <location filename="../src/ui/screens/mainwindow/torrentsmodel.cpp" line="110"/>
-        <source>Paused (%1)</source>
-        <extracomment>Torrent status while torrent also has an error. %1 is error string</extracomment>
-        <translation>Приостановлен (%1)</translation>
-    </message>
-    <message>
         <location filename="../src/ui/screens/mainwindow/torrentsmodel.cpp" line="113"/>
         <source>Paused</source>
         <extracomment>Torrent status</extracomment>
         <translation>Приостановлен</translation>
     </message>
     <message>
-        <location filename="../src/ui/screens/mainwindow/torrentsmodel.cpp" line="117"/>
-        <source>Downloading (%1)</source>
-        <extracomment>Torrent status while torrent also has an error. %1 is error string</extracomment>
-        <translation>Загружается (%1)</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/screens/mainwindow/torrentsmodel.cpp" line="124"/>
-        <source>Seeding (%1)</source>
-        <extracomment>Torrent status while torrent also has an error. %1 is error string</extracomment>
-        <translation>Раздается (%1)</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/screens/mainwindow/torrentsmodel.cpp" line="132"/>
-        <source>Queued (%1)</source>
-        <extracomment>Torrent status while torrent also has an error. %1 is error string</extracomment>
-        <translation>В очереди (%1)</translation>
+        <source>Finished</source>
+        <extracomment>Torrent status</extracomment>
+        <translation>Завершено</translation>
     </message>
     <message>
         <location filename="../src/ui/screens/mainwindow/torrentsmodel.cpp" line="135"/>
@@ -851,22 +832,10 @@ Seeding idle limit mode (global settings/stop if idle for/unlimited)</extracomme
         <translation>В очереди</translation>
     </message>
     <message>
-        <location filename="../src/ui/screens/mainwindow/torrentsmodel.cpp" line="139"/>
-        <source>Checking (%1)</source>
-        <extracomment>Torrent status while torrent also has an error. %1 is error string</extracomment>
-        <translation>Проверяется (%1)</translation>
-    </message>
-    <message>
         <location filename="../src/ui/screens/mainwindow/torrentsmodel.cpp" line="142"/>
         <source>Checking</source>
         <extracomment>Torrent status</extracomment>
         <translation>Проверяется</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/screens/mainwindow/torrentsmodel.cpp" line="146"/>
-        <source>Queued for checking (%1)</source>
-        <extracomment>Torrent status while torrent also has an error. %1 is error string</extracomment>
-        <translation>В очереди на проверку (%1)</translation>
     </message>
     <message>
         <location filename="../src/ui/screens/mainwindow/torrentsmodel.cpp" line="346"/>
@@ -1860,6 +1829,11 @@ Torrent's uploaded size</extracomment>
         <translation>Последняя активность:</translation>
     </message>
     <message>
+        <source>Error:</source>
+        <extracomment>Torrent's error</extracomment>
+        <translation>Ошибка:</translation>
+    </message>
+    <message>
         <location filename="../src/ui/screens/torrentproperties/torrentpropertieswidget.cpp" line="173"/>
         <source>Total size:</source>
         <translation>Общий размер:</translation>
@@ -2464,10 +2438,6 @@ Filter option of torrents list's label filter. %1 is label, %L2 is number of tor
     <message>
         <source>Paused (insufficient free space)</source>
         <translation>Приостановлено (недостаточно свободного места)</translation>
-    </message>
-    <message>
-        <source>Paused (insufficient free space) (%1)</source>
-        <translation>Приостановлено (недостаточно свободного места) (%1)</translation>
     </message>
     <message>
         <source>Waiting for free space to move data</source>

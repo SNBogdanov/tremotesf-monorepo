@@ -44,10 +44,6 @@ namespace tremotesf::desktoputils {
     const QIcon& statusIcon(StatusIcon icon) {
         using enum StatusIcon;
         switch (icon) {
-        case Active: {
-            static const QIcon qicon(":/active.png"_L1);
-            return qicon;
-        }
         case ActiveDownload: {
             static const QIcon qicon(":/active-download.png"_L1);
             return qicon;
@@ -56,12 +52,32 @@ namespace tremotesf::desktoputils {
             static const QIcon qicon(":/active-upload.png"_L1);
             return qicon;
         }
+        case All: {
+            static const QIcon qicon(":/all.png"_L1);
+            return qicon;
+        }
+        case CheckWaiting: {
+            static const QIcon qicon(":/check-waiting.png"_L1);
+            return qicon;
+        }
         case CriticalError: {
             static const QIcon qicon(":/critical-error.png"_L1);
             return qicon;
         }
+        case Done: {
+            static const QIcon qicon(":/done.png"_L1);
+            return qicon;
+        }
         case Inactive: {
             static const QIcon qicon(":/inactive.png"_L1);
+            return qicon;
+        }
+        case QueuedForDownloading: {
+            static const QIcon qicon(":/queued-download.png"_L1);
+            return qicon;
+        }
+        case QueuedForSeeding: {
+            static const QIcon qicon(":/queued-seed.png"_L1);
             return qicon;
         }
         case TrackerErrorDownloading: {
@@ -84,29 +100,12 @@ namespace tremotesf::desktoputils {
             static const QIcon qicon(":/downloading.png"_L1);
             return qicon;
         }
-        case Errored: {
-            static const QIcon qicon(":/errored.png"_L1);
-            return qicon;
-        }
         case Paused: {
             static const QIcon qicon(":/paused.png"_L1);
             return qicon;
         }
-        case Queued: {
-            static const QIcon qicon(":/queued.png"_L1);
-            return qicon;
-        }
         case Seeding: {
             static const QIcon qicon(":/seeding.png"_L1);
-            return qicon;
-        }
-        case StalledDownloading: {
-            static const QIcon qicon(":/stalled-downloading.png"_L1);
-            return qicon;
-        }
-
-        case StalledSeeding: {
-            static const QIcon qicon(":/stalled-seeding.png"_L1);
             return qicon;
         }
         }

@@ -48,18 +48,23 @@ namespace tremotesf {
                 using namespace desktoputils;
                 using enum desktoputils::StatusIcon;
 
-                if (torrent->data().error != TorrentData::Error::None) {
-                    switch (torrent->data().error) {
+                const auto& data = torrent->data();
+                const bool statusSupportsError =
+                    (data.status == TorrentData::Status::QueuedForDownloading
+                     || data.status == TorrentData::Status::Downloading
+                     || data.status == TorrentData::Status::QueuedForSeeding
+                     || data.status == TorrentData::Status::Seeding);
+                if (data.hasError() && statusSupportsError) {
+                    switch (data.error) {
                     case TorrentData::Error::LocalError:
                         return statusIcon(CriticalError);
                     case TorrentData::Error::TrackerWarning:
                     case TorrentData::Error::TrackerError:
-                        switch (torrent->data().status) {
+                        // Tracker errors are shown only for active transfers, queued torrents keep their queue icon
+                        switch (data.status) {
                         case TorrentData::Status::Downloading:
-                        case TorrentData::Status::QueuedForDownloading:
                             return statusIcon(TrackerErrorDownloading);
                         case TorrentData::Status::Seeding:
-                        case TorrentData::Status::QueuedForSeeding:
                             return statusIcon(TrackerErrorSeeding);
                         default:
                             break;
@@ -69,29 +74,29 @@ namespace tremotesf {
                         break;
                     }
                 }
-                switch (torrent->data().status) {
+                switch (data.status) {
                 case TorrentData::Status::Paused:
-                case TorrentData::Status::PausedDueToSpace:
+                    if (data.leftUntilDone == 0 && data.sizeWhenDone != 0) {
+                        return statusIcon(Done);
+                    }
                     return statusIcon(Paused);
                 case TorrentData::Status::Seeding:
-                    if (torrent->data().isSeedingStalled()) {
-                        return statusIcon(StalledSeeding);
-                    }
                     return statusIcon(Seeding);
                 case TorrentData::Status::Downloading:
-                    if (torrent->data().isDownloadingStalled()) {
-                        return statusIcon(StalledDownloading);
-                    }
                     return statusIcon(Downloading);
                 case TorrentData::Status::QueuedForDownloading:
+                    return statusIcon(QueuedForDownloading);
                 case TorrentData::Status::QueuedForSeeding:
-                case TorrentData::Status::WaitingForSpaceToMove:
-                    return statusIcon(Queued);
-                case TorrentData::Status::Checking:
+                    return statusIcon(QueuedForSeeding);
                 case TorrentData::Status::QueuedForChecking:
+                    return statusIcon(CheckWaiting);
+                case TorrentData::Status::Checking:
+                    return statusIcon(Checking);
+                case TorrentData::Status::PausedDueToSpace:
+                case TorrentData::Status::WaitingForSpaceToMove:
                 case TorrentData::Status::RunningScript:
                 case TorrentData::Status::Moving:
-                    return statusIcon(Checking);
+                    return statusIcon(Waiting);
                 }
                 break;
             }
@@ -127,55 +132,29 @@ namespace tremotesf {
             case Column::Status: {
                 switch (torrent->data().status) {
                 case TorrentData::Status::Paused:
-                    if (torrent->data().hasError()) {
-                        //: Torrent status while torrent also has an error. %1 is error string
-                        return qApp->translate("tremotesf", "Paused (%1)").arg(torrent->data().errorString);
+                    if (torrent->data().leftUntilDone == 0 && torrent->data().sizeWhenDone != 0) {
+                        //: Torrent status
+                        return qApp->translate("tremotesf", "Finished");
                     }
                     //: Torrent status
                     return qApp->translate("tremotesf", "Paused");
                 case TorrentData::Status::Downloading:
-                    if (torrent->data().hasError()) {
-                        //: Torrent status while torrent also has an error. %1 is error string
-                        return qApp->translate("tremotesf", "Downloading (%1)").arg(torrent->data().errorString);
-                    }
                     //: Torrent status
                     return qApp->translate("tremotesf", "Downloading", "Torrent status");
                 case TorrentData::Status::Seeding:
-                    if (torrent->data().hasError()) {
-                        //: Torrent status while torrent also has an error. %1 is error string
-                        return qApp->translate("tremotesf", "Seeding (%1)").arg(torrent->data().errorString);
-                    }
                     //: Torrent status
                     return qApp->translate("tremotesf", "Seeding", "Torrent status");
                 case TorrentData::Status::QueuedForDownloading:
                 case TorrentData::Status::QueuedForSeeding:
-                    if (torrent->data().hasError()) {
-                        //: Torrent status while torrent also has an error. %1 is error string
-                        return qApp->translate("tremotesf", "Queued (%1)").arg(torrent->data().errorString);
-                    }
                     //: Torrent status
                     return qApp->translate("tremotesf", "Queued");
                 case TorrentData::Status::Checking:
-                    if (torrent->data().hasError()) {
-                        //: Torrent status while torrent also has an error. %1 is error string
-                        return qApp->translate("tremotesf", "Checking (%1)").arg(torrent->data().errorString);
-                    }
                     //: Torrent status
                     return qApp->translate("tremotesf", "Checking");
                 case TorrentData::Status::QueuedForChecking:
-                    if (torrent->data().hasError()) {
-                        //: Torrent status while torrent also has an error. %1 is error string
-                        return qApp->translate("tremotesf", "Queued for checking (%1)")
-                            .arg(torrent->data().errorString);
-                    }
                     //: Torrent status
                     return qApp->translate("tremotesf", "Queued for checking");
                 case TorrentData::Status::PausedDueToSpace:
-                    if (torrent->data().hasError()) {
-                        //: Torrent status while torrent also has an error. %1 is error string
-                        return qApp->translate("tremotesf", "Paused (insufficient free space) (%1)")
-                            .arg(torrent->data().errorString);
-                    }
                     //: Torrent status
                     return qApp->translate("tremotesf", "Paused (insufficient free space)");
                 case TorrentData::Status::WaitingForSpaceToMove:
