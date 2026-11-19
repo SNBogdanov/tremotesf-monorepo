@@ -494,9 +494,15 @@ class TorrentsListScreenViewModel(application: Application, savedStateHandle: Sa
         fun statusFilterAcceptsTorrent(torrent: Torrent, filterMode: StatusFilterMode): Boolean {
             val active = torrent.downloadSpeed.bytesPerSecond != 0L || torrent.uploadSpeed.bytesPerSecond != 0L
             val stopped = torrent.status == TorrentStatus.Paused
-            val finished = torrent.status == TorrentStatus.Seeding || (stopped && torrent.leftUntilDone.bytes == 0L)
+            val finished = torrent.status == TorrentStatus.Seeding ||
+                    (stopped && torrent.leftUntilDone.bytes == 0L && torrent.sizeWhenDone.bytes != 0L)
             // Server does not report tracker/local errors for torrents that are not running
             val errorsOnlyForRunningTorrents = torrent.status in ERRORS_ONLY_FOR_RUNNING_TORRENTS_STATUSES
+            val hasTrackerError = torrent.error == Torrent.Error.TrackerWarning ||
+                    torrent.error == Torrent.Error.TrackerError
+            // Tracker errors are not shown for queued torrents, they keep their queue icon
+            val hasShownTrackerError = hasTrackerError &&
+                    (torrent.status == TorrentStatus.Downloading || torrent.status == TorrentStatus.Seeding)
             return when (filterMode) {
                 StatusFilterMode.All -> true
                 StatusFilterMode.Downloading -> torrent.status == TorrentStatus.Downloading
@@ -507,7 +513,8 @@ class TorrentsListScreenViewModel(application: Application, savedStateHandle: Sa
                 StatusFilterMode.ActiveUpload -> torrent.status == TorrentStatus.Seeding && active
                 StatusFilterMode.Inactive -> !active && !stopped
                 StatusFilterMode.Stopped -> stopped
-                StatusFilterMode.Errored -> torrent.error != null && errorsOnlyForRunningTorrents
+                StatusFilterMode.Errored ->
+                    hasShownTrackerError || (torrent.error == Torrent.Error.LocalError && errorsOnlyForRunningTorrents)
                 StatusFilterMode.Waiting -> torrent.status in WAITING_STATUSES
             }
         }

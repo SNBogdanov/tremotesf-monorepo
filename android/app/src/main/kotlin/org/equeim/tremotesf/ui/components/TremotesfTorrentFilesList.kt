@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -160,6 +161,7 @@ fun TremotesfTorrentsFilesList(
                 key = { it.nodePath },
                 contentType = { ContentType.FileTreeItem }
             ) { item ->
+                val downloaded = item.progress >= 1f
                 Column(Modifier.animateItem()) {
                     ListItem(
                         leadingContent = {
@@ -181,10 +183,14 @@ fun TremotesfTorrentsFilesList(
                         supportingContent = { itemSupportingContent(item) },
                         trailingContent = {
                             TriStateCheckbox(
-                                state = when (item.wantedState) {
-                                    WantedState.Wanted -> ToggleableState.On
-                                    WantedState.Unwanted -> ToggleableState.Off
-                                    WantedState.Mixed -> ToggleableState.Indeterminate
+                                state = if (downloaded) {
+                                    ToggleableState.On
+                                } else {
+                                    when (item.wantedState) {
+                                        WantedState.Wanted -> ToggleableState.On
+                                        WantedState.Unwanted -> ToggleableState.Off
+                                        WantedState.Mixed -> ToggleableState.Indeterminate
+                                    }
                                 },
                                 onClick = {
                                     filesTree.setItemsWanted(
@@ -195,7 +201,12 @@ fun TremotesfTorrentsFilesList(
                                         }
                                     )
                                 },
-                                enabled = !selectionState.hasSelection
+                                enabled = !selectionState.hasSelection && !downloaded,
+                                colors = CheckboxDefaults.colors(
+                                    disabledCheckedColor = MaterialTheme.colorScheme.outline,
+                                    disabledUncheckedColor = MaterialTheme.colorScheme.outline,
+                                    disabledIndeterminateColor = MaterialTheme.colorScheme.outline
+                                )
                             )
                         },
                         colors = ListItemDefaults.colors(

@@ -109,6 +109,13 @@ inline fun <T> rememberLocaleDependentValue(crossinline calculation: (Locale) ->
 inline fun rememberNumberFormat(crossinline formatProducer: () -> NumberFormat): NumberFormat =
     rememberLocaleDependentValue { formatProducer() }
 
+fun formatTorrentProgress(progress: Double, formatter: NumberFormat): String {
+    if (progress >= 1.0) {
+        return formatter.format(100.0)
+    }
+    return formatter.format(minOf(progress * 100.0, 99.9))
+}
+
 @Composable
 inline fun rememberDateTimeFormatter(crossinline formatterProducer: () -> DateTimeFormatter): DateTimeFormatter =
     rememberLocaleDependentValue { formatterProducer() }

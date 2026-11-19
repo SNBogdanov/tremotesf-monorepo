@@ -176,7 +176,7 @@ fun DetailsTab(
                         if (torrentDetails.topicUrl.isBlank()) {
                             AnnotatedString(torrentDetails.topicName)
                         } else {
-                            torrentDetails.topicName.annotateLinks(linkColor)
+                            torrentDetails.topicName.annotateLink(torrentDetails.topicUrl, linkColor)
                         }
                     }
                     Text(annotated)
@@ -241,6 +241,20 @@ private fun String.annotateLinks(color: Color): AnnotatedString {
             end = it.range.last + 1
         )
     }.toList())
+}
+
+private fun String.annotateLink(url: String, color: Color): AnnotatedString {
+    val styles = TextLinkStyles(SpanStyle(color = color, textDecoration = TextDecoration.Underline))
+    return AnnotatedString(
+        this,
+        annotations = listOf(
+            AnnotatedString.Range(
+                item = LinkAnnotation.Url(url, styles),
+                start = 0,
+                end = length
+            )
+        )
+    )
 }
 
 @Preview

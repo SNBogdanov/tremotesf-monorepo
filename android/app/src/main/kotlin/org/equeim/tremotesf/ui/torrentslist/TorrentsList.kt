@@ -96,6 +96,7 @@ import org.equeim.tremotesf.ui.components.tremotesfMultiSelectionClickable
 import org.equeim.tremotesf.ui.utils.FileSizeFormatter
 import org.equeim.tremotesf.ui.utils.Utils
 import org.equeim.tremotesf.ui.utils.formatTorrentEta
+import org.equeim.tremotesf.ui.utils.formatTorrentProgress
 import org.equeim.tremotesf.ui.utils.rememberFileSizeFormatter
 import org.equeim.tremotesf.ui.utils.rememberNumberFormat
 import java.text.DecimalFormat
@@ -274,7 +275,7 @@ private fun LazyItemScope.TorrentCard(
                                 R.string.completed_string,
                                 fileSizeFormatter.formatFileSize(torrent.completedSize),
                                 fileSizeFormatter.formatFileSize(torrent.sizeWhenDone),
-                                progressFormatter.format(torrent.percentDone * 100)
+                                formatTorrentProgress(torrent.percentDone, progressFormatter)
                             )
                         },
                         maxLines = 1,
@@ -412,7 +413,7 @@ private fun LazyItemScope.TorrentCompactListItem(
                         } else {
                             R.string.progress_string
                         },
-                        progressFormatter.format(torrent.percentDone * 100)
+                        formatTorrentProgress(torrent.percentDone, progressFormatter)
                     )
                 )
             }
@@ -519,13 +520,13 @@ private fun Torrent.getStatusString(progressFormatter: NumberFormat): String {
         TorrentStatus.Checking -> if (error != null) {
             stringResource(
                 R.string.torrent_checking_with_error,
-                progressFormatter.format(recheckProgress * 100),
+                formatTorrentProgress(recheckProgress, progressFormatter),
                 errorString
             )
         } else {
             stringResource(
                 R.string.torrent_checking,
-                progressFormatter.format(recheckProgress * 100)
+                formatTorrentProgress(recheckProgress, progressFormatter)
             )
         }
 
