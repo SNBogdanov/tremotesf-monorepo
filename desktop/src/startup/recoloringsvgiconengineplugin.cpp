@@ -5,7 +5,9 @@
 #include <QIconEnginePlugin>
 #include <QStyleOptionMenuItem>
 #include <QGuiApplication>
+#include <QWidget>
 
+#include "desktoputils.h"
 #include "recoloringsvgiconengineplugin.h"
 #include "target_os.h"
 #include "ui/recoloringsvgiconengine.h"
@@ -42,6 +44,22 @@ namespace tremotesf {
         QProxyStyle::drawControl(element, option, painter, widget);
         if (drawingSelectedMenuItem) {
             drawingSelectedMenuItem = false;
+        }
+    }
+
+    int RecoloringSvgIconStyle::pixelMetric(
+        QStyle::PixelMetric metric, const QStyleOption* option, const QWidget* widget
+    ) const {
+        // Menus and tool buttons use small icons, which look too tiny on high-DPI screens
+        const int iconSize = desktoputils::iconSizeForDevicePixelRatio(widget ? widget->devicePixelRatio() : 1.0);
+        switch (metric) {
+        case PM_SmallIconSize:
+        case PM_ToolBarIconSize:
+            return iconSize;
+        case PM_LargeIconSize:
+            return iconSize + 8;
+        default:
+            return QProxyStyle::pixelMetric(metric, option, widget);
         }
     }
 

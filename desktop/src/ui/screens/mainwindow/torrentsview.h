@@ -7,6 +7,9 @@
 
 #include <QTreeView>
 
+class QEvent;
+class QShowEvent;
+
 namespace tremotesf {
     class TorrentsProxyModel;
 
@@ -18,6 +21,15 @@ namespace tremotesf {
         Q_DISABLE_COPY_MOVE(TorrentsView)
 
         void saveState();
+
+    protected:
+        bool event(QEvent* event) override;
+        void showEvent(QShowEvent* event) override;
+
+    private:
+        void updateIconSize();
+
+        bool mScreenChangeConnected = false;
     };
 }
 

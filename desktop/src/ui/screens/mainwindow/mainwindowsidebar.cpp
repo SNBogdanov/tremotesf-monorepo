@@ -6,18 +6,22 @@
 
 #include <QApplication>
 #include <QCheckBox>
+#include <QEvent>
 #include <QFrame>
 #include <QIcon>
 #include <QItemSelectionModel>
 #include <QLineEdit>
 #include <QListView>
 #include <QMenu>
+#include <QShowEvent>
 #include <QVBoxLayout>
+#include <QWindow>
 #include <QShortcut>
 
 #include <algorithm>
 #include <vector>
 
+#include "desktoputils.h"
 #include "rpc/rpc.h"
 #include "rpc/serversettings.h"
 #include "rpc/torrent.h"
@@ -49,7 +53,7 @@ namespace tremotesf {
                 : QListView(parent), mTorrentsProxyModel(torrentsProxyModel), mModel(model) {
                 mModel->setParent(this);
                 setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-                setIconSize(QSize(16, 16));
+                updateIconSize();
                 if (delegate) {
                     delegate->setParent(this);
                     setItemDelegate(delegate);
@@ -75,12 +79,41 @@ namespace tremotesf {
                 return {sizeHintForColumn(0), height};
             }
 
+            void updateIconSize() {
+                const int size = desktoputils::iconSizeForDevicePixelRatio(devicePixelRatio());
+                setIconSize(QSize(size, size));
+                updateGeometry();
+            }
+
             void setFilterEnabled(bool enabled) {
                 setVisible(enabled);
                 setTorrentsModelFilterEnabled(enabled);
             }
 
         protected:
+            bool event(QEvent* event) override {
+                switch (event->type()) {
+                case QEvent::DevicePixelRatioChange:
+                case QEvent::ScreenChangeInternal:
+                    updateIconSize();
+                    break;
+                default:
+                    break;
+                }
+                return QListView::event(event);
+            }
+
+            void showEvent(QShowEvent* event) override {
+                updateIconSize();
+                if (!mScreenChangeConnected) {
+                    if (auto* window = windowHandle()) {
+                        QObject::connect(window, &QWindow::screenChanged, this, [this] { updateIconSize(); });
+                        mScreenChangeConnected = true;
+                    }
+                }
+                QListView::showEvent(event);
+            }
+
             void init(Rpc* rpc, std::optional<int> sortByRole = {}) {
                 mRpc = rpc;
                 setContextMenuPolicy(Qt::CustomContextMenu);
@@ -212,6 +245,7 @@ namespace tremotesf {
             TorrentsProxyModel* mTorrentsProxyModel;
             BaseTorrentsFiltersSettingsModel* mModel;
             BaseProxyModel* mProxyModel{};
+            bool mScreenChangeConnected = false;
         };
 
         class StatusFiltersListView final : public BaseListView {

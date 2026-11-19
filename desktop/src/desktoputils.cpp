@@ -41,6 +41,11 @@ SPECIALIZE_FORMATTER_FOR_QDEBUG(QUrl)
 using namespace Qt::StringLiterals;
 
 namespace tremotesf::desktoputils {
+    int iconSizeForDevicePixelRatio(qreal devicePixelRatio) {
+        // 16x16 icons on a 100% screen, 24x24 on a 150% screen, 32x32 on a 200% screen, etc.
+        return qMax(16, qRound(16.0 * devicePixelRatio));
+    }
+
     const QIcon& statusIcon(StatusIcon icon) {
         using enum StatusIcon;
         switch (icon) {

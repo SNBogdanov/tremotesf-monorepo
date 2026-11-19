@@ -1054,6 +1054,10 @@ namespace tremotesf {
                 if (torrent->data().status == TorrentData::Status::Paused
                     || torrent->data().status == TorrentData::Status::PausedDueToSpace) {
                     mPauseTorrentAction->setEnabled(false);
+                } else if (torrent->data().status == TorrentData::Status::QueuedForDownloading
+                           || torrent->data().status == TorrentData::Status::QueuedForSeeding) {
+                    // Torrent is already started, but "Start now" can move it out of the queue
+                    mStartTorrentAction->setEnabled(false);
                 } else {
                     mStartTorrentAction->setEnabled(false);
                     mStartTorrentNowAction->setEnabled(false);
@@ -1474,8 +1478,16 @@ namespace tremotesf {
             });
         }
 
+    public:
+        void updateIconSizes() {
+            const int size = desktoputils::iconSizeForDevicePixelRatio(mWindow->devicePixelRatio());
+            mToolBar.setIconSize(QSize(size, size));
+        }
+
+    private:
         void setupToolBar() {
             mToolBar.setObjectName("toolBar"_L1);
+            updateIconSizes();
             mToolBar.setContextMenuPolicy(Qt::CustomContextMenu);
             mToolBar.setMovable(!Settings::instance()->get_toolBarLocked());
             mWindow->addToolBar(Qt::TopToolBarArea, &mToolBar);
@@ -1812,12 +1824,16 @@ namespace tremotesf {
         if (event->type() == QEvent::WindowStateChange) {
             // This may be called in Impl constructor from restoreGeometry(), when mImpl is still uninitialized, so access it inside the lambda
             QMetaObject::invokeMethod(this, [this] { mImpl->updateShowHideAction(); }, Qt::QueuedConnection);
+        } else if (event->type() == QEvent::DevicePixelRatioChange || event->type() == QEvent::ScreenChangeInternal) {
+            // Update icon sizes when the window is moved to a screen with a different device pixel ratio
+            QMetaObject::invokeMethod(this, [this] { mImpl->updateIconSizes(); }, Qt::QueuedConnection);
         }
         return QMainWindow::event(event);
     }
 
     void MainWindow::showEvent(QShowEvent* event) {
         QMetaObject::invokeMethod(this, [this] { mImpl->updateShowHideAction(); }, Qt::QueuedConnection);
+        QMetaObject::invokeMethod(this, [this] { mImpl->updateIconSizes(); }, Qt::QueuedConnection);
         QMainWindow::showEvent(event);
     }
 

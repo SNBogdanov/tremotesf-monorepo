@@ -5,8 +5,13 @@
 #include "torrentsview.h"
 
 #include <set>
+#include <QEvent>
 #include <QHeaderView>
+#include <QShowEvent>
+#include <QSize>
+#include <QWindow>
 
+#include "desktoputils.h"
 #include "ui/widgets/basetreeview.h"
 #include "ui/widgets/progressbardelegate.h"
 #include "downloaddirectorydelegate.h"
@@ -17,6 +22,7 @@
 namespace tremotesf {
     TorrentsView::TorrentsView(TorrentsProxyModel* model, QWidget* parent) : QTreeView(parent) {
         setCommonTreeViewProperties(this, true);
+        updateIconSize();
         setContextMenuPolicy(Qt::CustomContextMenu);
         setItemDelegate(new TooltipWhenElidedDelegate(this));
         setItemDelegateForColumn(
@@ -63,6 +69,34 @@ namespace tremotesf {
             );
             sortByColumn(static_cast<int>(AddedDate), Qt::DescendingOrder);
         }
+    }
+
+    bool TorrentsView::event(QEvent* event) {
+        switch (event->type()) {
+        case QEvent::DevicePixelRatioChange:
+        case QEvent::ScreenChangeInternal:
+            updateIconSize();
+            break;
+        default:
+            break;
+        }
+        return QTreeView::event(event);
+    }
+
+    void TorrentsView::showEvent(QShowEvent* event) {
+        updateIconSize();
+        if (!mScreenChangeConnected) {
+            if (auto* window = windowHandle()) {
+                QObject::connect(window, &QWindow::screenChanged, this, [this] { updateIconSize(); });
+                mScreenChangeConnected = true;
+            }
+        }
+        QTreeView::showEvent(event);
+    }
+
+    void TorrentsView::updateIconSize() {
+        const int size = desktoputils::iconSizeForDevicePixelRatio(devicePixelRatio());
+        setIconSize(QSize(size, size));
     }
 
     void TorrentsView::saveState() { Settings::instance()->set_torrentsViewHeaderState(header()->saveState()); }

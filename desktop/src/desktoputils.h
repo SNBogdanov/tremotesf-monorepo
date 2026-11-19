@@ -5,6 +5,8 @@
 #ifndef TREMOTESF_DESKTOPUTILS_H
 #define TREMOTESF_DESKTOPUTILS_H
 
+#include <QtGlobal>
+
 class QIcon;
 class QString;
 class QTextDocument;
@@ -12,6 +14,9 @@ class QWidget;
 
 namespace tremotesf::desktoputils {
     constexpr int defaultDbusTimeout = 2000; // 2 seconds
+
+    /// Icon size in logical pixels for the given device pixel ratio
+    [[nodiscard]] int iconSizeForDevicePixelRatio(qreal devicePixelRatio);
 
     enum class StatusIcon {
         ActiveDownload,
