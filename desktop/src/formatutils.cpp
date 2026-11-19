@@ -53,61 +53,61 @@ namespace tremotesf::formatutils {
                 //: Download speed suffix in bytes per second
                 .speed = [] { return qApp->translate("tremotesf", "%L1 B/s"); }
             },
-            //: IEC 80000 binary prefixes, i.e. KiB = 1024 bytes
+            //: KB here means 1024 bytes
             ByteUnitStrings{
-                //: Size suffix in kibibytes
-                .size = [] { return qApp->translate("tremotesf", "%L1 KiB"); },
-                //: Download speed suffix in kibibytes per second
-                .speed = [] { return qApp->translate("tremotesf", "%L1 KiB/s"); }
+                //: Size suffix in kilobytes
+                .size = [] { return qApp->translate("tremotesf", "%L1 KB"); },
+                //: Download speed suffix in kilobytes per second
+                .speed = [] { return qApp->translate("tremotesf", "%L1 KB/s"); }
             },
-            //: IEC 80000 binary prefixes, i.e. KiB = 1024 bytes
+            //: KB here means 1024 bytes
             ByteUnitStrings{
-                //: Size suffix in mebibytes
-                .size = [] { return qApp->translate("tremotesf", "%L1 MiB"); },
-                //: Download speed suffix in mebibytes per second
-                .speed = [] { return qApp->translate("tremotesf", "%L1 MiB/s"); }
+                //: Size suffix in megabytes
+                .size = [] { return qApp->translate("tremotesf", "%L1 MB"); },
+                //: Download speed suffix in megabytes per second
+                .speed = [] { return qApp->translate("tremotesf", "%L1 MB/s"); }
             },
-            //: IEC 80000 binary prefixes, i.e. KiB = 1024 bytes
+            //: KB here means 1024 bytes
             ByteUnitStrings{
-                //: Size suffix in gibibytes
-                .size = [] { return qApp->translate("tremotesf", "%L1 GiB"); },
-                //: Download speed suffix in gibibytes per second
-                .speed = [] { return qApp->translate("tremotesf", "%L1 GiB/s"); }
+                //: Size suffix in gigabytes
+                .size = [] { return qApp->translate("tremotesf", "%L1 GB"); },
+                //: Download speed suffix in gigabytes per second
+                .speed = [] { return qApp->translate("tremotesf", "%L1 GB/s"); }
             },
-            //: IEC 80000 binary prefixes, i.e. KiB = 1024 bytes
+            //: KB here means 1024 bytes
             ByteUnitStrings{
-                //: Size suffix in tebibytes
-                .size = [] { return qApp->translate("tremotesf", "%L1 TiB"); },
-                //: Download speed suffix in tebibytes per second
-                .speed = [] { return qApp->translate("tremotesf", "%L1 TiB/s"); }
+                //: Size suffix in terabytes
+                .size = [] { return qApp->translate("tremotesf", "%L1 TB"); },
+                //: Download speed suffix in terabytes per second
+                .speed = [] { return qApp->translate("tremotesf", "%L1 TB/s"); }
             },
-            //: IEC 80000 binary prefixes, i.e. KiB = 1024 bytes
+            //: KB here means 1024 bytes
             ByteUnitStrings{
-                //: Size suffix in pebibytes
-                .size = [] { return qApp->translate("tremotesf", "%L1 PiB"); },
-                //: Download speed suffix in pebibytes per second
-                .speed = [] { return qApp->translate("tremotesf", "%L1 PiB/s"); }
+                //: Size suffix in petabytes
+                .size = [] { return qApp->translate("tremotesf", "%L1 PB"); },
+                //: Download speed suffix in petabytes per second
+                .speed = [] { return qApp->translate("tremotesf", "%L1 PB/s"); }
             },
-            //: IEC 80000 binary prefixes, i.e. KiB = 1024 bytes
+            //: KB here means 1024 bytes
             ByteUnitStrings{
-                //: Size suffix in exbibytes
-                .size = [] { return qApp->translate("tremotesf", "%L1 EiB"); },
-                //: Download speed suffix in exbibytes per second
-                .speed = [] { return qApp->translate("tremotesf", "%L1 EiB/s"); }
+                //: Size suffix in exabytes
+                .size = [] { return qApp->translate("tremotesf", "%L1 EB"); },
+                //: Download speed suffix in exabytes per second
+                .speed = [] { return qApp->translate("tremotesf", "%L1 EB/s"); }
             },
-            //: IEC 80000 binary prefixes, i.e. KiB = 1024 bytes
+            //: KB here means 1024 bytes
             ByteUnitStrings{
-                //: Size suffix in zebibytes
-                .size = [] { return qApp->translate("tremotesf", "%L1 ZiB"); },
-                //: Download speed suffix in zebibytes per second
-                .speed = [] { return qApp->translate("tremotesf", "%L1 ZiB/s"); }
+                //: Size suffix in zettabytes
+                .size = [] { return qApp->translate("tremotesf", "%L1 ZB"); },
+                //: Download speed suffix in zettabytes per second
+                .speed = [] { return qApp->translate("tremotesf", "%L1 ZB/s"); }
             },
-            //: IEC 80000 binary prefixes, i.e. KiB = 1024 bytes
+            //: KB here means 1024 bytes
             ByteUnitStrings{
-                //: Size suffix in yobibytes
-                .size = [] { return qApp->translate("tremotesf", "%L1 YiB"); },
-                //: Download speed suffix in yobibytes per second
-                .speed = [] { return qApp->translate("tremotesf", "%L1 YiB/s"); }
+                //: Size suffix in yottabytes
+                .size = [] { return qApp->translate("tremotesf", "%L1 YB"); },
+                //: Download speed suffix in yottabytes per second
+                .speed = [] { return qApp->translate("tremotesf", "%L1 YB/s"); }
             },
         };
         constexpr size_t maxByteUnit = byteUnits.size() - 1;
@@ -132,12 +132,12 @@ namespace tremotesf::formatutils {
     QString formatByteSpeed(long long speed) { return formatBytes(speed, StringType::Speed); }
 
     QString formatSpeedLimit(int limit) {
-        //: Download speed suffix in kibibytes per second
-        return qApp->translate("tremotesf", "%L1 KiB/s").arg(limit);
+        //: Download speed suffix in kilobytes per second
+        return qApp->translate("tremotesf", "%L1 KB/s").arg(limit);
     }
 
     QString formatProgress(double progress) {
-        if (qFuzzyCompare(progress, 1.0)) {
+        if (progress >= 1.0) {
             //: Progress in percents. %L1 must remain unchanged, % after it is a percent character
             return qApp->translate("tremotesf", "%L1%").arg(100);
         }

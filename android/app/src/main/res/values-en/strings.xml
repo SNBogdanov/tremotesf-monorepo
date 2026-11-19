@@ -114,7 +114,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <string name="progress_string">%s%%</string>
 
-    <!-- e.g. "100 MiB of 200 MiB (50%)" -->
+    <!-- e.g. "100 MB of 200 MB (50%)" -->
     <string name="completed_string">%1$s of %2$s (%3$s%%)</string>
 
     <string name="priority">Priority</string>
@@ -283,7 +283,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="check_local_data">Check local data</string>
 
 
-    <!-- e.g. "100 MiB, uploaded 200 MiB" -->
+    <!-- e.g. "100 MB, uploaded 200 MB" -->
     <string name="uploaded_string">%1$s, uploaded %2$s</string>
 
     <string name="torrent_paused">Paused</string>
@@ -308,26 +308,26 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <string-array name="size_units">
         <item>%s B</item>
-        <item>%s KiB</item>
-        <item>%s MiB</item>
-        <item>%s GiB</item>
-        <item>%s TiB</item>
-        <item>%s PiB</item>
-        <item>%s EiB</item>
-        <item>%s ZiB</item>
-        <item>%s YiB</item>
+        <item>%s KB</item>
+        <item>%s MB</item>
+        <item>%s GB</item>
+        <item>%s TB</item>
+        <item>%s PB</item>
+        <item>%s EB</item>
+        <item>%s ZB</item>
+        <item>%s YB</item>
     </string-array>
 
     <string-array name="speed_units">
         <item>%s B/s</item>
-        <item>%s KiB/s</item>
-        <item>%s MiB/s</item>
-        <item>%s GiB/s</item>
-        <item>%s TiB/s</item>
-        <item>%s PiB/s</item>
-        <item>%s EiB/s</item>
-        <item>%s ZiB/s</item>
-        <item>%s YiB/s</item>
+        <item>%s KB/s</item>
+        <item>%s MB/s</item>
+        <item>%s GB/s</item>
+        <item>%s TB/s</item>
+        <item>%s PB/s</item>
+        <item>%s EB/s</item>
+        <item>%s ZB/s</item>
+        <item>%s YB/s</item>
     </string-array>
 
     <string name="remove_torrent_message">Are you sure you want to remove this torrent?</string>

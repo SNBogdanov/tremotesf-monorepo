@@ -60,7 +60,7 @@
         <location filename="../src/ui/screens/addtorrent/addtorrentdialog.cpp" line="370"/>
         <location filename="../src/ui/screens/mainwindow/mainwindowstatusbar.cpp" line="106"/>
         <source>Free space: %1</source>
-        <extracomment>%1 is a amount of free space in a directory, e.g. 1 GiB</extracomment>
+        <extracomment>%1 is a amount of free space in a directory, e.g. 1 GB</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -751,7 +751,7 @@ Torrent&apos;s properties dialog tab</extracomment>
     <message>
         <location filename="../src/ui/screens/torrentproperties/torrentpropertieswidget.cpp" line="218"/>
         <source>%1 of %2 (%3)</source>
-        <extracomment>Torrent&apos;s completion size, e.g. 100 MiB of 200 MiB (50%). %1 is completed size, %2 is size, %3 is progress in percents</extracomment>
+        <extracomment>Torrent&apos;s completion size, e.g. 100 MB of 200 MB (50%). %1 is completed size, %2 is size, %3 is progress in percents</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2245,50 +2245,50 @@ Peers list column title</extracomment>
     </message>
     <message>
         <location filename="../src/formatutils.cpp" line="59"/>
-        <source>%L1 KiB</source>
-        <extracomment>IEC 80000 binary prefixes, i.e. KiB = 1024 bytes Size suffix in kibibytes</extracomment>
+        <source>%L1 KB</source>
+        <extracomment>KB here means 1024 bytes Size suffix in kilobytes</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/formatutils.cpp" line="66"/>
-        <source>%L1 MiB</source>
-        <extracomment>IEC 80000 binary prefixes, i.e. KiB = 1024 bytes Size suffix in mebibytes</extracomment>
+        <source>%L1 MB</source>
+        <extracomment>KB here means 1024 bytes Size suffix in megabytes</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/formatutils.cpp" line="73"/>
-        <source>%L1 GiB</source>
-        <extracomment>IEC 80000 binary prefixes, i.e. KiB = 1024 bytes Size suffix in gibibytes</extracomment>
+        <source>%L1 GB</source>
+        <extracomment>KB here means 1024 bytes Size suffix in gigabytes</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/formatutils.cpp" line="80"/>
-        <source>%L1 TiB</source>
-        <extracomment>IEC 80000 binary prefixes, i.e. KiB = 1024 bytes Size suffix in tebibytes</extracomment>
+        <source>%L1 TB</source>
+        <extracomment>KB here means 1024 bytes Size suffix in terabytes</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/formatutils.cpp" line="87"/>
-        <source>%L1 PiB</source>
-        <extracomment>IEC 80000 binary prefixes, i.e. KiB = 1024 bytes Size suffix in pebibytes</extracomment>
+        <source>%L1 PB</source>
+        <extracomment>KB here means 1024 bytes Size suffix in petabytes</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/formatutils.cpp" line="94"/>
-        <source>%L1 EiB</source>
-        <extracomment>IEC 80000 binary prefixes, i.e. KiB = 1024 bytes Size suffix in exbibytes</extracomment>
+        <source>%L1 EB</source>
+        <extracomment>KB here means 1024 bytes Size suffix in exabytes</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/formatutils.cpp" line="101"/>
-        <source>%L1 ZiB</source>
-        <extracomment>IEC 80000 binary prefixes, i.e. KiB = 1024 bytes Size suffix in zebibytes</extracomment>
+        <source>%L1 ZB</source>
+        <extracomment>KB here means 1024 bytes Size suffix in zettabytes</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/formatutils.cpp" line="108"/>
-        <source>%L1 YiB</source>
-        <extracomment>IEC 80000 binary prefixes, i.e. KiB = 1024 bytes Size suffix in yobibytes</extracomment>
+        <source>%L1 YB</source>
+        <extracomment>KB here means 1024 bytes Size suffix in yottabytes</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2300,50 +2300,50 @@ Peers list column title</extracomment>
     <message>
         <location filename="../src/formatutils.cpp" line="61"/>
         <location filename="../src/formatutils.cpp" line="136"/>
-        <source>%L1 KiB/s</source>
-        <extracomment>Download speed suffix in kibibytes per second</extracomment>
+        <source>%L1 KB/s</source>
+        <extracomment>Download speed suffix in kilobytes per second</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/formatutils.cpp" line="68"/>
-        <source>%L1 MiB/s</source>
-        <extracomment>Download speed suffix in mebibytes per second</extracomment>
+        <source>%L1 MB/s</source>
+        <extracomment>Download speed suffix in megabytes per second</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/formatutils.cpp" line="75"/>
-        <source>%L1 GiB/s</source>
-        <extracomment>Download speed suffix in gibibytes per second</extracomment>
+        <source>%L1 GB/s</source>
+        <extracomment>Download speed suffix in gigabytes per second</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/formatutils.cpp" line="82"/>
-        <source>%L1 TiB/s</source>
-        <extracomment>Download speed suffix in tebibytes per second</extracomment>
+        <source>%L1 TB/s</source>
+        <extracomment>Download speed suffix in terabytes per second</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/formatutils.cpp" line="89"/>
-        <source>%L1 PiB/s</source>
-        <extracomment>Download speed suffix in pebibytes per second</extracomment>
+        <source>%L1 PB/s</source>
+        <extracomment>Download speed suffix in petabytes per second</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/formatutils.cpp" line="96"/>
-        <source>%L1 EiB/s</source>
-        <extracomment>Download speed suffix in exbibytes per second</extracomment>
+        <source>%L1 EB/s</source>
+        <extracomment>Download speed suffix in exabytes per second</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/formatutils.cpp" line="103"/>
-        <source>%L1 ZiB/s</source>
-        <extracomment>Download speed suffix in zebibytes per second</extracomment>
+        <source>%L1 ZB/s</source>
+        <extracomment>Download speed suffix in zettabytes per second</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/formatutils.cpp" line="110"/>
-        <source>%L1 YiB/s</source>
-        <extracomment>Download speed suffix in yobibytes per second</extracomment>
+        <source>%L1 YB/s</source>
+        <extracomment>Download speed suffix in yottabytes per second</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>

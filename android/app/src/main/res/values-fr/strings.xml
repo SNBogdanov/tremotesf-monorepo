@@ -133,7 +133,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <string name="progress_string_with_dot">\u00b7 %s%%</string>
 
-    <!-- e.g. "100 MiB of 200 MiB (50%)" -->
+    <!-- e.g. "100 MB of 200 MB (50%)" -->
     <string name="completed_string">%1$s sur %2$s (%3$s%%)</string>
 
     <string name="priority">Priorité</string>
@@ -306,7 +306,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="delete_files">Supprimer aussi les fichiers du disque</string>
     <string name="check_local_data">Vérification données locales</string>
     <string name="reannounce">Redemander des pairs au traqueur</string>
-    <!-- e.g. "100 MiB, uploaded 200 MiB" -->
+    <!-- e.g. "100 MB, uploaded 200 MB" -->
     <string name="uploaded_string">%1$s, envoyé %2$s</string>
 
     <string name="torrent_paused">En pause</string>

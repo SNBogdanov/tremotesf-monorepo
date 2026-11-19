@@ -151,7 +151,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <string name="progress_string_with_dot">\u00b7 %s%%</string>
 
-    <!-- e.g. "100 MiB of 200 MiB (50%)" -->
+    <!-- e.g. "100 MB of 200 MB (50%)" -->
     <string name="completed_string">%1$s из %2$s (%3$s%%)</string>
 
     <string name="priority">Приоритет</string>
@@ -358,7 +358,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="tracker_replace_error">Не удалось изменить трекер: %1$s</string>
     <string name="trackers_remove_error">Не удалось удалить трекеры: %1$s</string>
 
-    <!-- e.g. "100 MiB, uploaded 200 MiB" -->
+    <!-- e.g. "100 MB, uploaded 200 MB" -->
     <string name="uploaded_string">%1$s, роздано %2$s</string>
 
     <string name="torrent_paused">Приостановлен</string>
@@ -407,26 +407,26 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <string-array name="size_units">
         <item>%s Б</item>
-        <item>%s КиБ</item>
-        <item>%s МиБ</item>
-        <item>%s ГиБ</item>
-        <item>%s ТиБ</item>
-        <item>%s ПиБ</item>
-        <item>%s ЭиБ</item>
-        <item>%s ЗиБ</item>
-        <item>%s ЙиБ</item>
+        <item>%s КБ</item>
+        <item>%s МБ</item>
+        <item>%s ГБ</item>
+        <item>%s ТБ</item>
+        <item>%s ПБ</item>
+        <item>%s ЭБ</item>
+        <item>%s ЗБ</item>
+        <item>%s ЙБ</item>
     </string-array>
 
     <string-array name="speed_units">
         <item>%s Б/с</item>
-        <item>%s КиБ/с</item>
-        <item>%s МиБ/с</item>
-        <item>%s ГиБ/с</item>
-        <item>%s ТиБ/с</item>
-        <item>%s ПиБ/с</item>
-        <item>%s ЭиБ/с</item>
-        <item>%s ЗиБ/с</item>
-        <item>%s ЙиБ/с</item>
+        <item>%s КБ/с</item>
+        <item>%s МБ/с</item>
+        <item>%s ГБ/с</item>
+        <item>%s ТБ/с</item>
+        <item>%s ПБ/с</item>
+        <item>%s ЭБ/с</item>
+        <item>%s ЗБ/с</item>
+        <item>%s ЙБ/с</item>
     </string-array>
 
     <string name="remove_torrent_message">Вы уверены, что хотите удалить этот торрент?</string>
