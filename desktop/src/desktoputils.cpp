@@ -12,6 +12,7 @@
 #include <QIcon>
 #include <QMessageBox>
 #include <QRegularExpression>
+#include <QSize>
 #include <QStringBuilder>
 #include <QStyle>
 #include <QTextCursor>
@@ -40,6 +41,16 @@ SPECIALIZE_FORMATTER_FOR_QDEBUG(QUrl)
 
 using namespace Qt::StringLiterals;
 
+namespace {
+    QIcon loadStatusIcon(QLatin1String name) {
+        QIcon icon;
+        for (const int size : {16, 24, 32, 48, 64, 96}) {
+            icon.addFile(QStringLiteral(":/status/%1/%2.png").arg(size).arg(name), QSize(size, size));
+        }
+        return icon;
+    }
+}
+
 namespace tremotesf::desktoputils {
     int iconSizeForDevicePixelRatio(qreal devicePixelRatio) {
         // 16x16 icons on a 100% screen, 24x24 on a 150% screen, 32x32 on a 200% screen, etc.
@@ -50,67 +61,87 @@ namespace tremotesf::desktoputils {
         using enum StatusIcon;
         switch (icon) {
         case ActiveDownload: {
-            static const QIcon qicon(":/active-download.png"_L1);
+            static const QIcon qicon = loadStatusIcon("active-download"_L1);
             return qicon;
         }
         case ActiveUpload: {
-            static const QIcon qicon(":/active-upload.png"_L1);
+            static const QIcon qicon = loadStatusIcon("active-upload"_L1);
             return qicon;
         }
         case All: {
-            static const QIcon qicon(":/all.png"_L1);
+            static const QIcon qicon = loadStatusIcon("all"_L1);
             return qicon;
         }
         case CheckWaiting: {
-            static const QIcon qicon(":/check-waiting.png"_L1);
+            static const QIcon qicon = loadStatusIcon("check-waiting"_L1);
             return qicon;
         }
         case CriticalError: {
-            static const QIcon qicon(":/critical-error.png"_L1);
+            static const QIcon qicon = QIcon::fromTheme("dialog-error"_L1, loadStatusIcon("critical-error"_L1));
             return qicon;
         }
         case Done: {
-            static const QIcon qicon(":/done.png"_L1);
+            static const QIcon qicon = loadStatusIcon("done"_L1);
             return qicon;
         }
         case Inactive: {
-            static const QIcon qicon(":/inactive.png"_L1);
+            static const QIcon qicon = loadStatusIcon("inactive"_L1);
             return qicon;
         }
         case QueuedForDownloading: {
-            static const QIcon qicon(":/queued-download.png"_L1);
+            static const QIcon qicon = loadStatusIcon("queued-download"_L1);
             return qicon;
         }
         case QueuedForSeeding: {
-            static const QIcon qicon(":/queued-seed.png"_L1);
+            static const QIcon qicon = loadStatusIcon("queued-seed"_L1);
             return qicon;
         }
         case TrackerErrorDownloading: {
-            static const QIcon qicon(":/tracker-error-downloading.png"_L1);
+            static const QIcon qicon = loadStatusIcon("tracker-error-downloading"_L1);
             return qicon;
         }
         case TrackerErrorSeeding: {
-            static const QIcon qicon(":/tracker-error-seeding.png"_L1);
+            static const QIcon qicon = loadStatusIcon("tracker-error-seeding"_L1);
             return qicon;
         }
         case Waiting: {
-            static const QIcon qicon(":/waiting.png"_L1);
+            static const QIcon qicon = loadStatusIcon("waiting"_L1);
+            return qicon;
+        }
+        case PausedDueToSpace: {
+            static const QIcon qicon = loadStatusIcon("paused-due-to-space"_L1);
+            return qicon;
+        }
+        case WaitingForSpaceToMove: {
+            static const QIcon qicon = loadStatusIcon("waiting-to-move"_L1);
+            return qicon;
+        }
+        case RunningScript: {
+            static const QIcon qicon = loadStatusIcon("running-script"_L1);
+            return qicon;
+        }
+        case Moving: {
+            static const QIcon qicon = loadStatusIcon("moving"_L1);
             return qicon;
         }
         case Checking: {
-            static const QIcon qicon(":/checking.png"_L1);
+            static const QIcon qicon = loadStatusIcon("checking"_L1);
             return qicon;
         }
         case Downloading: {
-            static const QIcon qicon(":/downloading.png"_L1);
+            static const QIcon qicon = loadStatusIcon("downloading"_L1);
             return qicon;
         }
         case Paused: {
-            static const QIcon qicon(":/paused.png"_L1);
+            static const QIcon qicon = loadStatusIcon("paused"_L1);
             return qicon;
         }
         case Seeding: {
-            static const QIcon qicon(":/seeding.png"_L1);
+            static const QIcon qicon = loadStatusIcon("seeding"_L1);
+            return qicon;
+        }
+        case Speedometer: {
+            static const QIcon qicon = loadStatusIcon("speedometer"_L1);
             return qicon;
         }
         }
@@ -121,15 +152,15 @@ namespace tremotesf::desktoputils {
     const QIcon& priorityIcon(Priority priority) {
         switch (priority) {
         case Priority::High: {
-            static const QIcon qicon(":/priority-high.png"_L1);
+            static const QIcon qicon = loadStatusIcon("priority-high"_L1);
             return qicon;
         }
         case Priority::Normal: {
-            static const QIcon qicon(":/priority-normal.png"_L1);
+            static const QIcon qicon = loadStatusIcon("priority-normal"_L1);
             return qicon;
         }
         case Priority::Low: {
-            static const QIcon qicon(":/priority-low.png"_L1);
+            static const QIcon qicon = loadStatusIcon("priority-low"_L1);
             return qicon;
         }
         }

@@ -12,6 +12,8 @@ namespace tremotesf {
     struct CommandLineArgs {
         QStringList files{};
         QStringList urls{};
+        QString profile{};
+        QString serverName{};
         bool minimized{};
         std::optional<bool> enableDebugLogs{};
 

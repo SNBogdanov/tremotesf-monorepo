@@ -6,17 +6,21 @@ package org.equeim.tremotesf.ui.components
 
 import android.os.Parcelable
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -46,12 +50,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
@@ -61,11 +68,12 @@ import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import org.equeim.tremotesf.R
 import org.equeim.tremotesf.torrentfile.TorrentFilesTree
+import org.equeim.tremotesf.torrentfile.TorrentFilesTree.Item.Priority
 import org.equeim.tremotesf.torrentfile.TorrentFilesTree.Item.WantedState
 import org.equeim.tremotesf.ui.Dimens
 import org.equeim.tremotesf.ui.FileDownload
+import org.equeim.tremotesf.ui.FileTypeIcons
 import org.equeim.tremotesf.ui.Folder
-import org.equeim.tremotesf.ui.InsertDriveFile
 import org.equeim.tremotesf.ui.LowPriority
 
 @Composable
@@ -166,16 +174,35 @@ fun TremotesfTorrentsFilesList(
                     ListItem(
                         leadingContent = {
                             if (selectionState.isSelected(item.nodePath)) {
-                                Icon(
-                                    imageVector = Icons.Filled.CheckCircle,
-                                    contentDescription = stringResource(R.string.selected),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(3.dp),
+                                    modifier = Modifier.padding(bottom = 4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.CheckCircle,
+                                        contentDescription = stringResource(R.string.selected),
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    if (!item.isDirectory) {
+                                        FilePriorityIndicator(item.priority)
+                                    }
+                                }
+                            } else if (item.isDirectory) {
+                                Icon(Icons.Filled.Folder, stringResource(R.string.directory_icon))
                             } else {
-                                if (item.isDirectory) {
-                                    Icon(Icons.Filled.Folder, stringResource(R.string.directory_icon))
-                                } else {
-                                    Icon(Icons.AutoMirrored.Filled.InsertDriveFile, stringResource(R.string.file_icon))
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(3.dp),
+                                    modifier = Modifier.padding(bottom = 4.dp)
+                                ) {
+                                    Icon(
+                                        FileTypeIcons.fileIcon(item.name),
+                                        stringResource(R.string.file_icon),
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    FilePriorityIndicator(item.priority)
                                 }
                             }
                         },
@@ -413,4 +440,20 @@ private fun computeSelectedItemsPriority(
         }
     }
     return priority ?: TorrentFilesTree.Item.Priority.Normal
+}
+
+@Composable
+private fun FilePriorityIndicator(priority: Priority) {
+    val color = when (priority) {
+        Priority.High -> Color(0xFFE53935)
+        Priority.Normal -> Color(0xFF43A047)
+        Priority.Low -> Color(0xFFFFB300)
+        Priority.Mixed -> MaterialTheme.colorScheme.outline
+    }
+    Box(
+        Modifier
+            .size(width = 18.dp, height = 3.dp)
+            .clip(RoundedCornerShape(2.dp))
+            .background(color)
+    )
 }

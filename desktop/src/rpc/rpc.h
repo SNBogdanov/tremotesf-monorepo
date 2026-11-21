@@ -5,13 +5,15 @@
 #ifndef TREMOTESF_RPC_RPC_H
 #define TREMOTESF_RPC_RPC_H
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <optional>
 #include <vector>
-
 #include <QByteArray>
+#include <QJsonObject>
 #include <QObject>
+#include <QPointer>
 
 #include "coroutines/scope.h"
 #include "torrent.h"
@@ -32,6 +34,11 @@ namespace tremotesf {
     namespace impl {
         class RequestRouter;
     }
+
+    struct ArchiveResponse {
+        bool success{};
+        QJsonObject arguments{};
+    };
 
     struct ConnectionConfiguration {
         Q_GADGET
@@ -144,7 +151,9 @@ namespace tremotesf {
             TorrentData::Priority bandwidthPriority,
             bool start,
             DeleteFileMode deleteFileMode,
-            std::vector<QString> labels
+            std::vector<QString> labels,
+            std::optional<bool> sequentialDownload = std::nullopt,
+            std::optional<bool> metadataOnly = std::nullopt
         );
 
         void addTorrentLinks(
@@ -152,7 +161,9 @@ namespace tremotesf {
             QString downloadDirectory,
             TorrentData::Priority bandwidthPriority,
             bool start,
-            std::vector<QString> labels
+            std::vector<QString> labels,
+            std::optional<bool> sequentialDownload = std::nullopt,
+            std::optional<bool> metadataOnly = std::nullopt
         );
 
         void startTorrents(std::span<const int> ids);
@@ -179,6 +190,10 @@ namespace tremotesf {
         void renameTorrentFile(int torrentId, QString filePath, QString newName);
 
         Coroutine<std::optional<qint64>> getFreeSpaceForPath(QString path);
+        void
+        requestFreeSpaceForPath(QString path, QObject* context, std::function<void(std::optional<qint64>)> callback);
+
+        void requestArchive(QJsonObject arguments, QObject* context, std::function<void(ArchiveResponse)> callback);
 
         void shutdownServer();
 
@@ -199,17 +214,27 @@ namespace tremotesf {
             TorrentData::Priority bandwidthPriority,
             bool start,
             DeleteFileMode deleteFileMode,
-            std::vector<QString> labels
+            std::vector<QString> labels,
+            std::optional<bool> sequentialDownload = std::nullopt,
+            std::optional<bool> metadataOnly = std::nullopt
         );
         Coroutine<> addTorrentLinksImpl(
             QStringList links,
             QString downloadDirectory,
             TorrentData::Priority bandwidthPriority,
             bool start,
-            std::vector<QString> labels
+            std::vector<QString> labels,
+            std::optional<bool> sequentialDownload = std::nullopt,
+            std::optional<bool> metadataOnly = std::nullopt
         );
         Coroutine<> addTorrentLinkImpl(
-            QString link, QString downloadDirectory, int bandwidthPriority, bool start, std::vector<QString> labels
+            QString link,
+            QString downloadDirectory,
+            int bandwidthPriority,
+            bool start,
+            std::vector<QString> labels,
+            std::optional<bool> sequentialDownload = std::nullopt,
+            std::optional<bool> metadataOnly = std::nullopt
         );
         Coroutine<> getTorrentsFiles(QJsonArray ids);
         Coroutine<> getTorrentsPeers(QJsonArray ids);
@@ -217,6 +242,12 @@ namespace tremotesf {
         Coroutine<std::optional<qint64>> getDownloadDirFreeSpaceImpl();
         Coroutine<std::optional<qint64>> getDownloadDirFreeSpaceLegacyMethod();
         Coroutine<std::optional<qint64>> getFreeSpaceForPathImpl(QString path);
+        Coroutine<> requestFreeSpaceForPathImpl(
+            QString path, QPointer<QObject> context, std::function<void(std::optional<qint64>)> callback
+        );
+        Coroutine<> requestArchiveImpl(
+            QJsonObject arguments, QPointer<QObject> context, std::function<void(ArchiveResponse)> callback
+        );
         Coroutine<> shutdownServerImpl();
 
         Coroutine<> getServerSettings();

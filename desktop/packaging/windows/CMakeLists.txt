@@ -14,7 +14,14 @@ set(CPACK_WIX_VERSION 4)
 set(CPACK_WIX_INSTALL_SCOPE perMachine)
 set(CPACK_WIX_UPGRADE_GUID "67e0511b-d9de-4b3c-a604-0dd47522d451")
 set(CPACK_WIX_PRODUCT_ICON "${TREMOTESF_WINDOWS_ICON}")
-set(CPACK_WIX_EXTRA_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/registry.wxs")
-set(CPACK_WIX_PATCH_FILE "${CMAKE_CURRENT_SOURCE_DIR}/registry_feature_patch.wxs")
+set(CPACK_WIX_EXTRA_SOURCES
+    "${CMAKE_CURRENT_SOURCE_DIR}/registry.wxs"
+    "${CMAKE_CURRENT_SOURCE_DIR}/desktop_shortcut.wxs"
+)
+set(CPACK_WIX_UI_REF "WixUI_FeatureTree")
+set(CPACK_WIX_PATCH_FILE
+    "${CMAKE_CURRENT_SOURCE_DIR}/registry_feature_patch.wxs"
+    "${CMAKE_CURRENT_SOURCE_DIR}/desktop_shortcut_patch.wxs"
+)
 
 include(CPack)

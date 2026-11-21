@@ -8,14 +8,18 @@
 
 #include <QActionGroup>
 #include <QCoreApplication>
+#include <QEvent>
 #include <QHBoxLayout>
 #include <QIcon>
 #include <QLabel>
 #include <QMenu>
 #include <QPainter>
+#include <QShowEvent>
 #include <QStyleOption>
 #include <QToolButton>
+#include <QWindow>
 
+#include "desktoputils.h"
 #include "log/log.h"
 #include "rpc/serversettings.h"
 #include "rpc/serverstats.h"
@@ -138,13 +142,35 @@ namespace tremotesf {
         QObject::connect(mRpc, &Rpc::statusChanged, this, &MainWindowStatusBar::updateStatusLabels);
 
         const auto updateSpeedAndFreeSpaceLabels = [=, this] {
-            downloadSpeedLabel->setText(formatutils::formatByteSpeed(mRpc->serverStats()->downloadSpeed()));
-            uploadSpeedLabel->setText(formatutils::formatByteSpeed(mRpc->serverStats()->uploadSpeed()));
+            const auto& serverSettings = mRpc->serverSettings()->data();
+            const auto formatLimit = [](int limit) -> QString {
+                return limit > 0 ? formatutils::formatSpeedLimit(limit) : QStringLiteral("\u221E");
+            };
+            const int downloadLimit =
+                serverSettings.alternativeSpeedLimitsEnabled
+                    ? serverSettings.alternativeDownloadSpeedLimit
+                    : (serverSettings.downloadSpeedLimited ? serverSettings.downloadSpeedLimit : 0);
+            const int uploadLimit = serverSettings.alternativeSpeedLimitsEnabled
+                                        ? serverSettings.alternativeUploadSpeedLimit
+                                        : (serverSettings.uploadSpeedLimited ? serverSettings.uploadSpeedLimit : 0);
+            downloadSpeedLabel->setText(
+                formatutils::formatByteSpeed(mRpc->serverStats()->downloadSpeed())
+                + u" ("_s
+                + formatLimit(downloadLimit)
+                + u')'
+            );
+            uploadSpeedLabel->setText(
+                formatutils::formatByteSpeed(mRpc->serverStats()->uploadSpeed())
+                + u" ("_s
+                + formatLimit(uploadLimit)
+                + u')'
+            );
             freeSpaceLabel->setText(qApp->translate("tremotesf", "Free space: %1")
                                         .arg(formatutils::formatByteSize(mRpc->serverStats()->freeSpace())));
         };
         updateSpeedAndFreeSpaceLabels();
         QObject::connect(mRpc->serverStats(), &ServerStats::updated, this, updateSpeedAndFreeSpaceLabels);
+        QObject::connect(mRpc->serverSettings(), &ServerSettings::changed, this, updateSpeedAndFreeSpaceLabels);
     }
 
     namespace {
@@ -242,9 +268,9 @@ namespace tremotesf {
 
     void MainWindowStatusBar::updateAltSpeedLimitIcon() {
         if (isPaletteDark()) {
-            mAltSpeedLimitsAction->setIcon(QIcon(":/speedometer.png"));
+            mAltSpeedLimitsAction->setIcon(desktoputils::statusIcon(desktoputils::StatusIcon::Speedometer));
         } else {
-            mAltSpeedLimitsAction->setIcon(QIcon(":/speedometer.png"));
+            mAltSpeedLimitsAction->setIcon(desktoputils::statusIcon(desktoputils::StatusIcon::Speedometer));
         }
     }
 
@@ -268,7 +294,38 @@ namespace tremotesf {
         style()->drawPrimitive(QStyle::PE_IndicatorToolBarSeparator, &opt, &p, this);
     }
 
-    QSize IconWidget::sizeHint() const { return {16, 16}; }
+    QSize IconWidget::sizeHint() const {
+        const int size = desktoputils::iconSizeForDevicePixelRatio(devicePixelRatio());
+        return {size, size};
+    }
+
+    bool IconWidget::event(QEvent* event) {
+        switch (event->type()) {
+        case QEvent::DevicePixelRatioChange:
+        case QEvent::ScreenChangeInternal:
+            updateIconSize();
+            break;
+        default:
+            break;
+        }
+        return QWidget::event(event);
+    }
+
+    void IconWidget::showEvent(QShowEvent* event) {
+        updateIconSize();
+        if (!mScreenChangeConnected) {
+            if (auto* window = windowHandle()) {
+                QObject::connect(window, &QWindow::screenChanged, this, [this] { updateIconSize(); });
+                mScreenChangeConnected = true;
+            }
+        }
+        QWidget::showEvent(event);
+    }
+
+    void IconWidget::updateIconSize() {
+        const int size = desktoputils::iconSizeForDevicePixelRatio(devicePixelRatio());
+        setFixedSize(size, size);
+    }
 
     void IconWidget::paintEvent(QPaintEvent*) {
         QPainter painter(this);

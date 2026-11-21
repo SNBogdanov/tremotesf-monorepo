@@ -9,6 +9,8 @@
 
 #include <QTreeView>
 
+class QKeyEvent;
+
 namespace tremotesf {
     class BaseTorrentFilesModel;
     class LocalTorrentFilesModel;
@@ -30,6 +32,11 @@ namespace tremotesf {
         );
 
         void saveState();
+
+        [[nodiscard]] TorrentFilesProxyModel* proxyModel() const;
+
+    protected:
+        void keyPressEvent(QKeyEvent* event) override;
 
     private:
         void init();

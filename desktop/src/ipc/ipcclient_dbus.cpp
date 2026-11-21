@@ -76,7 +76,7 @@ namespace tremotesf {
         }
 
         OrgFreedesktopApplicationInterface mInterface{
-            IpcServerDbus::serviceName, IpcServerDbus::objectPath, QDBusConnection::sessionBus()
+            IpcServerDbus::serviceName(), IpcServerDbus::objectPath, QDBusConnection::sessionBus()
         };
     };
 

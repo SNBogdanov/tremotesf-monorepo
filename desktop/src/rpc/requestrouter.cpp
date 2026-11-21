@@ -414,7 +414,7 @@ namespace tremotesf::impl {
         });
         if (!json.has_value()) {
             emit requestFailed(RpcError::ParseError, {}, {});
-            cancelCoroutine();
+            co_return Response{};
         }
         const bool success = isResultSuccessful(*json);
         if (!success) {
@@ -470,6 +470,6 @@ namespace tremotesf::impl {
             co_return co_await performRequest(getOriginalRequestAndDeleteReply(std::move(reply)), metadata);
         }
         emit requestFailed(error, reply->errorString(), detailedErrorMessage);
-        cancelCoroutine();
+        co_return Response{};
     }
 }

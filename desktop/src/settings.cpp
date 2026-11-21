@@ -87,6 +87,8 @@ namespace tremotesf {
         TorrentData::Priority, lastAddTorrentPriority, "lastAddTorrentPriority", TorrentData::Priority::Normal
     )
     SETTINGS_PROPERTY_DEF(bool, lastAddTorrentStartAfterAdding, "lastAddTorrentStartAfterAdding", true)
+    SETTINGS_PROPERTY_DEF(bool, lastAddTorrentSequentialDownload, "lastAddTorrentSequentialDownload", false)
+    SETTINGS_PROPERTY_DEF(bool, lastAddTorrentMetadataOnly, "lastAddTorrentMetadataOnly", false)
     SETTINGS_PROPERTY_DEF(bool, lastAddTorrentDeleteTorrentFile, "lastAddTorrentDeleteTorrentFile", false)
     SETTINGS_PROPERTY_DEF(bool, lastAddTorrentMoveTorrentFileToTrash, "lastAddTorrentMoveTorrentFileToTrash", true)
 
@@ -138,10 +140,15 @@ namespace tremotesf {
     SETTINGS_PROPERTY_DEF(QByteArray, trackersViewHeaderState, "trackersViewHeaderState", {})
     SETTINGS_PROPERTY_DEF(QByteArray, peersViewHeaderState, "peersViewHeaderState", {})
     SETTINGS_PROPERTY_DEF(QByteArray, localTorrentFilesViewHeaderState, "localTorrentFilesViewHeaderState", {})
+    SETTINGS_PROPERTY_DEF(QByteArray, serverSettingsDialogGeometry, "serverSettingsDialogGeometry", {})
+    SETTINGS_PROPERTY_DEF(QByteArray, minFreeSpaceTableHeaderState, "minFreeSpaceTableHeaderState", {})
+    SETTINGS_PROPERTY_DEF(QByteArray, archiveViewDialogGeometry, "archiveViewDialogGeometry", {})
+    SETTINGS_PROPERTY_DEF(QByteArray, archiveViewHeaderState, "archiveViewHeaderState", {})
 
     SETTINGS_PROPERTY_DEF(
         Settings::DarkThemeMode, darkThemeMode, "darkThemeMode", Settings::DarkThemeMode::FollowSystem
     )
+    SETTINGS_PROPERTY_DEF(Settings::CloseBehavior, closeBehavior, "closeBehavior", Settings::CloseBehavior::HideToTray)
     SETTINGS_PROPERTY_DEF(bool, useSystemAccentColor, "useSystemAccentColor", true)
     SETTINGS_PROPERTY_DEF(
         Settings::TorrentDoubleClickAction,
@@ -171,6 +178,7 @@ namespace tremotesf {
         qRegisterMetaType<TorrentData::Priority>();
         qRegisterMetaType<TorrentsProxyModel::StatusFilter>();
         qRegisterMetaType<Settings::DarkThemeMode>();
+        qRegisterMetaType<Settings::CloseBehavior>();
         qRegisterMetaType<Settings::TorrentDoubleClickAction>();
     }
 

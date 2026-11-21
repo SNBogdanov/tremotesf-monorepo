@@ -78,6 +78,7 @@ namespace tremotesf {
         IncompleteDirectory,
         TopicName,
         TopicUrl,
+        MetadataOnly,
 
         Count
     };
@@ -187,6 +188,8 @@ namespace tremotesf {
                 return "topic_name"_L1;
             case TorrentData::UpdateKey::TopicUrl:
                 return "topic_url"_L1;
+            case TorrentData::UpdateKey::MetadataOnly:
+                return "metadata_only"_L1;
             case TorrentData::UpdateKey::Count:
                 return {};
             }
@@ -504,6 +507,9 @@ namespace tremotesf {
         case TorrentData::UpdateKey::TopicUrl:
             setChanged(topicUrl, value.toString(), changed);
             return;
+        case TorrentData::UpdateKey::MetadataOnly:
+            setChanged(metadataOnly, value.toBool(), changed);
+            return;
         case TorrentData::UpdateKey::Count:
             throw std::logic_error("UpdateKey::Count should not be mapped");
         }
@@ -562,6 +568,10 @@ namespace tremotesf {
                 continue;
             }
             if (key == TorrentData::UpdateKey::TopicUrl && !serverSettings->data().hasForkFeature("topic_url/v1"_L1)) {
+                continue;
+            }
+            if (key == TorrentData::UpdateKey::MetadataOnly
+                && !serverSettings->data().hasForkFeature("metadata_only/v1"_L1)) {
                 continue;
             }
             fields.push_back(updateKeyString(key));
@@ -635,6 +645,11 @@ namespace tremotesf {
     void Torrent::setAutoPriority(bool enabled) {
         mData.autoPriority = enabled;
         mRpc->setTorrentProperty(mData.id, updateKeyString(TorrentData::UpdateKey::AutoPriority), enabled);
+    }
+
+    void Torrent::setMetadataOnly(bool enabled) {
+        mData.metadataOnly = enabled;
+        mRpc->setTorrentProperty(mData.id, updateKeyString(TorrentData::UpdateKey::MetadataOnly), enabled);
     }
 
     void Torrent::setIncompleteDirectory(const QString& directory, bool move) {

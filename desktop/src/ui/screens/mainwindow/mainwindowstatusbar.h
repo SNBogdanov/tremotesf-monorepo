@@ -58,15 +58,22 @@ namespace tremotesf {
     class IconWidget final : public QWidget {
         Q_OBJECT
     public:
-        explicit IconWidget(QIcon icon, QWidget* parent = nullptr) : QWidget(parent), mIcon(std::move(icon)) {}
+        explicit IconWidget(QIcon icon, QWidget* parent = nullptr) : QWidget(parent), mIcon(std::move(icon)) {
+            updateIconSize();
+        }
 
         QSize sizeHint() const override;
 
     protected:
+        bool event(QEvent* event) override;
+        void showEvent(QShowEvent* event) override;
         void paintEvent(QPaintEvent* event) override;
 
     private:
+        void updateIconSize();
+
         QIcon mIcon;
+        bool mScreenChangeConnected = false;
     };
 }
 

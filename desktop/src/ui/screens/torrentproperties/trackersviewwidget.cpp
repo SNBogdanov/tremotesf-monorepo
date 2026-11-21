@@ -17,6 +17,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QTreeView>
+#include <QUrl>
 #include <QVBoxLayout>
 
 #include "rpc/torrent.h"
@@ -80,17 +81,36 @@ namespace tremotesf {
         QObject::connect(removeAction, &QAction::triggered, this, &TrackersViewWidget::removeTrackers);
 
         QObject::connect(mTrackersView, &EnterEatingTreeView::customContextMenuRequested, this, [=, this](QPoint pos) {
-            if (mTrackersView->indexAt(pos).isValid()) {
-                QMenu contextMenu;
-                const auto* const editAction = contextMenu.addAction(
-                    QIcon::fromTheme("document-properties"_L1),
-                    //: Tracker's context menu item
-                    qApp->translate("tremotesf", "&Edit...")
-                );
-                QObject::connect(editAction, &QAction::triggered, this, &TrackersViewWidget::showEditDialogs);
-                contextMenu.addAction(removeAction);
-                contextMenu.exec(mTrackersView->viewport()->mapToGlobal(pos));
+            const auto index = mTrackersView->indexAt(pos);
+            if (!index.isValid()) {
+                return;
             }
+            QMenu contextMenu;
+            const auto* const editAction = contextMenu.addAction(
+                QIcon::fromTheme("document-properties"_L1),
+                //: Tracker's context menu item
+                qApp->translate("tremotesf", "&Edit...")
+            );
+            QObject::connect(editAction, &QAction::triggered, this, &TrackersViewWidget::showEditDialogs);
+
+            const auto& tracker = mModel->trackerAtIndex(mProxyModel->mapToSource(index));
+            const QUrl announceUrl(tracker.announce());
+            if (announceUrl.host() == "plab.site"_L1 || announceUrl.host() == "plab.site1"_L1) {
+                const auto* const toggleAction = contextMenu.addAction(
+                    QIcon::fromTheme("view-refresh"_L1),
+                    //: Tracker's context menu item
+                    qApp->translate("tremotesf", "Change tracker")
+                );
+                QObject::connect(toggleAction, &QAction::triggered, this, [this, id = tracker.id(), announceUrl] {
+                    QUrl newAnnounceUrl(announceUrl);
+                    newAnnounceUrl.setHost(announceUrl.host() == "plab.site"_L1 ? "plab.site1"_L1 : "plab.site"_L1);
+                    mTorrent->setTracker(id, newAnnounceUrl.toString());
+                    mRpc->reannounceTorrents(std::array{mTorrent->data().id});
+                });
+            }
+
+            contextMenu.addAction(removeAction);
+            contextMenu.exec(mTrackersView->viewport()->mapToGlobal(pos));
         });
 
         layout->addWidget(mTrackersView);
@@ -169,6 +189,7 @@ namespace tremotesf {
                 | std::views::transform([](QString& announceUrl) { return std::set{std::move(announceUrl)}; })
                 | std::ranges::to<std::vector>()
             );
+            mRpc->reannounceTorrents(std::array{mTorrent->data().id});
         });
         dialog->show();
     }
@@ -189,6 +210,7 @@ namespace tremotesf {
             );
             QObject::connect(dialog, &TextInputDialog::accepted, this, [=, this] {
                 mTorrent->setTracker(id, dialog->text());
+                mRpc->reannounceTorrents(std::array{mTorrent->data().id});
             });
             dialog->show();
         }
@@ -226,6 +248,7 @@ namespace tremotesf {
 
         if (dialog.exec() == QMessageBox::Ok) {
             mTorrent->removeTrackers(ids);
+            mRpc->reannounceTorrents(std::array{mTorrent->data().id});
         }
     }
 }

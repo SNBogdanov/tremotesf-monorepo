@@ -10,6 +10,7 @@
 #include <QHostAddress>
 #include <QHostInfo>
 #include <QNetworkProxy>
+#include <QPointer>
 #include <QSslCertificate>
 #include <QSslKey>
 
@@ -255,7 +256,9 @@ namespace tremotesf {
         TorrentData::Priority bandwidthPriority,
         bool start,
         DeleteFileMode deleteFileMode,
-        std::vector<QString> labels
+        std::vector<QString> labels,
+        std::optional<bool> sequentialDownload,
+        std::optional<bool> metadataOnly
     ) {
         if (isConnected()) {
             mBackgroundRequestsCoroutineScope.launch(addTorrentFileImpl(
@@ -268,7 +271,9 @@ namespace tremotesf {
                 bandwidthPriority,
                 start,
                 deleteFileMode,
-                std::move(labels)
+                std::move(labels),
+                sequentialDownload,
+                metadataOnly
             ));
         }
     }
@@ -282,7 +287,9 @@ namespace tremotesf {
             const std::vector<int>& lowPriorityFiles,
             TorrentData::Priority bandwidthPriority,
             bool start,
-            const std::vector<QString>& labels
+            const std::vector<QString>& labels,
+            std::optional<bool> sequentialDownload,
+            std::optional<bool> metadataOnly
         ) {
             QString fileData{};
             try {
@@ -310,6 +317,12 @@ namespace tremotesf {
             }
             if (!labels.empty()) {
                 arguments.insert("labels"_L1, toJsonArray(labels));
+            }
+            if (sequentialDownload.has_value()) {
+                arguments.insert(u"sequential_download"_s, *sequentialDownload);
+            }
+            if (metadataOnly.has_value()) {
+                arguments.insert(u"metadata_only"_s, *metadataOnly);
             }
             return RequestRouter::makeRequestData("torrent-add"_L1, std::move(arguments));
         }
@@ -339,7 +352,9 @@ namespace tremotesf {
         TorrentData::Priority bandwidthPriority,
         bool start,
         DeleteFileMode deleteFileMode,
-        std::vector<QString> labels
+        std::vector<QString> labels,
+        std::optional<bool> sequentialDownload,
+        std::optional<bool> metadataOnly
     ) {
         std::optional<QByteArray> requestData = co_await runOnThreadPool(
             makeAddTorrentFileRequestData,
@@ -350,7 +365,9 @@ namespace tremotesf {
             std::move(lowPriorityFiles),
             bandwidthPriority,
             start,
-            std::move(labels)
+            std::move(labels),
+            sequentialDownload,
+            metadataOnly
         );
         if (!requestData.has_value()) {
             emit torrentAddError(filePath);
@@ -386,7 +403,9 @@ namespace tremotesf {
         QString downloadDirectory,
         TorrentData::Priority bandwidthPriority,
         bool start,
-        std::vector<QString> labels
+        std::vector<QString> labels,
+        std::optional<bool> sequentialDownload,
+        std::optional<bool> metadataOnly
     ) {
         if (isConnected()) {
             mBackgroundRequestsCoroutineScope.launch(addTorrentLinksImpl(
@@ -394,7 +413,9 @@ namespace tremotesf {
                 std::move(downloadDirectory),
                 bandwidthPriority,
                 start,
-                std::move(labels)
+                std::move(labels),
+                sequentialDownload,
+                metadataOnly
             ));
         }
     }
@@ -404,13 +425,23 @@ namespace tremotesf {
         QString downloadDirectory,
         TorrentData::Priority bandwidthPriority,
         bool start,
-        std::vector<QString> labels
+        std::vector<QString> labels,
+        std::optional<bool> sequentialDownload,
+        std::optional<bool> metadataOnly
     ) {
         const int priorityInt = TorrentData::priorityToInt(bandwidthPriority);
         co_await waitAll(
             links
             | std::views::transform([&](QString& link) {
-                  return addTorrentLinkImpl(std::move(link), downloadDirectory, priorityInt, start, labels);
+                  return addTorrentLinkImpl(
+                      std::move(link),
+                      downloadDirectory,
+                      priorityInt,
+                      start,
+                      labels,
+                      sequentialDownload,
+                      metadataOnly
+                  );
               })
             | std::ranges::to<std::vector>()
         );
@@ -418,7 +449,13 @@ namespace tremotesf {
     }
 
     Coroutine<> Rpc::addTorrentLinkImpl(
-        QString link, QString downloadDirectory, int bandwidthPriority, bool start, std::vector<QString> labels
+        QString link,
+        QString downloadDirectory,
+        int bandwidthPriority,
+        bool start,
+        std::vector<QString> labels,
+        std::optional<bool> sequentialDownload,
+        std::optional<bool> metadataOnly
     ) {
         QJsonObject arguments{
             {u"filename"_s, link},
@@ -428,6 +465,12 @@ namespace tremotesf {
         };
         if (!labels.empty()) {
             arguments.insert("labels"_L1, toJsonArray(labels));
+        }
+        if (sequentialDownload.has_value()) {
+            arguments.insert(u"sequential_download"_s, *sequentialDownload);
+        }
+        if (metadataOnly.has_value()) {
+            arguments.insert(u"metadata_only"_s, *metadataOnly);
         }
         const auto response = co_await mRequestRouter->postRequest("torrent-add"_L1, std::move(arguments));
         if (response.arguments.contains(torrentDuplicateKey)) {
@@ -587,8 +630,15 @@ namespace tremotesf {
     }
 
     Coroutine<std::optional<qint64>> Rpc::getDownloadDirFreeSpaceImpl() {
-        if (mServerSettings->data().canShowFreeSpaceForPath()) {
-            co_return co_await getFreeSpaceForPathImpl(mServerSettings->data().downloadDirectory);
+        const auto& serverSettings = mServerSettings->data();
+        QString path = serverSettings.downloadDirectory;
+        if (serverSettings.incompleteDirectoryEnabled
+            && !serverSettings.incompleteDirectory.isEmpty()
+            && serverSettings.incompleteDirectory != serverSettings.downloadDirectory) {
+            path = serverSettings.incompleteDirectory;
+        }
+        if (serverSettings.canShowFreeSpaceForPath()) {
+            co_return co_await getFreeSpaceForPathImpl(std::move(path));
         }
         co_return co_await getDownloadDirFreeSpaceLegacyMethod();
     }
@@ -614,6 +664,12 @@ namespace tremotesf {
     }
 
     Coroutine<std::optional<qint64>> Rpc::getFreeSpaceForPath(QString path) {
+        info().log(
+            "getFreeSpaceForPath: connected={}, canShowFreeSpaceForPath={}, path='{}'",
+            isConnected(),
+            mServerSettings->data().canShowFreeSpaceForPath(),
+            path
+        );
         if (!isConnected()) {
             co_return std::nullopt;
         }
@@ -623,16 +679,63 @@ namespace tremotesf {
         if (path == mServerSettings->data().downloadDirectory) {
             co_return co_await getDownloadDirFreeSpaceImpl();
         }
-        cancelCoroutine();
+        co_return std::nullopt;
     }
 
     Coroutine<std::optional<qint64>> Rpc::getFreeSpaceForPathImpl(QString path) {
         QJsonObject arguments{{u"path"_s, path}};
         const auto response = co_await mRequestRouter->postRequest("free-space"_L1, std::move(arguments));
+        info().log("getFreeSpaceForPathImpl: path='{}', success={}", path, response.success);
         if (response.success) {
             co_return response.arguments.value("size-bytes"_L1).toInteger();
         }
         co_return std::nullopt;
+    }
+
+    void
+    Rpc::requestFreeSpaceForPath(QString path, QObject* context, std::function<void(std::optional<qint64>)> callback) {
+        info().log("requestFreeSpaceForPath: requesting free space for '{}'", path);
+        mBackgroundRequestsCoroutineScope.launch(requestFreeSpaceForPathImpl(
+            std::move(path), QPointer<QObject>(context), std::move(callback)
+        ));
+    }
+
+    Coroutine<> Rpc::requestFreeSpaceForPathImpl(
+        QString path, QPointer<QObject> context, std::function<void(std::optional<qint64>)> callback
+    ) {
+        const auto freeSpace = co_await getFreeSpaceForPath(std::move(path));
+        info().log(
+            "requestFreeSpaceForPath: free space result {}, context alive={}, callback valid={}",
+            freeSpace ? QString::number(*freeSpace) : QStringLiteral("nullopt"),
+            !context.isNull(),
+            static_cast<bool>(callback)
+        );
+        if (context && callback) {
+            callback(freeSpace);
+        }
+    }
+
+    void Rpc::requestArchive(
+        QJsonObject arguments, QObject* context, std::function<void(ArchiveResponse)> callback
+    ) {
+        if (!isConnected()) {
+            if (callback) {
+                callback({});
+            }
+            return;
+        }
+        mBackgroundRequestsCoroutineScope.launch(
+            requestArchiveImpl(std::move(arguments), QPointer<QObject>(context), std::move(callback))
+        );
+    }
+
+    Coroutine<> Rpc::requestArchiveImpl(
+        QJsonObject arguments, QPointer<QObject> context, std::function<void(ArchiveResponse)> callback
+    ) {
+        const auto response = co_await mRequestRouter->postRequest("torrent_archive"_L1, std::move(arguments));
+        if (context && callback) {
+            callback(ArchiveResponse{response.success, response.arguments});
+        }
     }
 
     void Rpc::shutdownServer() {

@@ -28,6 +28,7 @@ import androidx.navigation3.runtime.metadata
 import androidx.navigation3.scene.DialogSceneStrategy.Companion.DialogKey
 import com.cheonjaeung.compose.grid.GridScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
@@ -39,7 +40,9 @@ import org.equeim.tremotesf.rpc.requests.FileSize
 import org.equeim.tremotesf.rpc.requests.SessionStatsResponseArguments
 import org.equeim.tremotesf.rpc.requests.TransferRate
 import org.equeim.tremotesf.rpc.requests.getDownloadDirFreeSpace
+import org.equeim.tremotesf.rpc.requests.getFreeSpaceInDirectory
 import org.equeim.tremotesf.rpc.requests.getSessionStats
+import org.equeim.tremotesf.rpc.requests.serversettings.getDownloadingServerSettings
 import org.equeim.tremotesf.ui.Destination
 import org.equeim.tremotesf.ui.Dimens
 import org.equeim.tremotesf.ui.NavController
@@ -113,6 +116,31 @@ private fun ServerStatsDialogContent(
                             CommonStats(total, fileSizeFormatter, ratioFormatter)
                             Text(stringResource(R.string.free_space_in_download_directory))
                             Text(fileSizeFormatter.formatFileSize(uiState.downloadDirFreeSpace))
+
+                            if (uiState.minFreeSpaceRules.isNotEmpty()) {
+                                TremotesfSectionHeader(
+                                    R.string.free_space_by_paths,
+                                    Modifier
+                                        .span { maxLineSpan }
+                                        .padding(top = Dimens.SpacingSmall)
+                                )
+                                for (rule in uiState.minFreeSpaceRules) {
+                                    Text(rule.path, Modifier.span { maxLineSpan })
+                                    Text(
+                                        text = if (rule.freeSpace != null) {
+                                            stringResource(
+                                                R.string.free_space_with_limit,
+                                                fileSizeFormatter.formatFileSize(rule.freeSpace),
+                                                fileSizeFormatter.formatFileSize(rule.limit)
+                                            )
+                                        } else {
+                                            stringResource(R.string.free_space_error)
+                                        },
+                                        modifier = Modifier.span { maxLineSpan },
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -164,7 +192,8 @@ private fun ServerStatsDialogPreview() = ScreenPreview {
                             active = 666.days
                         )
                     ),
-                    downloadDirFreeSpace = FileSize.fromBytes(999999999999)
+                    downloadDirFreeSpace = FileSize.fromBytes(999999999999),
+                    minFreeSpaceRules = emptyList()
                 )
             )
         },
@@ -172,10 +201,13 @@ private fun ServerStatsDialogPreview() = ScreenPreview {
     )
 }
 
+data class MinFreeSpaceRuleState(val path: String, val limit: FileSize, val freeSpace: FileSize?)
+
 class ServerStatsDialogScreenViewModel : ViewModel() {
     data class UiState(
         val sessionStats: SessionStatsResponseArguments,
-        val downloadDirFreeSpace: FileSize
+        val downloadDirFreeSpace: FileSize,
+        val minFreeSpaceRules: List<MinFreeSpaceRuleState>
     )
 
     val uiState: StateFlow<RpcRequestState<UiState>> =
@@ -183,7 +215,44 @@ class ServerStatsDialogScreenViewModel : ViewModel() {
             coroutineScope {
                 val stats = async { getSessionStats() }
                 val freeSpace = async { getDownloadDirFreeSpace() }
-                UiState(stats.await(), freeSpace.await())
+                val settings = async { getDownloadingServerSettings() }
+                val rules = settings.await().minFreeSpace.mapNotNull(::parseMinFreeSpaceRule)
+                val ruleStates = coroutineScope {
+                    rules.map { rule ->
+                        async {
+                            MinFreeSpaceRuleState(
+                                path = rule.path,
+                                limit = rule.limit,
+                                freeSpace = runCatching { getFreeSpaceInDirectory(rule.path) }.getOrNull()
+                            )
+                        }
+                    }.awaitAll()
+                }
+                UiState(stats.await(), freeSpace.await(), ruleStates)
             }
         }
+}
+
+private data class MinFreeSpaceRule(val path: String, val limit: FileSize)
+
+private fun parseMinFreeSpaceRule(value: String): MinFreeSpaceRule? {
+    val separator = value.lastIndexOf('=')
+    if (separator <= 0 || separator >= value.lastIndex) return null
+    val path = value.substring(0, separator)
+    val limit = parseMinFreeSpaceSize(value.substring(separator + 1)) ?: return null
+    return MinFreeSpaceRule(path, FileSize.fromBytes(limit))
+}
+
+private fun parseMinFreeSpaceSize(value: String): Long? {
+    val trimmed = value.trim().removeSuffix("B").removeSuffix("i")
+    if (trimmed.isEmpty()) return null
+    val multiplier = when (trimmed.last().uppercaseChar()) {
+        'K' -> 1024L
+        'M' -> 1024L * 1024
+        'G' -> 1024L * 1024 * 1024
+        'T' -> 1024L * 1024 * 1024 * 1024
+        else -> 1L
+    }
+    val number = if (multiplier == 1L) trimmed else trimmed.dropLast(1)
+    return number.toLongOrNull()?.let { it * multiplier }
 }

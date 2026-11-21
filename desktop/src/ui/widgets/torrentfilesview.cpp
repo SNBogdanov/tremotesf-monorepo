@@ -9,6 +9,7 @@
 #include <QCoreApplication>
 #include <QHeaderView>
 #include <QItemSelectionModel>
+#include <QKeyEvent>
 #include <QMenu>
 
 #include "rpc/mounteddirectoriesutils.h"
@@ -104,11 +105,31 @@ namespace tremotesf {
         }
     }
 
+    void TorrentFilesView::keyPressEvent(QKeyEvent* event) {
+        if (event->key() == Qt::Key_F2 && (mLocalFile || mRpc->serverSettings()->data().canRenameFiles())) {
+            const auto current = currentIndex();
+            if (current.isValid()) {
+                const auto nameIndex =
+                    current.siblingAtColumn(mModel->columnNumber(BaseTorrentFilesModel::Column::Name));
+                if (nameIndex.isValid()) {
+                    edit(nameIndex);
+                    event->accept();
+                    return;
+                }
+            }
+        }
+        QTreeView::keyPressEvent(event);
+    }
+
+    TorrentFilesProxyModel* TorrentFilesView::proxyModel() const { return mProxyModel; }
+
     void TorrentFilesView::init() {
         setCommonTreeViewProperties(this, false);
+        header()->setFirstSectionMovable(true);
         setContextMenuPolicy(Qt::CustomContextMenu);
         setModel(mProxyModel);
         setSelectionMode(QAbstractItemView::ExtendedSelection);
+        setEditTriggers(QAbstractItemView::EditKeyPressed);
 
         QObject::connect(mModel, &BaseTorrentFilesModel::modelReset, this, &TorrentFilesView::onModelReset);
         QObject::connect(this, &TorrentFilesView::customContextMenuRequested, this, &TorrentFilesView::showContextMenu);
@@ -208,6 +229,7 @@ namespace tremotesf {
 
         //: File loading priority
         QAction* highPriorityAction = priorityGroup.addAction(qApp->translate("tremotesf", "&High"));
+        highPriorityAction->setIcon(desktoputils::priorityIcon(desktoputils::Priority::High));
         highPriorityAction->setCheckable(true);
         QObject::connect(highPriorityAction, &QAction::triggered, this, [=, this](bool checked) {
             if (checked) {
@@ -217,6 +239,7 @@ namespace tremotesf {
 
         //: File loading priority
         QAction* normalPriorityAction = priorityGroup.addAction(qApp->translate("tremotesf", "&Normal"));
+        normalPriorityAction->setIcon(desktoputils::priorityIcon(desktoputils::Priority::Normal));
         normalPriorityAction->setCheckable(true);
         QObject::connect(normalPriorityAction, &QAction::triggered, this, [=, this](bool checked) {
             if (checked) {
@@ -226,6 +249,7 @@ namespace tremotesf {
 
         //: File loading priority
         QAction* lowPriorityAction = priorityGroup.addAction(qApp->translate("tremotesf", "&Low"));
+        lowPriorityAction->setIcon(desktoputils::priorityIcon(desktoputils::Priority::Low));
         lowPriorityAction->setCheckable(true);
         QObject::connect(lowPriorityAction, &QAction::triggered, this, [=, this](bool checked) {
             if (checked) {
@@ -273,11 +297,11 @@ namespace tremotesf {
             );
             renameAction->setEnabled(sourceIndexes.size() == 1);
             QObject::connect(renameAction, &QAction::triggered, this, [=, this] {
-                const QModelIndex& index = sourceIndexes.first();
-                auto entry = static_cast<const TorrentFilesModelEntry*>(index.internalPointer());
-                showFileRenameDialog(entry->name(), this, [=, this](const auto& newName) {
-                    mModel->renameFile(index, newName);
-                });
+                const auto sourceIndex =
+                    sourceIndexes.first().siblingAtColumn(mModel->columnNumber(BaseTorrentFilesModel::Column::Name));
+                const auto proxyIndex = mProxyModel->mapFromSource(sourceIndex);
+                setCurrentIndex(proxyIndex);
+                edit(proxyIndex);
             });
         }
 

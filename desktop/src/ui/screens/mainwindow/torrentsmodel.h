@@ -47,7 +47,9 @@ namespace tremotesf {
             LeftUntilDone,
             DownloadDirectory,
             CompletedSize,
-            ActivityDate
+            ActivityDate,
+            Id,
+            WantedSize
         };
         Q_ENUM(Column)
 
@@ -58,6 +60,8 @@ namespace tremotesf {
         int columnCount(const QModelIndex& = {}) const override;
         QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
         QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+        Qt::ItemFlags flags(const QModelIndex& index) const override;
+        bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
         int rowCount(const QModelIndex& = {}) const override;
 
         Rpc* rpc() const;

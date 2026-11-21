@@ -3,11 +3,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include <QCoreApplication>
-#include <QMimeDatabase>
 
-#include "desktoputils.h"
+#include "ui/filetypeicons.h"
 #include "stdutils.h"
 #include "torrentfilesmodelentry.h"
+
+using namespace Qt::StringLiterals;
 
 namespace tremotesf {
     TorrentFilesModelEntry::Priority TorrentFilesModelEntry::fromFilePriority(TorrentFile::Priority priority) {
@@ -99,34 +100,17 @@ namespace tremotesf {
         return changed;
     }
 
-    namespace {
-        QIcon determineFileIcon(const QString& fileName) {
-            static const QMimeDatabase mimeDb{};
-            const auto mimeType = mimeDb.mimeTypeForFile(fileName, QMimeDatabase::MatchExtension);
-            if (!mimeType.isValid()) {
-                return desktoputils::standardFileIcon();
-            }
-            if (const auto icon = QIcon::fromTheme(mimeType.iconName()); !icon.isNull()) {
-                return icon;
-            }
-            if (const auto icon = QIcon::fromTheme(mimeType.genericIconName()); !icon.isNull()) {
-                return icon;
-            }
-            return desktoputils::standardFileIcon();
-        }
-    }
-
     QIcon TorrentFilesModelEntry::icon() const {
         return std::visit(
             [&](auto&& data) {
                 if constexpr (std::same_as<FileData, std::remove_cvref_t<decltype(data)>>) {
                     if (!data.initializedIcon) {
-                        data.icon = determineFileIcon(name());
+                        data.icon = filetypeicons::fileIcon(name());
                         data.initializedIcon = true;
                     }
                     return data.icon;
                 } else {
-                    return desktoputils::standardDirIcon();
+                    return filetypeicons::folderIcon();
                 }
             },
             mFileOrDirectoryData

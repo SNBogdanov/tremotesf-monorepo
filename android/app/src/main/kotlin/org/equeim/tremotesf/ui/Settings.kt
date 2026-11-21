@@ -354,6 +354,24 @@ object Settings {
     private fun <T : Any, R : Any> Property<T>.map(prefsToMapped: (T) -> R, mappedToPrefs: (R) -> T) =
         MappedProperty(this, prefsToMapped, mappedToPrefs)
 
+    internal fun snapshotPreferences(): Map<String, *> = preferences.all
+
+    internal fun replacePreferences(values: Map<String, Any?>) {
+        preferences.edit {
+            clear()
+            for ((key, value) in values) {
+                when (value) {
+                    is Boolean -> putBoolean(key, value)
+                    is Int -> putInt(key, value)
+                    is Long -> putLong(key, value)
+                    is Float -> putFloat(key, value)
+                    is String -> putString(key, value)
+                    is Set<*> -> putStringSet(key, value.filterIsInstance<String>().toSet())
+                }
+            }
+        }
+    }
+
     private class MappedProperty<T : Any, R : Any>(
         private val prefsProperty: Property<T>,
         private val prefsToMapped: (T) -> R,

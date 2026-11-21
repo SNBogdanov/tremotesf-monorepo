@@ -18,6 +18,7 @@
 #include <cxxopts.hpp>
 
 #include "log/log.h"
+#include "startup/appprofile.h"
 #include "target_os.h"
 
 namespace tremotesf {
@@ -78,6 +79,8 @@ namespace tremotesf {
         )("h,help", "display this help", cxxopts::value<bool>()->default_value("false")
         )("m,minimized", "start minimized in notification area", cxxopts::value(args.minimized)->default_value("false")
         )("d,debug-logs", "enable debug logs", cxxopts::value(args.enableDebugLogs)->implicit_value("true")
+        )("p,profile", "use a separate settings and server list profile", cxxopts::value<std::string>()
+        )("server", "select a server from the profile on startup", cxxopts::value<std::string>()
         )("torrents", "", cxxopts::value(torrents));
         opts.parse_positional("torrents");
         opts.positional_help("torrents");
@@ -94,6 +97,25 @@ namespace tremotesf {
             return args;
         }
         parsePositionals(torrents, args);
+
+        if (result.count("profile") != 0) {
+            args.profile = QString::fromStdString(result["profile"].as<std::string>());
+            if (!isValidProfileName(args.profile)) {
+                throw std::invalid_argument(
+                    fmt::format(
+                        "Invalid profile name '{}': only letters, digits, '.', '_' and '-' are allowed, up to 64 "
+                        "characters",
+                        args.profile.toStdString()
+                    )
+                );
+            }
+        }
+        if (result.count("server") != 0) {
+            args.serverName = QString::fromStdString(result["server"].as<std::string>());
+            if (args.serverName.isEmpty()) {
+                throw std::invalid_argument("Server name must not be empty");
+            }
+        }
 
         return args;
     }

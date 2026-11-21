@@ -11,6 +11,7 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDialogButtonBox>
+#include <QDir>
 #include <QFileInfo>
 #include <QFormLayout>
 #include <QGroupBox>
@@ -44,6 +45,8 @@
 #include "ui/widgets/torrentfilesview.h"
 
 #include "localtorrentfilesmodel.h"
+
+using namespace Qt::StringLiterals;
 
 namespace tremotesf {
     namespace {
@@ -101,6 +104,11 @@ namespace tremotesf {
     }
 
     void AddTorrentDialog::accept() {
+        const bool metadataOnlySupported = mAddTorrentParametersWidgets.metadataOnlyCheckBox
+                                           && mRpc->serverSettings()->data().hasForkFeature("metadata_only/v1"_L1);
+        const auto metadataOnly =
+            metadataOnlySupported ? std::optional<bool>(mAddTorrentParametersWidgets.metadataOnlyCheckBox->isChecked())
+                                  : std::nullopt;
         if (isAddingFile()) {
             if (!checkIfTorrentFileExists()) {
                 mRpc->addTorrentFile(
@@ -113,7 +121,9 @@ namespace tremotesf {
                     priorityFromComboBoxIndex(mAddTorrentParametersWidgets.priorityComboBox->currentIndex()),
                     mAddTorrentParametersWidgets.startTorrentCheckBox->isChecked(),
                     determineDeleteFileMode(mAddTorrentParametersWidgets),
-                    mEditLabelsWidget->enabledLabels()
+                    mEditLabelsWidget->enabledLabels(),
+                    mAddTorrentParametersWidgets.sequentialDownloadCheckBox->isChecked(),
+                    metadataOnly
                 );
             }
         } else {
@@ -125,7 +135,9 @@ namespace tremotesf {
                     mAddTorrentParametersWidgets.downloadDirectoryWidget->path(),
                     priorityFromComboBoxIndex(mAddTorrentParametersWidgets.priorityComboBox->currentIndex()),
                     mAddTorrentParametersWidgets.startTorrentCheckBox->isChecked(),
-                    mEditLabelsWidget->enabledLabels()
+                    mEditLabelsWidget->enabledLabels(),
+                    mAddTorrentParametersWidgets.sequentialDownloadCheckBox->isChecked(),
+                    metadataOnly
                 );
             }
         }
@@ -176,6 +188,18 @@ namespace tremotesf {
         startTorrentCheckBox->setChecked(parameters.startAfterAdding);
         layout->addRow(startTorrentCheckBox);
 
+        auto* const sequentialDownloadCheckBox = new QCheckBox(qApp->translate("tremotesf", "Download sequentially"));
+        sequentialDownloadCheckBox->setChecked(parameters.sequentialDownload);
+        layout->addRow(sequentialDownloadCheckBox);
+
+        QCheckBox* metadataOnlyCheckBox{};
+        if (!forTorrentFile) {
+            metadataOnlyCheckBox = new QCheckBox(qApp->translate("tremotesf", "Download metadata only (magnet links)"));
+            metadataOnlyCheckBox->setChecked(parameters.metadataOnly);
+            metadataOnlyCheckBox->setVisible(rpc->serverSettings()->data().hasForkFeature("metadata_only/v1"_L1));
+            layout->addRow(metadataOnlyCheckBox);
+        }
+
         QGroupBox* deleteTorrentFileGroupBox{};
         QCheckBox* moveTorrentFileToTrashCheckBox{};
         if (forTorrentFile) {
@@ -195,6 +219,8 @@ namespace tremotesf {
             .downloadDirectoryWidget = downloadDirectoryWidget,
             .priorityComboBox = priorityComboBox,
             .startTorrentCheckBox = startTorrentCheckBox,
+            .sequentialDownloadCheckBox = sequentialDownloadCheckBox,
+            .metadataOnlyCheckBox = metadataOnlyCheckBox,
             .deleteTorrentFileGroupBox = deleteTorrentFileGroupBox,
             .moveTorrentFileToTrashCheckBox = moveTorrentFileToTrashCheckBox
         };
@@ -221,7 +247,8 @@ namespace tremotesf {
         layout->addRow(mMessageWidget);
 
         if (isAddingFile()) {
-            mTorrentFilePathTextField = new QLineEdit(std::get<FileParams>(mParams).filePath, this);
+            mTorrentFilePathTextField =
+                new QLineEdit(QDir::toNativeSeparators(QDir::cleanPath(std::get<FileParams>(mParams).filePath)), this);
             mTorrentFilePathTextField->setReadOnly(true);
             //: Input field's label
             layout->addRow(qApp->translate("tremotesf", "Torrent file:"), mTorrentFilePathTextField);
@@ -299,6 +326,13 @@ namespace tremotesf {
             const auto parameters = getAddTorrentParameters(mRpc);
             mAddTorrentParametersWidgets.downloadDirectoryWidget->resetPath(parameters.downloadDirectory);
             mAddTorrentParametersWidgets.startTorrentCheckBox->setChecked(parameters.startAfterAdding);
+            mAddTorrentParametersWidgets.sequentialDownloadCheckBox->setChecked(parameters.sequentialDownload);
+            if (mAddTorrentParametersWidgets.metadataOnlyCheckBox) {
+                mAddTorrentParametersWidgets.metadataOnlyCheckBox->setChecked(parameters.metadataOnly);
+                mAddTorrentParametersWidgets.metadataOnlyCheckBox->setVisible(
+                    mRpc->serverSettings()->data().hasForkFeature("metadata_only/v1"_L1)
+                );
+            }
         }
 
         for (int i = 1, max = layout()->count(); i < max; ++i) {
@@ -471,6 +505,10 @@ namespace tremotesf {
 
         );
         startTorrentCheckBox->setChecked(initialParameters.startAfterAdding);
+        sequentialDownloadCheckBox->setChecked(initialParameters.sequentialDownload);
+        if (metadataOnlyCheckBox) {
+            metadataOnlyCheckBox->setChecked(initialParameters.metadataOnly);
+        }
         if (deleteTorrentFileGroupBox) {
             deleteTorrentFileGroupBox->setChecked(initialParameters.deleteTorrentFile);
             moveTorrentFileToTrashCheckBox->setChecked(initialParameters.moveTorrentFileToTrash);
@@ -482,10 +520,13 @@ namespace tremotesf {
         auto* const settings = Settings::instance();
         settings->set_lastAddTorrentPriority(priorityFromComboBoxIndex(priorityComboBox->currentIndex()));
         settings->set_lastAddTorrentStartAfterAdding(startTorrentCheckBox->isChecked());
+        settings->set_lastAddTorrentSequentialDownload(sequentialDownloadCheckBox->isChecked());
+        if (metadataOnlyCheckBox) {
+            settings->set_lastAddTorrentMetadataOnly(metadataOnlyCheckBox->isChecked());
+        }
         if (deleteTorrentFileGroupBox) {
             settings->set_lastAddTorrentDeleteTorrentFile(deleteTorrentFileGroupBox->isChecked());
             settings->set_lastAddTorrentMoveTorrentFileToTrash(moveTorrentFileToTrashCheckBox->isChecked());
         }
     }
-
 }

@@ -75,7 +75,7 @@ namespace tremotesf {
         totalGroupBoxLayout->addRow(qApp->translate("tremotesf", "Free space in download directory:"), freeSpaceField);
         auto* freeSpaceLabel = qobject_cast<QLabel*>(totalGroupBoxLayout->labelForField(freeSpaceField));
         freeSpaceLabel->setWordWrap(true);
-        freeSpaceLabel->setAlignment(Qt::AlignTrailing | Qt::AlignVCenter);
+        freeSpaceLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
         layout->addWidget(totalGroupBox);
 

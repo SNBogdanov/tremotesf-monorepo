@@ -55,6 +55,8 @@ namespace tremotesf {
             TorrentDownloadDirectoryDirectorySelectionWidget* downloadDirectoryWidget;
             QComboBox* priorityComboBox;
             QCheckBox* startTorrentCheckBox;
+            QCheckBox* sequentialDownloadCheckBox;
+            QCheckBox* metadataOnlyCheckBox;
             QGroupBox* deleteTorrentFileGroupBox;
             QCheckBox* moveTorrentFileToTrashCheckBox;
 

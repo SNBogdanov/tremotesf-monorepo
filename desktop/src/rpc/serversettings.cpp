@@ -22,6 +22,7 @@ namespace tremotesf {
         constexpr auto trashTorrentFilesKey = "trash-original-torrent-files"_L1;
         constexpr auto startAddedTorrentsKey = "start-added-torrents"_L1;
         constexpr auto renameIncompleteFilesKey = "rename-partial-files"_L1;
+        constexpr auto sequentialDownloadKey = "sequential_download"_L1;
         constexpr auto incompleteDirectoryEnabledKey = "incomplete-dir-enabled"_L1;
         constexpr auto incompleteDirectoryKey = "incomplete-dir"_L1;
 
@@ -112,9 +113,9 @@ namespace tremotesf {
 
         constexpr auto autoPrioritySortMapper = EnumMapper(
             std::array{
-                EnumMapping(ServerSettingsData::AutoPrioritySort::Id, 0),
-                EnumMapping(ServerSettingsData::AutoPrioritySort::Name, 1),
-                EnumMapping(ServerSettingsData::AutoPrioritySort::Size, 2)
+                EnumMapping(ServerSettingsData::AutoPrioritySort::Id, "id"_L1),
+                EnumMapping(ServerSettingsData::AutoPrioritySort::Name, "name"_L1),
+                EnumMapping(ServerSettingsData::AutoPrioritySort::Size, "size"_L1)
             }
         );
     }
@@ -132,7 +133,13 @@ namespace tremotesf {
     bool ServerSettingsData::hasLabelsProperty() const { return (rpcVersion >= 16); }
 
     bool ServerSettingsData::hasForkFeature(QLatin1String feature) const {
-        return forkFeatures.contains(feature.toString());
+        const QString name = feature.toString();
+        for (const auto& forkFeature : forkFeatures) {
+            if (forkFeature == name || forkFeature.startsWith(name + u'/')) {
+                return true;
+            }
+        }
+        return false;
     }
 
     ServerSettings::ServerSettings(Rpc* rpc, QObject* parent) : QObject(parent), mRpc(rpc), mSaveOnSet(true) {}
@@ -164,6 +171,13 @@ namespace tremotesf {
         mData.renameIncompleteFiles = rename;
         if (mSaveOnSet) {
             mRpc->setSessionProperty(renameIncompleteFilesKey, mData.renameIncompleteFiles);
+        }
+    }
+
+    void ServerSettings::setSequentialDownload(bool enabled) {
+        mData.sequentialDownload = enabled;
+        if (mSaveOnSet) {
+            mRpc->setSessionProperty(sequentialDownloadKey, mData.sequentialDownload);
         }
     }
 
@@ -538,6 +552,12 @@ namespace tremotesf {
         setChanged(mData.trashTorrentFiles, serverSettings.value(trashTorrentFilesKey).toBool(), changed);
         setChanged(mData.startAddedTorrents, serverSettings.value(startAddedTorrentsKey).toBool(), changed);
         setChanged(mData.renameIncompleteFiles, serverSettings.value(renameIncompleteFilesKey).toBool(), changed);
+        mData.hasSequentialDownload = serverSettings.contains(sequentialDownloadKey);
+        setChanged(
+            mData.sequentialDownload,
+            mData.hasSequentialDownload && serverSettings.value(sequentialDownloadKey).toBool(),
+            changed
+        );
         setChanged(
             mData.incompleteDirectoryEnabled,
             serverSettings.value(incompleteDirectoryEnabledKey).toBool(),
@@ -675,6 +695,7 @@ namespace tremotesf {
              {trashTorrentFilesKey, mData.trashTorrentFiles},
              {startAddedTorrentsKey, mData.startAddedTorrents},
              {renameIncompleteFilesKey, mData.renameIncompleteFiles},
+             {sequentialDownloadKey, mData.sequentialDownload},
              {incompleteDirectoryEnabledKey, mData.incompleteDirectoryEnabled},
              {incompleteDirectoryKey, mData.incompleteDirectory},
 

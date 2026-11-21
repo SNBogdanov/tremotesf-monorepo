@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.plugin.compose)
     alias(libs.plugins.kotlin.plugin.parcelize)
+    alias(libs.plugins.kotlin.plugin.serialization)
     alias(libs.plugins.tremotesf.common.settings)
 }
 
@@ -110,6 +111,7 @@ dependencies {
 
     implementation(libs.composeGrid)
     implementation(libs.timber)
+    implementation(libs.serialization.json)
     implementation(libs.serialization.json.okio)
     implementation(libs.lazycolumnscrollbar)
 

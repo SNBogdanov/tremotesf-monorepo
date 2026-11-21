@@ -5,6 +5,7 @@
 #ifndef TREMOTESF_SERVERSETTINGSDIALOG_H
 #define TREMOTESF_SERVERSETTINGSDIALOG_H
 
+#include <QChar>
 #include <QDialog>
 
 class QCheckBox;
@@ -12,8 +13,9 @@ class QComboBox;
 class QDoubleSpinBox;
 class QGroupBox;
 class QLineEdit;
-class QPlainTextEdit;
+class QPushButton;
 class QSpinBox;
+class QTableWidget;
 class QTimeEdit;
 
 class KMessageWidget;
@@ -26,20 +28,25 @@ namespace tremotesf {
         Q_OBJECT
 
     public:
-        explicit ServerSettingsDialog(const Rpc* rpc, QWidget* parent = nullptr);
+        explicit ServerSettingsDialog(Rpc* rpc, QWidget* parent = nullptr);
         void accept() override;
 
     private:
         void setupUi();
         void loadSettings();
 
-        const Rpc* mRpc;
+        void addMinFreeSpaceRow(const QString& path = {}, quint64 value = 0, QChar unit = u'G');
+        void removeSelectedMinFreeSpaceRows();
+        void updateMinFreeSpaceFreeSpace(int row);
+
+        Rpc* mRpc;
 
         KMessageWidget* mDisconnectedMessageWidget = nullptr;
 
         QWidget* mDownloadingPageWidget = nullptr;
         RemoteDirectorySelectionWidget* mDownloadDirectoryWidget = nullptr;
         QCheckBox* mStartAddedTorrentsCheckBox = nullptr;
+        QCheckBox* mSequentialDownloadCheckBox = nullptr;
         QCheckBox* mIncompleteFilesCheckBox = nullptr;
         QCheckBox* mIncompleteDirectoryCheckBox = nullptr;
         RemoteDirectorySelectionWidget* mIncompleteDirectoryWidget = nullptr;
@@ -63,7 +70,9 @@ namespace tremotesf {
         QCheckBox* mQueueMoveToEndCheckBox = nullptr;
         QSpinBox* mQueueMoveToEndMinutesSpinBox = nullptr;
 
-        QPlainTextEdit* mMinFreeSpaceEdit = nullptr;
+        QTableWidget* mMinFreeSpaceTable = nullptr;
+        QPushButton* mAddMinFreeSpaceButton = nullptr;
+        QPushButton* mRemoveMinFreeSpaceButton = nullptr;
         QLineEdit* mMinFreeSpaceResumeMarginEdit = nullptr;
         QCheckBox* mMoveCompletedTorrentsCheckBox = nullptr;
         QCheckBox* mMovePartialFilesCheckBox = nullptr;

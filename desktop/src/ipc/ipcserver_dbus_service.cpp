@@ -45,7 +45,7 @@ namespace tremotesf {
         new OrgFreedesktopApplicationAdaptor(this);
 
         auto connection(QDBusConnection::sessionBus());
-        if (connection.registerService(IpcServerDbus::serviceName)) {
+        if (connection.registerService(IpcServerDbus::serviceName())) {
             info().log("Registered D-Bus service");
             if (connection.registerObject(IpcServerDbus::objectPath, this)) {
                 info().log("Registered D-Bus object");

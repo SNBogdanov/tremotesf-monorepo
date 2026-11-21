@@ -153,6 +153,11 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <!-- e.g. "100 MB of 200 MB (50%)" -->
     <string name="completed_string">%1$s из %2$s (%3$s%%)</string>
+    <!-- e.g. "100 MB of 200 MB" -->
+    <string name="size_of_size">%1$s из %2$s</string>
+    <!-- e.g. "100 MB (Ratio: 0.50)" -->
+    <string name="uploaded_with_ratio">%1$s (%2$s: %3$s)</string>
+    <string name="eta_unknown">Оставшееся время неизвестно</string>
 
     <string name="priority">Приоритет</string>
     <string name="high_priority">Высокий</string>
@@ -306,7 +311,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <string name="current_session">Текущая сессия</string>
     <string name="total">Всего</string>
-    <string name="duration">Продолжительность</string>
+    <string name="duration">Длительность</string>
     <string name="close">Закрыть</string>
     <string name="server_stats">Статистика сервера</string>
 
@@ -547,7 +552,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <string name="load_from_file">Загрузить из файла</string>
 
-    <string name="free_space_in_download_directory">Свободное место в каталоге загрузки</string>
+    <string name="free_space_in_download_directory">Свободное место</string>
+    <string name="free_space_by_paths">Свободное место по путям</string>
+    <string name="free_space_with_limit">Свободно: %1$s (%2$s)</string>
 
     <string name="reset">Сбросить</string>
 
@@ -598,7 +605,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="disable_auto_priority">Отключить автоматический приоритет</string>
     <string name="torrent_auto_priority_error">Не удалось изменить автоматический приоритет</string>
     <string name="auto_priority">Автоматически приоритизировать торренты</string>
-    <string name="auto_priority_max_high">Максимум торрентов с высоким приоритетом</string>
+    <string name="auto_priority_max_high">Максимальное количество файлов с высоким приоритетом в торренте</string>
     <string name="queue_move_to_end">Переносить неактивные загрузки в конец очереди</string>
     <string name="min_free_space">Минимум свободного места (path=size, по одному правилу на строку)</string>
     <string name="min_free_space_resume_margin">Запас свободного места для возобновления</string>
@@ -612,4 +619,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="incomplete_directory">Каталог незавершённых</string>
     <string name="move_incomplete_data">Переместить существующие незавершённые данные</string>
     <string name="torrent_set_incomplete_dir_error">Не удалось изменить каталог незавершённых</string>
-</resources>
+'
+    <string name="backup">Резервная копия</string>
+    <string name="backup_export">Экспорт настроек</string>
+    <string name="backup_restore">Импорт настроек</string>
+    <string name="backup_export_success">Настройки экспортированы</string>
+    <string name="backup_restore_success">Настройки импортированы. Перезапустите Tremotesf, чтобы применить все изменения.</string>
+    <string name="backup_error">Не удалось выполнить операцию: %1$s</string>
+    <string name="backup_warning">Файл резервной копии содержит пароли серверов и другие конфиденциальные данные.</string>
+'</resources>

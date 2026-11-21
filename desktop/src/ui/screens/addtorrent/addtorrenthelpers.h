@@ -20,6 +20,8 @@ namespace tremotesf {
         QString downloadDirectory;
         TorrentData::Priority priority;
         bool startAfterAdding;
+        bool sequentialDownload;
+        bool metadataOnly;
         bool deleteTorrentFile;
         bool moveTorrentFileToTrash;
     };

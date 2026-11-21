@@ -148,6 +148,11 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <!-- e.g. "100 MB of 200 MB (50%)" -->
     <string name="completed_string">%1$s of %2$s (%3$s%%)</string>
+    <!-- e.g. "100 MB of 200 MB" -->
+    <string name="size_of_size">%1$s of %2$s</string>
+    <!-- e.g. "100 MB (Ratio: 0.50)" -->
+    <string name="uploaded_with_ratio">%1$s (%2$s: %3$s)</string>
+    <string name="eta_unknown">Remaining time unknown</string>
 
     <string name="priority">Priority</string>
     <string name="high_priority">High</string>
@@ -274,7 +279,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="maximum_active_uploads">Maximum active uploads</string>
     <string name="ignore_queue">Ignore queue position if idle for</string>
     <string name="auto_priority">Automatically prioritize torrents</string>
-    <string name="auto_priority_max_high">Maximum torrents with high priority</string>
+    <string name="auto_priority_max_high">Maximum files with high priority per torrent</string>
     <string name="queue_move_to_end">Move inactive downloads to the end of the queue</string>
     <string name="alternative_limits">Alternative limits</string>
     <string name="enable">Enable</string>
@@ -547,7 +552,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <string name="load_from_file">Load from file</string>
 
-    <string name="free_space_in_download_directory">Free space in download directory</string>
+    <string name="free_space_in_download_directory">Free space (downloads)</string>
+    <string name="free_space_by_paths">Free space by paths</string>
+    <string name="free_space_with_limit">Free: %1$s (%2$s)</string>
 
     <!--    Override BottomSheetDialog's BottomSheetBehavior-->
     <string name="bottom_sheet_behavior" translatable="false" tools:keep="@string/bottom_sheet_behavior">org.equeim.tremotesf.ui.ExpandedBottomSheetBehavior</string>
@@ -591,4 +598,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="sort_order">Sort order:</string>
     <string name="ascending">Ascending</string>
     <string name="descending">Descending</string>
-</resources>
+'
+    <string name="backup">Backup</string>
+    <string name="backup_export">Export settings</string>
+    <string name="backup_restore">Import settings</string>
+    <string name="backup_export_success">Settings exported</string>
+    <string name="backup_restore_success">Settings imported. Restart Tremotesf to apply all changes.</string>
+    <string name="backup_error">Backup failed: %1$s</string>
+    <string name="backup_warning">The backup file contains server passwords and other sensitive data.</string>
+'</resources>

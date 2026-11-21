@@ -389,6 +389,8 @@ private fun SettingsScreen(navigateUp: () -> Unit, properties: SettingsScreenVie
                 modifier = Modifier.fillMaxWidth(),
                 horizontalContentPadding = horizontalPadding
             )
+
+            SettingsBackupSection(horizontalPadding)
         }
     }
 }

@@ -216,7 +216,7 @@ namespace tremotesf {
                     qApp->translate("tremotesf", "&Start")
                 );
                 QAction* const startNowAction = menu.addAction(
-                    QIcon::fromTheme("media-playback-start"_L1),
+                    QIcon::fromTheme("media-playback-start-now"_L1, QIcon::fromTheme("media-playback-start"_L1)),
                     //: Context menu item to start torrents that match the selected filter immediately
                     qApp->translate("tremotesf", "Start &Now")
                 );

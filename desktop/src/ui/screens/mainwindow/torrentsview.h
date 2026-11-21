@@ -8,6 +8,7 @@
 #include <QTreeView>
 
 class QEvent;
+class QKeyEvent;
 class QShowEvent;
 
 namespace tremotesf {
@@ -24,12 +25,17 @@ namespace tremotesf {
 
     protected:
         bool event(QEvent* event) override;
+        void changeEvent(QEvent* event) override;
+        void keyPressEvent(QKeyEvent* event) override;
         void showEvent(QShowEvent* event) override;
 
     private:
         void updateIconSize();
+        void updateAlternateRowColor();
+        void ensureSelection();
 
         bool mScreenChangeConnected = false;
+        int mRowToSelectAfterRemoval = -1;
     };
 }
 

@@ -36,11 +36,41 @@ namespace tremotesf {
 
     int TorrentsModel::columnCount(const QModelIndex&) const { return QMetaEnum::fromType<Column>().keyCount(); }
 
+    Qt::ItemFlags TorrentsModel::flags(const QModelIndex& index) const {
+        auto flags = QAbstractTableModel::flags(index);
+        if (index.isValid() && static_cast<Column>(index.column()) == Column::Name) {
+            flags |= Qt::ItemIsEditable;
+        }
+        return flags;
+    }
+
+    bool TorrentsModel::setData(const QModelIndex& index, const QVariant& value, int role) {
+        if (!index.isValid() || role != Qt::EditRole || static_cast<Column>(index.column()) != Column::Name) {
+            return false;
+        }
+        const auto newName = value.toString().trimmed();
+        if (newName.isEmpty()) {
+            return false;
+        }
+        auto* const torrent = torrentAtIndex(index);
+        if (!torrent || torrent->data().name == newName) {
+            return false;
+        }
+        torrent->renameFile(torrent->data().name, newName);
+        return true;
+    }
+
     QVariant TorrentsModel::data(const QModelIndex& index, int role) const {
         if (!index.isValid()) {
             return {};
         }
         const auto* const torrent = mRpc->torrents().at(static_cast<size_t>(index.row())).get();
+        if (role == Qt::EditRole) {
+            if (static_cast<Column>(index.column()) == Column::Name) {
+                return torrent->data().name;
+            }
+            return {};
+        }
         switch (role) {
         case Qt::DecorationRole:
             switch (static_cast<Column>(index.column())) {
@@ -93,10 +123,13 @@ namespace tremotesf {
                 case TorrentData::Status::Checking:
                     return statusIcon(Checking);
                 case TorrentData::Status::PausedDueToSpace:
+                    return statusIcon(PausedDueToSpace);
                 case TorrentData::Status::WaitingForSpaceToMove:
+                    return statusIcon(WaitingForSpaceToMove);
                 case TorrentData::Status::RunningScript:
+                    return statusIcon(RunningScript);
                 case TorrentData::Status::Moving:
-                    return statusIcon(Waiting);
+                    return statusIcon(Moving);
                 }
                 break;
             }
@@ -129,6 +162,10 @@ namespace tremotesf {
                     return formatutils::formatProgress(torrent->data().recheckProgress);
                 }
                 return formatutils::formatProgress(torrent->data().percentDone);
+            case Column::Id:
+                return torrent->data().id;
+            case Column::WantedSize:
+                return formatutils::formatByteSize(torrent->data().sizeWhenDone);
             case Column::Status: {
                 switch (torrent->data().status) {
                 case TorrentData::Status::Paused:
@@ -312,6 +349,10 @@ namespace tremotesf {
                 return torrent->data().completedSize;
             case Column::ActivityDate:
                 return torrent->data().activityDate;
+            case Column::Id:
+                return torrent->data().id;
+            case Column::WantedSize:
+                return torrent->data().sizeWhenDone;
             default:
                 return data(index, Qt::DisplayRole);
             }
@@ -404,6 +445,12 @@ namespace tremotesf {
         case Column::ActivityDate:
             //: Torrents list column name
             return qApp->translate("tremotesf", "Last Activity");
+        case Column::Id:
+            //: Torrents list column name
+            return qApp->translate("tremotesf", "ID");
+        case Column::WantedSize:
+            //: Torrents list column name, total size of files selected for downloading
+            return qApp->translate("tremotesf", "Selected size");
         default:
             return {};
         }

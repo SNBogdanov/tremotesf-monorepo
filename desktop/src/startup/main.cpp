@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include <algorithm>
 #include <utility>
 
 #include <QApplication>
@@ -17,6 +18,8 @@
 #include "signalhandler.h"
 #include "ipc/ipcclient.h"
 #include "log/log.h"
+#include "rpc/servers.h"
+#include "startup/appprofile.h"
 #include "ui/iconthemesetup.h"
 #include "ui/savewindowstatedispatcher.h"
 #include "ui/screens/mainwindow/mainwindow.h"
@@ -108,11 +111,6 @@ namespace {
 }
 
 int main(int argc, char** argv) {
-    // This does not need QApplication instance, and we need it in windowsInitPrelude()
-    QCoreApplication::setOrganizationName(TREMOTESF_EXECUTABLE_NAME ""_L1);
-    QCoreApplication::setApplicationName(QCoreApplication::organizationName());
-    QCoreApplication::setApplicationVersion(TREMOTESF_VERSION ""_L1);
-
     //
     // Command line parsing
     //
@@ -126,6 +124,20 @@ int main(int argc, char** argv) {
         warning().logWithException(e, "Failed to parse command line arguments");
         return EXIT_FAILURE;
     }
+
+    if (!args.profile.isEmpty()) {
+        setProfileName(args.profile);
+    }
+
+    // Organization name isolates settings, server list and logs between profiles
+    QString organizationName = TREMOTESF_EXECUTABLE_NAME ""_L1;
+    if (!args.profile.isEmpty()) {
+        organizationName += '-';
+        organizationName += args.profile;
+    }
+    QCoreApplication::setOrganizationName(organizationName);
+    QCoreApplication::setApplicationName(TREMOTESF_EXECUTABLE_NAME ""_L1);
+    QCoreApplication::setApplicationVersion(TREMOTESF_VERSION ""_L1);
 
     if (args.enableDebugLogs.has_value()) {
         overrideDebugLogs(*args.enableDebugLogs);
@@ -154,6 +166,16 @@ int main(int argc, char** argv) {
 
     if (shouldExitBecauseAnotherInstanceIsRunning(args)) {
         return EXIT_SUCCESS;
+    }
+
+    if (!args.serverName.isEmpty()) {
+        auto* const servers = Servers::instance();
+        const auto serversList = servers->servers();
+        if (std::ranges::any_of(serversList, [&args](const Server& server) { return server.name == args.serverName; })) {
+            servers->setCurrentServer(args.serverName);
+        } else {
+            warning().log("Server '{}' not found in profile '{}'", args.serverName, args.profile);
+        }
     }
 
     QGuiApplication::setQuitOnLastWindowClosed(false);

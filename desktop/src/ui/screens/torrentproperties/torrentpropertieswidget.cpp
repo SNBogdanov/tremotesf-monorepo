@@ -4,6 +4,7 @@
 
 #include "torrentpropertieswidget.h"
 
+#include <algorithm>
 #include <array>
 
 #include <fmt/format.h>
@@ -42,6 +43,7 @@
 #include "rpc/torrent.h"
 #include "ui/itemmodels/baseproxymodel.h"
 #include "ui/itemmodels/stringlistmodel.h"
+#include "ui/itemmodels/torrentfilesproxymodel.h"
 #include "ui/stylehelpers.h"
 #include "ui/widgets/basetreeview.h"
 #include "ui/widgets/progressbardelegate.h"
@@ -81,6 +83,65 @@ namespace tremotesf {
 
         auto filesTab = new QWidget(this);
         auto filesTabLayout = new QVBoxLayout(filesTab);
+
+        auto filesFilterLayout = new QHBoxLayout();
+        filesFilterLayout->addWidget(new QLabel(qApp->translate("tremotesf", "Show:"), this));
+        auto filesFilterComboBox = new QComboBox(this);
+        using FilterMode = TorrentFilesProxyModel::FilterMode;
+        filesFilterComboBox->addItem(qApp->translate("tremotesf", "All files"), static_cast<int>(FilterMode::All));
+        filesFilterComboBox->addItem(
+            qApp->translate("tremotesf", "Downloaded files"),
+            static_cast<int>(FilterMode::Downloaded)
+        );
+        filesFilterComboBox->addItem(
+            qApp->translate("tremotesf", "Not downloaded files"),
+            static_cast<int>(FilterMode::NotDownloaded)
+        );
+        filesFilterLayout->addWidget(filesFilterComboBox);
+
+        filesFilterLayout->addWidget(new QLabel(qApp->translate("tremotesf", "Priority:"), this));
+        auto highPriorityCheckBox = new QCheckBox(qApp->translate("tremotesf", "High"), this);
+        auto normalPriorityCheckBox = new QCheckBox(qApp->translate("tremotesf", "Normal"), this);
+        auto lowPriorityCheckBox = new QCheckBox(qApp->translate("tremotesf", "Low"), this);
+        for (auto* checkBox : {highPriorityCheckBox, normalPriorityCheckBox, lowPriorityCheckBox}) {
+            checkBox->setChecked(true);
+            filesFilterLayout->addWidget(checkBox);
+        }
+        const auto updatePriorityFilter = [=, this] {
+            int mask = 0;
+            if (highPriorityCheckBox->isChecked()) {
+                mask |= TorrentFilesProxyModel::PriorityHigh;
+            }
+            if (normalPriorityCheckBox->isChecked()) {
+                mask |= TorrentFilesProxyModel::PriorityNormal;
+            }
+            if (lowPriorityCheckBox->isChecked()) {
+                mask |= TorrentFilesProxyModel::PriorityLow;
+            }
+            mFilesView->proxyModel()->setPriorityFilter(mask);
+        };
+        for (auto* checkBox : {highPriorityCheckBox, normalPriorityCheckBox, lowPriorityCheckBox}) {
+            QObject::connect(checkBox, &QCheckBox::toggled, this, updatePriorityFilter);
+        }
+
+        auto showUnwantedFilesCheckBox = new QCheckBox(qApp->translate("tremotesf", "Show unwanted files"), this);
+        showUnwantedFilesCheckBox->setChecked(true);
+        filesFilterLayout->addWidget(showUnwantedFilesCheckBox);
+        filesFilterLayout->addStretch();
+        filesTabLayout->addLayout(filesFilterLayout);
+
+        QObject::connect(filesFilterComboBox, &QComboBox::currentIndexChanged, this, [=, this](int index) {
+            mFilesView->proxyModel()->setFilterMode(
+                static_cast<FilterMode>(filesFilterComboBox->itemData(index).toInt())
+            );
+        });
+        QObject::connect(
+            showUnwantedFilesCheckBox,
+            &QCheckBox::toggled,
+            mFilesView->proxyModel(),
+            &TorrentFilesProxyModel::setShowUnwanted
+        );
+
         filesTabLayout->addWidget(mFilesView);
         overrideBreezeFramelessScrollAreaHeuristic(mFilesView, true);
         //: Torrent properties dialog tab
@@ -201,7 +262,9 @@ namespace tremotesf {
         infoGroupBoxLayout->addRow(qApp->translate("tremotesf", "Created on:"), creationDateLabel);
         auto commentTextEdit = new QTextBrowser(this);
         commentTextEdit->setOpenExternalLinks(true);
-        commentTextEdit->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+        commentTextEdit->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
+        // Show a few lines by default, longer comments are scrollable
+        commentTextEdit->setFixedHeight(commentTextEdit->fontMetrics().lineSpacing() * 4 + 8);
         //: Torrent's comment text
         infoGroupBoxLayout->addRow(qApp->translate("tremotesf", "Comment:"), commentTextEdit);
 
@@ -219,12 +282,16 @@ namespace tremotesf {
         auto labelsModel = new StringListModel({}, QIcon::fromTheme("tag"_L1), this);
         auto labelsProxyModel = new BaseProxyModel(labelsModel, Qt::DisplayRole, std::nullopt, this);
         auto labelsView = new QListView(this);
-        labelsView->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+        labelsView->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
         labelsView->setFlow(QListView::LeftToRight);
         labelsView->setWrapping(true);
         labelsView->setResizeMode(QListView::Adjust);
         labelsView->setIconSize(QSize(16, 16));
         labelsView->setModel(labelsProxyModel);
+        // Show at most two rows of labels, more labels are scrollable
+        const int labelsRowHeight =
+            std::max(labelsView->fontMetrics().lineSpacing(), labelsView->iconSize().height()) + 4;
+        labelsView->setFixedHeight(labelsRowHeight * 2 + labelsView->frameWidth() * 2 + labelsView->spacing());
         //: Torrent's labels
         infoGroupBoxLayout->addRow(qApp->translate("tremotesf", "Labels:"), labelsView);
         auto labelsLabel = infoGroupBoxLayout->labelForField(labelsView);

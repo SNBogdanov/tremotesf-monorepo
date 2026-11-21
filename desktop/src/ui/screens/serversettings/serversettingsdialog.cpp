@@ -5,7 +5,9 @@
 #include "serversettingsdialog.h"
 
 #include <array>
+#include <optional>
 
+#include <QAbstractItemView>
 #include <QCoreApplication>
 #include <QDialogButtonBox>
 #include <QDoubleSpinBox>
@@ -15,10 +17,12 @@
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
+#include <QHeaderView>
 #include <QIcon>
 #include <QLabel>
 #include <QLineEdit>
-#include <QPlainTextEdit>
+#include <QPushButton>
+#include <QTableWidget>
 #include <QTimeEdit>
 #include <QVBoxLayout>
 
@@ -28,7 +32,11 @@
 #include <KPageWidget>
 
 #include "stdutils.h"
+#include "formatutils.h"
+#include "log/log.h"
 #include "rpc/numbervaluerange.h"
+#include "settings.h"
+#include "rpc/pathutils.h"
 #include "rpc/rpc.h"
 #include "rpc/serversettings.h"
 #include "ui/widgets/remotedirectoryselectionwidget.h"
@@ -37,6 +45,66 @@ using namespace Qt::StringLiterals;
 
 namespace tremotesf {
     namespace {
+        struct ParsedSize {
+            quint64 value{};
+            QChar unit = u'B';
+        };
+
+        std::optional<ParsedSize> parseSize(const QString& text) {
+            const auto trimmed = text.trimmed();
+            if (trimmed.isEmpty()) {
+                return std::nullopt;
+            }
+            int digits = 0;
+            while (digits < trimmed.size() && trimmed[digits].isDigit()) {
+                ++digits;
+            }
+            if (digits == 0) {
+                return std::nullopt;
+            }
+            bool ok = false;
+            const auto value = trimmed.left(digits).toULongLong(&ok);
+            if (!ok) {
+                return std::nullopt;
+            }
+            const auto suffix = trimmed.mid(digits).trimmed().toUpper();
+            QChar unit = u'B';
+            if (!suffix.isEmpty()) {
+                const QChar first = suffix.front();
+                if (first == u'B') {
+                    unit = u'B';
+                } else if (first == u'K' || first == u'M' || first == u'G' || first == u'T') {
+                    unit = first;
+                } else {
+                    return std::nullopt;
+                }
+            }
+            return ParsedSize{value, unit};
+        }
+
+        QString unitLabel(QChar unit) {
+            switch (unit.unicode()) {
+            case u'B':
+                //: Size unit, bytes
+                return qApp->translate("tremotesf", "B");
+            case u'K':
+                //: Size unit, kilobytes (1024 bytes)
+                return qApp->translate("tremotesf", "KB");
+            case u'M':
+                //: Size unit, megabytes (1024^2 bytes)
+                return qApp->translate("tremotesf", "MB");
+            case u'G':
+                //: Size unit, gigabytes (1024^3 bytes)
+                return qApp->translate("tremotesf", "GB");
+            case u'T':
+                //: Size unit, terabytes (1024^4 bytes)
+                return qApp->translate("tremotesf", "TB");
+            default:
+                return QString(unit) + QStringLiteral("B");
+            }
+        }
+
+        constexpr std::array sizeUnits{u'B', u'K', u'M', u'G', u'T'};
         constexpr std::array encryptionModeComboBoxItems{
             ServerSettingsData::EncryptionMode::Allowed,
             ServerSettingsData::EncryptionMode::Preferred,
@@ -51,12 +119,19 @@ namespace tremotesf {
         }
     }
 
-    ServerSettingsDialog::ServerSettingsDialog(const Rpc* rpc, QWidget* parent) : QDialog(parent), mRpc(rpc) {
+    ServerSettingsDialog::ServerSettingsDialog(Rpc* rpc, QWidget* parent) : QDialog(parent), mRpc(rpc) {
         //: Dialog title
         setWindowTitle(qApp->translate("tremotesf", "Server Options"));
 
         setupUi();
-        resize(sizeHint().expandedTo(QSize(700, 550)));
+        if (!restoreGeometry(Settings::instance()->get_serverSettingsDialogGeometry())) {
+            resize(sizeHint().expandedTo(QSize(700, 550)));
+        }
+        if (mMinFreeSpaceTable) {
+            mMinFreeSpaceTable->horizontalHeader()->restoreState(
+                Settings::instance()->get_minFreeSpaceTableHeaderState()
+            );
+        }
 
         const auto onConnectedChanged = [this] {
             if (mRpc->isConnected()) {
@@ -81,7 +156,77 @@ namespace tremotesf {
         QObject::connect(mRpc, &Rpc::connectedChanged, this, onConnectedChanged);
         onConnectedChanged();
 
-        loadSettings();
+        QObject::connect(this, &QDialog::finished, this, [this] {
+            Settings::instance()->set_serverSettingsDialogGeometry(saveGeometry());
+            Settings::instance()->set_minFreeSpaceTableHeaderState(
+                mMinFreeSpaceTable->horizontalHeader()->saveState()
+            );
+        });
+    }
+
+    void ServerSettingsDialog::addMinFreeSpaceRow(const QString& path, quint64 value, QChar unit) {
+        const int row = mMinFreeSpaceTable->rowCount();
+        mMinFreeSpaceTable->insertRow(row);
+        mMinFreeSpaceTable->setItem(row, 0, new QTableWidgetItem(path));
+        mMinFreeSpaceTable->setItem(row, 1, new QTableWidgetItem(QString::number(value)));
+        auto* const unitComboBox = new QComboBox(mMinFreeSpaceTable);
+        for (const auto sizeUnit : sizeUnits) {
+            unitComboBox->addItem(unitLabel(sizeUnit), QString(sizeUnit));
+        }
+        const int unitIndex = unitComboBox->findData(QString(unit));
+        unitComboBox->setCurrentIndex(unitIndex >= 0 ? unitIndex : unitComboBox->findData(QStringLiteral("G")));
+        mMinFreeSpaceTable->setCellWidget(row, 2, unitComboBox);
+        auto* const freeSpaceItem = new QTableWidgetItem();
+        freeSpaceItem->setFlags(freeSpaceItem->flags() & ~Qt::ItemIsEditable);
+        mMinFreeSpaceTable->setItem(row, 3, freeSpaceItem);
+    }
+
+    void ServerSettingsDialog::removeSelectedMinFreeSpaceRows() {
+        const auto selectedRows = mMinFreeSpaceTable->selectionModel()->selectedRows();
+        for (auto iterator = selectedRows.crbegin(), end = selectedRows.crend(); iterator != end; ++iterator) {
+            mMinFreeSpaceTable->removeRow(iterator->row());
+        }
+    }
+
+    void ServerSettingsDialog::updateMinFreeSpaceFreeSpace(int row) {
+        if (row < 0 || row >= mMinFreeSpaceTable->rowCount()) {
+            return;
+        }
+        const auto* const pathItem = mMinFreeSpaceTable->item(row, 0);
+        auto* const freeSpaceItem = mMinFreeSpaceTable->item(row, 3);
+        if (!pathItem || !freeSpaceItem) {
+            return;
+        }
+        const auto path = pathItem->text().trimmed();
+        if (path.isEmpty()) {
+            freeSpaceItem->setText({});
+            return;
+        }
+        freeSpaceItem->setText(QStringLiteral("…"));
+        const auto serverPath = normalizePath(path, mRpc->serverSettings()->data().pathOs);
+        info().log("Min free space: requesting for row {} path '{}' (server path '{}')", row, path, serverPath);
+        mRpc->requestFreeSpaceForPath(serverPath, this, [this, row, path](std::optional<qint64> freeSpace) {
+            info().log(
+                "Min free space: row {} path '{}' result {}",
+                row,
+                path,
+                freeSpace ? QString::number(*freeSpace) : QStringLiteral("nullopt")
+            );
+            if (row >= mMinFreeSpaceTable->rowCount()) {
+                return;
+            }
+            const auto* const currentPathItem = mMinFreeSpaceTable->item(row, 0);
+            if (!currentPathItem || currentPathItem->text().trimmed() != path) {
+                return;
+            }
+            auto* const currentFreeSpaceItem = mMinFreeSpaceTable->item(row, 3);
+            if (!currentFreeSpaceItem) {
+                return;
+            }
+            currentFreeSpaceItem->setText(
+                freeSpace ? formatutils::formatByteSize(*freeSpace) : qApp->translate("tremotesf", "Error")
+            );
+        });
     }
 
     void ServerSettingsDialog::accept() {
@@ -91,6 +236,9 @@ namespace tremotesf {
 
         settings->setDownloadDirectory(mDownloadDirectoryWidget->path());
         settings->setStartAddedTorrents(mStartAddedTorrentsCheckBox->isChecked());
+        if (settings->data().hasSequentialDownload) {
+            settings->setSequentialDownload(mSequentialDownloadCheckBox->isChecked());
+        }
         //settings->setTrashTorrentFiles(mTrashTorrentFilesCheckBox->isChecked());
         settings->setRenameIncompleteFiles(mIncompleteFilesCheckBox->isChecked());
         settings->setIncompleteDirectoryEnabled(mIncompleteDirectoryCheckBox->isChecked());
@@ -115,10 +263,23 @@ namespace tremotesf {
         settings->setQueueMoveToEndEnabled(mQueueMoveToEndCheckBox->isChecked());
         settings->setQueueMoveToEndMinutes(mQueueMoveToEndMinutesSpinBox->value());
         QStringList minFreeSpaceEntries;
-        for (const auto& line : mMinFreeSpaceEdit->toPlainText().split('\n')) {
-            const auto trimmed = line.trimmed();
-            if (!trimmed.isEmpty()) {
-                minFreeSpaceEntries.append(trimmed);
+        for (int row = 0, count = mMinFreeSpaceTable->rowCount(); row < count; ++row) {
+            const auto* pathItem = mMinFreeSpaceTable->item(row, 0);
+            const auto* valueItem = mMinFreeSpaceTable->item(row, 1);
+            const auto* unitComboBox = qobject_cast<QComboBox*>(mMinFreeSpaceTable->cellWidget(row, 2));
+            if (!pathItem || !valueItem || !unitComboBox) {
+                continue;
+            }
+            const auto path = pathItem->text().trimmed();
+            bool ok = false;
+            const auto value = valueItem->text().trimmed().toULongLong(&ok);
+            if (!path.isEmpty() && ok) {
+                minFreeSpaceEntries.append(QString("%1=%2%3"_L1)
+                                               .arg(
+                                                   normalizePath(path, settings->data().pathOs),
+                                                   QString::number(value),
+                                                   unitComboBox->currentData().toString()
+                                               ));
             }
         }
         settings->setMinFreeSpace(minFreeSpaceEntries);
@@ -202,6 +363,13 @@ namespace tremotesf {
         mStartAddedTorrentsCheckBox = new QCheckBox(qApp->translate("tremotesf", "Start added torrents"), this);
         downloadingPageLayout->addRow(mStartAddedTorrentsCheckBox);
 
+        mSequentialDownloadCheckBox = new QCheckBox(
+            //: Check box label
+            qApp->translate("tremotesf", "Download sequentially by default"),
+            this
+        );
+        downloadingPageLayout->addRow(mSequentialDownloadCheckBox);
+
         /*mTrashTorrentFilesCheckBox = new QCheckBox(qApp->translate("tremotesf", "Trash .torrent files"), this);
         downloadingPageLayout->addRow(mTrashTorrentFilesCheckBox);*/
 
@@ -231,11 +399,64 @@ namespace tremotesf {
         incompleteDirectoryWidgetLayout->addSpacing(28);
         incompleteDirectoryWidgetLayout->addWidget(mIncompleteDirectoryWidget);
 
-        mMinFreeSpaceEdit = new QPlainTextEdit(this);
-        mMinFreeSpaceEdit->setToolTip(
-            qApp->translate("tremotesf", "One \"path=size\" rule per line, for example /downloads=5G")
+        mMinFreeSpaceTable = new QTableWidget(0, 4, this);
+        mMinFreeSpaceTable->setToolTip(
+            qApp->translate("tremotesf", "Minimum free space rules, for example /downloads=5G")
         );
-        downloadingPageLayout->addRow(qApp->translate("tremotesf", "Minimum free space:"), mMinFreeSpaceEdit);
+        mMinFreeSpaceTable->setHorizontalHeaderLabels(
+            {qApp->translate("tremotesf", "Path"),
+             qApp->translate("tremotesf", "Value"),
+             qApp->translate("tremotesf", "Units"),
+             qApp->translate("tremotesf", "Current")}
+        );
+        auto* const minFreeSpaceHeader = mMinFreeSpaceTable->horizontalHeader();
+        minFreeSpaceHeader->setSectionResizeMode(QHeaderView::Interactive);
+        minFreeSpaceHeader->setStretchLastSection(false);
+        mMinFreeSpaceTable->setColumnWidth(0, 240);
+        mMinFreeSpaceTable->setColumnWidth(1, 100);
+        mMinFreeSpaceTable->setColumnWidth(2, 90);
+        mMinFreeSpaceTable->setColumnWidth(3, 120);
+        mMinFreeSpaceTable->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+        mMinFreeSpaceTable->setWordWrap(false);
+        mMinFreeSpaceTable->verticalHeader()->setVisible(false);
+        mMinFreeSpaceTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+        mMinFreeSpaceTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
+        mMinFreeSpaceTable->setMinimumHeight(120);
+
+        auto* const minFreeSpaceWidget = new QWidget(this);
+        auto* const minFreeSpaceLayout = new QVBoxLayout(minFreeSpaceWidget);
+        minFreeSpaceLayout->setContentsMargins(0, 0, 0, 0);
+        minFreeSpaceLayout->addWidget(mMinFreeSpaceTable);
+
+        auto* const minFreeSpaceButtonsLayout = new QHBoxLayout();
+        mAddMinFreeSpaceButton = new QPushButton(QIcon::fromTheme("list-add"_L1), QString(), this);
+        mAddMinFreeSpaceButton->setToolTip(qApp->translate("tremotesf", "Add rule"));
+        minFreeSpaceButtonsLayout->addWidget(mAddMinFreeSpaceButton);
+        mRemoveMinFreeSpaceButton = new QPushButton(QIcon::fromTheme("list-remove"_L1), QString(), this);
+        mRemoveMinFreeSpaceButton->setToolTip(qApp->translate("tremotesf", "Remove selected rules"));
+        minFreeSpaceButtonsLayout->addWidget(mRemoveMinFreeSpaceButton);
+        minFreeSpaceButtonsLayout->addStretch();
+        minFreeSpaceLayout->addLayout(minFreeSpaceButtonsLayout);
+
+        QObject::connect(mAddMinFreeSpaceButton, &QPushButton::clicked, this, [this] {
+            addMinFreeSpaceRow();
+            const int row = mMinFreeSpaceTable->rowCount() - 1;
+            mMinFreeSpaceTable->setCurrentCell(row, 0);
+            mMinFreeSpaceTable->editItem(mMinFreeSpaceTable->item(row, 0));
+        });
+        QObject::connect(
+            mRemoveMinFreeSpaceButton,
+            &QPushButton::clicked,
+            this,
+            &ServerSettingsDialog::removeSelectedMinFreeSpaceRows
+        );
+        QObject::connect(mMinFreeSpaceTable, &QTableWidget::itemChanged, this, [this](QTableWidgetItem* item) {
+            if (item->column() == 0) {
+                updateMinFreeSpaceFreeSpace(item->row());
+            }
+        });
+
+        downloadingPageLayout->addRow(qApp->translate("tremotesf", "Minimum free space:"), minFreeSpaceWidget);
 
         mMinFreeSpaceResumeMarginEdit = new QLineEdit(this);
         mMinFreeSpaceResumeMarginEdit->setToolTip(
@@ -246,11 +467,11 @@ namespace tremotesf {
             mMinFreeSpaceResumeMarginEdit
         );
 
-        mMoveCompletedTorrentsCheckBox =
-            new QCheckBox(qApp->translate("tremotesf", "Move completed torrents"), this);
+        mMoveCompletedTorrentsCheckBox = new QCheckBox(qApp->translate("tremotesf", "Move completed torrents"), this);
         downloadingPageLayout->addRow(mMoveCompletedTorrentsCheckBox);
 
-        mMovePartialFilesCheckBox = new QCheckBox(qApp->translate("tremotesf", "Move partial files when relocating"), this);
+        mMovePartialFilesCheckBox =
+            new QCheckBox(qApp->translate("tremotesf", "Move partial files when relocating"), this);
         downloadingPageLayout->addRow(mMovePartialFilesCheckBox);
 
         mForceFinishPartialFilesCheckBox =
@@ -316,7 +537,7 @@ namespace tremotesf {
             //: "Queue" server settings page
             qApp->translate("tremotesf", "Queue")
         );
-        queuePageItem->setIcon(QIcon::fromTheme("applications-utilities"_L1));
+        queuePageItem->setIcon(QIcon::fromTheme("tremotesf-queue"_L1));
 
         auto queuePageLayout = new QGridLayout(mQueuePageWidget);
 
@@ -366,7 +587,7 @@ namespace tremotesf {
         queuePageLayout->addWidget(mAutoPriorityCheckBox, 6, 0, 1, 2, Qt::AlignTop);
 
         queuePageLayout->addWidget(
-            new QLabel(qApp->translate("tremotesf", "Maximum torrents with high priority:"), this),
+            new QLabel(qApp->translate("tremotesf", "Maximum files with high priority per torrent:"), this),
             7,
             0,
             Qt::AlignTop
@@ -688,6 +909,8 @@ namespace tremotesf {
 
         mDownloadDirectoryWidget->resetPath(settings->data().downloadDirectory);
         mStartAddedTorrentsCheckBox->setChecked(settings->data().startAddedTorrents);
+        mSequentialDownloadCheckBox->setChecked(settings->data().sequentialDownload);
+        mSequentialDownloadCheckBox->setVisible(settings->data().hasSequentialDownload);
         mIncompleteFilesCheckBox->setChecked(settings->data().renameIncompleteFiles);
         mIncompleteDirectoryCheckBox->setChecked(settings->data().incompleteDirectoryEnabled);
         mIncompleteDirectoryWidget->resetPath(settings->data().incompleteDirectory);
@@ -716,15 +939,36 @@ namespace tremotesf {
         mQueueMoveToEndCheckBox->setChecked(settings->data().queueMoveToEndEnabled);
         mQueueMoveToEndMinutesSpinBox->setValue(settings->data().queueMoveToEndMinutes);
 
-        mMinFreeSpaceEdit->setPlainText(settings->data().minFreeSpace.join('\n'));
+        {
+            const QSignalBlocker blocker(mMinFreeSpaceTable);
+            mMinFreeSpaceTable->setRowCount(0);
+            for (const auto& rule : settings->data().minFreeSpace) {
+                const auto separator = rule.indexOf('=');
+                if (separator > 0) {
+                    const auto path = rule.left(separator).trimmed();
+                    if (const auto size = parseSize(rule.mid(separator + 1)); size) {
+                        addMinFreeSpaceRow(
+                            toNativeSeparators(normalizePath(path, settings->data().pathOs), settings->data().pathOs),
+                            size->value,
+                            size->unit
+                        );
+                    } else {
+                        addMinFreeSpaceRow(rule);
+                    }
+                } else {
+                    addMinFreeSpaceRow(rule);
+                }
+            }
+        }
+        for (int row = 0, count = mMinFreeSpaceTable->rowCount(); row < count; ++row) {
+            updateMinFreeSpaceFreeSpace(row);
+        }
         mMinFreeSpaceResumeMarginEdit->setText(settings->data().minFreeSpaceResumeMargin);
         mMoveCompletedTorrentsCheckBox->setChecked(settings->data().moveCompletedTorrentsEnabled);
         mMovePartialFilesCheckBox->setChecked(settings->data().movePartialFilesEnabled);
         mForceFinishPartialFilesCheckBox->setChecked(settings->data().forceFinishPartialFilesEnabled);
         mScriptTorrentDoneRemoveTorrentCheckBox->setChecked(settings->data().scriptTorrentDoneRemoveTorrentEnabled);
-        mScriptTorrentDoneRemoveTempFilesCheckBox->setChecked(
-            settings->data().scriptTorrentDoneRemoveTempFilesEnabled
-        );
+        mScriptTorrentDoneRemoveTempFilesCheckBox->setChecked(settings->data().scriptTorrentDoneRemoveTempFilesEnabled);
         mScriptTorrentDoneRemoveAllFilesCheckBox->setChecked(settings->data().scriptTorrentDoneRemoveAllFilesEnabled);
 
         mDownloadSpeedLimitCheckBox->setChecked(settings->data().downloadSpeedLimited);

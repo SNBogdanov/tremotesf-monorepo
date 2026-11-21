@@ -45,6 +45,23 @@ namespace tremotesf {
             if (column == Column::Name) {
                 return entry->icon();
             }
+            if (column == Column::Priority) {
+                switch (entry->priority()) {
+                case TorrentFilesModelEntry::Priority::Low:
+                    return desktoputils::priorityIcon(desktoputils::Priority::Low);
+                case TorrentFilesModelEntry::Priority::Normal:
+                    return desktoputils::priorityIcon(desktoputils::Priority::Normal);
+                case TorrentFilesModelEntry::Priority::High:
+                    return desktoputils::priorityIcon(desktoputils::Priority::High);
+                case TorrentFilesModelEntry::Priority::Mixed:
+                    return {};
+                }
+            }
+            break;
+        case Qt::EditRole:
+            if (column == Column::Name) {
+                return entry->name();
+            }
             break;
         case Qt::DisplayRole:
             switch (column) {
@@ -57,6 +74,11 @@ namespace tremotesf {
                 return formatutils::formatProgress(entry->progress());
             case Column::Priority:
                 return entry->priorityString();
+            case Column::Id:
+                if (entry->isDirectory()) {
+                    return {};
+                }
+                return entry->fileId();
             default:
                 break;
             }
@@ -74,7 +96,12 @@ namespace tremotesf {
             case Column::Progress:
                 return entry->progress();
             case Column::Priority:
-                return QVariant::fromValue(entry->priority());
+                return static_cast<int>(entry->priority());
+            case Column::Id:
+                if (entry->isDirectory()) {
+                    return -1;
+                }
+                return entry->fileId();
             default:
                 return data(index, Qt::DisplayRole);
             }
@@ -89,7 +116,7 @@ namespace tremotesf {
             return {};
         }
         if (fromColumnNumber(index.column()) == Column::Name) {
-            return QAbstractItemModel::flags(index) | Qt::ItemIsUserCheckable;
+            return QAbstractItemModel::flags(index) | Qt::ItemIsUserCheckable | Qt::ItemIsEditable;
         }
         return QAbstractItemModel::flags(index);
     }
@@ -114,6 +141,9 @@ namespace tremotesf {
         case Column::Priority:
             //: Column title in torrent's file list
             return qApp->translate("tremotesf", "Priority");
+        case Column::Id:
+            //: Column title in torrent's file list
+            return qApp->translate("tremotesf", "ID");
         default:
             return {};
         }
@@ -125,6 +155,15 @@ namespace tremotesf {
         }
         if (fromColumnNumber(index.column()) == Column::Name && role == Qt::CheckStateRole) {
             setFilesWanted({index}, (value.toInt() == Qt::Checked));
+            return true;
+        }
+        if (fromColumnNumber(index.column()) == Column::Name && role == Qt::EditRole) {
+            const auto newName = value.toString().trimmed();
+            const auto* const entry = static_cast<const TorrentFilesModelEntry*>(index.internalPointer());
+            if (newName.isEmpty() || entry->name() == newName) {
+                return false;
+            }
+            renameFile(index, newName);
             return true;
         }
         return false;

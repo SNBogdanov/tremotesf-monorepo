@@ -13,6 +13,7 @@
 
 #include "fileopeneventhandler.h"
 #include "log/log.h"
+#include "startup/appprofile.h"
 
 #ifdef Q_OS_WIN
 #    include <windows.h>
@@ -108,6 +109,11 @@ namespace tremotesf {
             warning().logWithException(e, "IpcServerSocket: failed to append session id to socket name");
         }
 #endif
+        const auto& profile = profileName();
+        if (!profile.isEmpty()) {
+            name += '-';
+            name += profile;
+        }
         return name;
     }
 

@@ -32,9 +32,14 @@ namespace tremotesf::desktoputils {
         QueuedForDownloading,
         QueuedForSeeding,
         Seeding,
+        Speedometer,
         TrackerErrorDownloading,
         TrackerErrorSeeding,
-        Waiting
+        Waiting,
+        PausedDueToSpace,
+        WaitingForSpaceToMove,
+        RunningScript,
+        Moving
     };
     const QIcon& statusIcon(StatusIcon icon);
 

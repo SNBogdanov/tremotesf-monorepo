@@ -37,6 +37,8 @@ namespace tremotesf {
         SETTINGS_PROPERTY(bool, rememberAddTorrentParameters)
         SETTINGS_PROPERTY(TorrentData::Priority, lastAddTorrentPriority)
         SETTINGS_PROPERTY(bool, lastAddTorrentStartAfterAdding)
+        SETTINGS_PROPERTY(bool, lastAddTorrentSequentialDownload)
+        SETTINGS_PROPERTY(bool, lastAddTorrentMetadataOnly)
         SETTINGS_PROPERTY(bool, lastAddTorrentDeleteTorrentFile)
         SETTINGS_PROPERTY(bool, lastAddTorrentMoveTorrentFileToTrash)
 
@@ -78,6 +80,10 @@ namespace tremotesf {
         SETTINGS_PROPERTY(QByteArray, trackersViewHeaderState)
         SETTINGS_PROPERTY(QByteArray, peersViewHeaderState)
         SETTINGS_PROPERTY(QByteArray, localTorrentFilesViewHeaderState)
+        SETTINGS_PROPERTY(QByteArray, serverSettingsDialogGeometry)
+        SETTINGS_PROPERTY(QByteArray, minFreeSpaceTableHeaderState)
+        SETTINGS_PROPERTY(QByteArray, archiveViewDialogGeometry)
+        SETTINGS_PROPERTY(QByteArray, archiveViewHeaderState)
 
         SETTINGS_PROPERTY(bool, displayRelativeTime)
 
@@ -87,10 +93,14 @@ namespace tremotesf {
         enum class DarkThemeMode { FollowSystem, On, Off };
         Q_ENUM(DarkThemeMode)
 
+        enum class CloseBehavior { HideToTray, Quit };
+        Q_ENUM(CloseBehavior)
+
         enum class TorrentDoubleClickAction { OpenPropertiesDialog, OpenTorrentFile, OpenDownloadDirectory };
         Q_ENUM(TorrentDoubleClickAction)
 
         SETTINGS_PROPERTY(Settings::DarkThemeMode, darkThemeMode)
+        SETTINGS_PROPERTY(Settings::CloseBehavior, closeBehavior)
         SETTINGS_PROPERTY(bool, useSystemAccentColor)
         SETTINGS_PROPERTY(Settings::TorrentDoubleClickAction, torrentDoubleClickAction)
 

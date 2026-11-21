@@ -13,7 +13,7 @@ namespace tremotesf {
         Q_OBJECT
 
     public:
-        static constexpr auto serviceName = QLatin1String("org.equeim.Tremotesf");
+        static QString serviceName();
         static constexpr auto objectPath = QLatin1String("/org/equeim/Tremotesf");
         static constexpr auto interfaceName = QLatin1String("org.freedesktop.Application");
 

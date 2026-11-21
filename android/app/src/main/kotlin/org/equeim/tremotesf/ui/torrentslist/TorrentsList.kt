@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -20,6 +19,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
@@ -36,6 +37,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
@@ -53,6 +55,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.pluralStringResource
@@ -80,7 +84,6 @@ import org.equeim.tremotesf.ui.ArrowDownward
 import org.equeim.tremotesf.ui.ArrowUpward
 import org.equeim.tremotesf.ui.ComponentPreview
 import org.equeim.tremotesf.ui.Dimens
-import org.equeim.tremotesf.ui.Label
 import org.equeim.tremotesf.ui.Pause
 import org.equeim.tremotesf.ui.TorrentRenameDialog
 import org.equeim.tremotesf.ui.TorrentsRemoveDialog
@@ -136,6 +139,7 @@ fun TorrentsList(
 
     val fileSizeFormatter = rememberFileSizeFormatter()
     val progressFormatter = rememberNumberFormat { DecimalFormat("0.#") }
+    val ratioFormatter = rememberNumberFormat { DecimalFormat("0.00") }
 
     val layoutDirection = LocalLayoutDirection.current
     val listPadding = PaddingValues(
@@ -172,6 +176,7 @@ fun TorrentsList(
                         multilineName = multilineName,
                         fileSizeFormatter = fileSizeFormatter,
                         progressFormatter = progressFormatter,
+                        ratioFormatter = ratioFormatter,
                         selectionState = selectionState,
                         onClick = { navigateToTorrentPropertiesScreen(torrent.hashString) }
                     )
@@ -208,12 +213,16 @@ private enum class ContentType {
     Compact
 }
 
+private val DownloadSpeedColor = Color(0xFF4CAF50)
+private val UploadSpeedColor = Color(0xFFF44336)
+
 @Composable
 private fun LazyItemScope.TorrentCard(
     torrent: Torrent,
     multilineName: Boolean,
     fileSizeFormatter: FileSizeFormatter,
     progressFormatter: NumberFormat,
+    ratioFormatter: NumberFormat,
     selectionState: TremotesfMultiSelectionState<Torrent, Int>,
     onClick: () -> Unit
 ) {
@@ -229,124 +238,151 @@ private fun LazyItemScope.TorrentCard(
             .clip(CardDefaults.elevatedShape)
             .tremotesfMultiSelectionClickable(selectionState, torrent.id, onClick)
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .padding(Dimens.SpacingBig)
                 .fillMaxWidth(),
+            verticalAlignment = Alignment.Top
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(Dimens.SpacingSmall),
-                verticalAlignment = Alignment.CenterVertically
+            Box(
+                modifier = Modifier.size(40.dp),
+                contentAlignment = Alignment.Center
             ) {
                 if (selectionState.isSelected(torrent.id)) {
                     Icon(
                         imageVector = Icons.Filled.CheckCircle,
                         contentDescription = stringResource(R.string.selected),
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(28.dp)
                     )
                 } else {
-                    StatusIcon(torrent.status)
+                    StatusIcon(torrent.status, Modifier.size(32.dp))
                 }
+            }
+
+            Column(
+                modifier = Modifier
+                    .weight(1.0f)
+                    .padding(start = Dimens.SpacingSmall)
+            ) {
                 Text(
                     text = torrent.name,
-                    maxLines = if (multilineName) Int.MAX_VALUE else 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1.0f)
+                    maxLines = if (multilineName) 2 else 1,
+                    overflow = TextOverflow.Ellipsis
                 )
-            }
-            ProvideTextStyle(
-                MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .padding(top = Dimens.SpacingSmall)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                ProvideTextStyle(
+                    MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
                 ) {
-                    Text(
-                        text = if (torrent.isFinished) {
-                            stringResource(
-                                R.string.uploaded_string,
-                                fileSizeFormatter.formatFileSize(torrent.sizeWhenDone),
-                                fileSizeFormatter.formatFileSize(torrent.totalUploaded)
-                            )
-                        } else {
-                            stringResource(
-                                R.string.completed_string,
-                                fileSizeFormatter.formatFileSize(torrent.completedSize),
-                                fileSizeFormatter.formatFileSize(torrent.sizeWhenDone),
-                                formatTorrentProgress(torrent.percentDone, progressFormatter)
-                            )
-                        },
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                    TorrentInfoRow(
+                        leftText = stringResource(
+                            R.string.size_of_size,
+                            fileSizeFormatter.formatFileSize(torrent.completedSize),
+                            fileSizeFormatter.formatFileSize(torrent.sizeWhenDone)
+                        ),
+                        speed = torrent.downloadSpeed,
+                        speedIcon = Icons.Filled.ArrowDownward,
+                        speedIconColor = DownloadSpeedColor,
+                        fileSizeFormatter = fileSizeFormatter,
+                        modifier = Modifier.padding(top = Dimens.SpacingSmall)
                     )
-
-                    if (torrent.eta?.isPositive() == true) {
-                        Text(formatTorrentEta(torrent.eta))
-                    }
-                }
-
-                LinearProgressIndicator(
-                    progress = { torrent.percentDone.toFloat() },
-                    modifier = Modifier
-                        .padding(top = Dimens.SpacingSmall)
-                        .fillMaxWidth(),
-                    gapSize = 0.dp,
-                    drawStopIndicator = {}
-                )
-
-                Row(
-                    modifier = Modifier
-                        .padding(top = Dimens.SpacingSmall)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column(Modifier.weight(1.0f)) {
+                    TorrentInfoRow(
+                        leftText = stringResource(
+                            R.string.uploaded_with_ratio,
+                            fileSizeFormatter.formatFileSize(torrent.totalUploaded),
+                            stringResource(R.string.ratio),
+                            ratioFormatter.format(torrent.ratio)
+                        ),
+                        speed = torrent.uploadSpeed,
+                        speedIcon = Icons.Filled.ArrowUpward,
+                        speedIconColor = UploadSpeedColor,
+                        fileSizeFormatter = fileSizeFormatter,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                    LinearProgressIndicator(
+                        progress = { torrent.percentDone.toFloat() },
+                        modifier = Modifier
+                            .padding(top = Dimens.SpacingSmall)
+                            .fillMaxWidth(),
+                        gapSize = 0.dp,
+                        drawStopIndicator = {}
+                    )
+                    Row(
+                        modifier = Modifier
+                            .padding(top = Dimens.SpacingSmall)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
-                            stringResource(
-                                R.string.download_speed_string,
-                                fileSizeFormatter.formatTransferRate(torrent.downloadSpeed),
-                            )
+                            text = stringResource(
+                                R.string.progress_string,
+                                formatTorrentProgress(torrent.percentDone, progressFormatter)
+                            ),
+                            maxLines = 1,
+                            style = LocalTextStyle.current.copy(fontFeatureSettings = "tnum")
                         )
                         Text(
-                            stringResource(
-                                R.string.upload_speed_string,
-                                fileSizeFormatter.formatTransferRate(torrent.uploadSpeed)
-                            )
-                        )
-                    }
-
-                    Column(modifier = Modifier.weight(1.0f), horizontalAlignment = Alignment.End) {
-                        Text(
-                            text = torrent.getStatusString(progressFormatter),
-                            maxLines = 3,
-                            overflow = TextOverflow.Ellipsis,
-                            textAlign = TextAlign.End
-                        )
-                        if (torrent.labels.isNotEmpty()) {
-                            FlowRow(
-                                horizontalArrangement = Arrangement.spacedBy(Dimens.SpacingSmall, Alignment.End),
-                                modifier = Modifier.padding(top = Dimens.SpacingSmall)
+                            text = if (torrent.status == TorrentStatus.Downloading
+                                || torrent.status == TorrentStatus.Seeding
                             ) {
-                                for (label in torrent.labels) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.AutoMirrored.Outlined.Label,
-                                            label,
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                        Text(label)
-                                    }
+                                if (torrent.eta?.isPositive() == true) {
+                                    formatTorrentEta(torrent.eta)
+                                } else {
+                                    stringResource(R.string.eta_unknown)
                                 }
-                            }
-                        }
+                            } else {
+                                torrent.getStatusString(progressFormatter)
+                            },
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.End,
+                            style = LocalTextStyle.current.copy(fontFeatureSettings = "tnum")
+                        )
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun TorrentInfoRow(
+    leftText: String,
+    speed: TransferRate,
+    speedIcon: ImageVector,
+    speedIconColor: Color,
+    fileSizeFormatter: FileSizeFormatter,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = leftText,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1.0f)
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.padding(start = Dimens.SpacingSmall)
+        ) {
+            Text(
+                text = fileSizeFormatter.formatTransferRate(speed),
+                maxLines = 1,
+                textAlign = TextAlign.End,
+                modifier = Modifier.width(96.dp),
+                style = LocalTextStyle.current.copy(fontFeatureSettings = "tnum")
+            )
+            Icon(
+                imageVector = speedIcon,
+                contentDescription = null,
+                tint = speedIconColor,
+                modifier = Modifier.size(18.dp)
+            )
         }
     }
 }
@@ -423,9 +459,9 @@ private fun LazyItemScope.TorrentCompactListItem(
 }
 
 @Composable
-private fun StatusIcon(status: TorrentStatus) {
+private fun StatusIcon(status: TorrentStatus, modifier: Modifier = Modifier) {
     Icon(
-        when (status) {
+        imageVector = when (status) {
             TorrentStatus.Paused,
             TorrentStatus.PausedDueToSpace -> Icons.Filled.Pause
             TorrentStatus.WaitingForSpaceToMove -> Icons.Filled.ArrowDownward
@@ -441,7 +477,8 @@ private fun StatusIcon(status: TorrentStatus) {
             TorrentStatus.QueuedForChecking,
             TorrentStatus.Checking -> Icons.Filled.Refresh
         },
-        contentDescription = stringResource(R.string.status)
+        contentDescription = stringResource(R.string.status),
+        modifier = modifier
     )
 }
 

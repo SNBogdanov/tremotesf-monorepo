@@ -58,6 +58,8 @@
 #include "ui/screens/serversettings/serversettingsdialog.h"
 #include "ui/screens/serverstatsdialog.h"
 #include "ui/screens/settingsdialog.h"
+#include "ui/screens/archive/archivemanagerdialog.h"
+#include "ui/screens/archive/archivesavedialog.h"
 #include "ui/screens/torrentproperties/torrentpropertiesdialog.h"
 #include "ui/screens/torrentproperties/torrentpropertieswidget.h"
 #include "ui/widgets/listplaceholder.h"
@@ -65,6 +67,7 @@
 #include "ui/widgets/torrentfilesview.h"
 
 #include "desktoputils.h"
+#include "edittrackersdialog.h"
 #include "editlabelsdialog.h"
 #include "filemanagerlauncher.h"
 #include "formatutils.h"
@@ -73,6 +76,7 @@
 #include "mainwindowstatusbar.h"
 #include "mainwindowviewmodel.h"
 #include "settings.h"
+#include "startup/appprofile.h"
 #include "target_os.h"
 #include "torrentsmodel.h"
 #include "torrentsproxymodel.h"
@@ -441,6 +445,11 @@ namespace tremotesf {
                 debug().log("Received close event on main window while quitting app, just close window");
                 return false;
             }
+            if (Settings::instance()->get_closeBehavior() == Settings::CloseBehavior::Quit) {
+                info().log("Closed main window, quitting app because of close behavior setting");
+                QMetaObject::invokeMethod(qApp, &QCoreApplication::quit, Qt::QueuedConnection);
+                return false;
+            }
             // Do stuff at the next event loop iteration since we are in the middle of event handling
             if (mTrayIcon.isVisible() && QSystemTrayIcon::isSystemTrayAvailable()) {
                 info().log("Closed main window but tray icon is active, hide windows without quitting app");
@@ -500,12 +509,16 @@ namespace tremotesf {
         };
 
         QMenu* mTorrentMenu{};
+        QAction* mTorrentPropertiesAction{};
         QAction* mStartTorrentAction{};
         QAction* mStartTorrentNowAction{};
         QAction* mPauseTorrentAction{};
         QAction* mRemoveTorrentAction{};
+        QAction* mMoveTorrentUpAction{};
+        QAction* mMoveTorrentDownAction{};
 
         QAction* mRenameTorrentAction{};
+        QAction* mMetadataOnlyAction{};
         QAction* mSetIncompleteDirectoryAction{};
 
         QAction* mOpenTorrentFilesAction{};
@@ -515,6 +528,10 @@ namespace tremotesf {
         QAction* mNormalPriorityAction{};
         QAction* mLowPriorityAction{};
         QAction* mAutoPriorityAction{};
+
+        QAction* mSettingsAction{};
+        QAction* mServerSettingsAction{};
+        QAction* mAltSpeedLimitsAction{};
 
         std::vector<QAction*> mConnectionDependentActions;
 
@@ -563,26 +580,21 @@ namespace tremotesf {
             //: Menu bar item
             mTorrentMenu = new QMenu(qApp->translate("tremotesf", "&Torrent"), mWindow);
 
-            QAction* torrentPropertiesAction = mTorrentMenu->addAction(
+            mTorrentPropertiesAction = mTorrentMenu->addAction(
                 QIcon::fromTheme("document-properties"_L1),
                 //: Torrent's context menu item
                 qApp->translate("tremotesf", "&Properties")
             );
             QObject::connect(
-                torrentPropertiesAction,
+                mTorrentPropertiesAction,
                 &QAction::triggered,
                 this,
                 &MainWindow::Impl::showTorrentsPropertiesDialogs
             );
-            torrentPropertiesAction->setVisible(!Settings::instance()->get_showTorrentPropertiesInMainWindow());
-            QObject::connect(
-                Settings::instance(),
-                &Settings::showTorrentPropertiesInMainWindowChanged,
-                this,
-                [torrentPropertiesAction] {
-                    torrentPropertiesAction->setVisible(!Settings::instance()->get_showTorrentPropertiesInMainWindow());
-                }
-            );
+            mTorrentPropertiesAction->setVisible(!Settings::instance()->get_showTorrentPropertiesInMainWindow());
+            QObject::connect(Settings::instance(), &Settings::showTorrentPropertiesInMainWindowChanged, this, [this] {
+                mTorrentPropertiesAction->setVisible(!Settings::instance()->get_showTorrentPropertiesInMainWindow());
+            });
 
             mTorrentMenu->addSeparator();
 
@@ -598,7 +610,7 @@ namespace tremotesf {
             });
 
             mStartTorrentNowAction = mTorrentMenu->addAction(
-                QIcon::fromTheme("media-playback-start"_L1),
+                QIcon::fromTheme("media-playback-start-now"_L1, QIcon::fromTheme("media-playback-start"_L1)),
                 //: Torrent's context menu item
                 qApp->translate("tremotesf", "Start &Now")
             );
@@ -715,17 +727,13 @@ namespace tremotesf {
                 //: Torrent's context menu item
                 qApp->translate("tremotesf", "&Rename")
             );
-            mRenameTorrentAction->setShortcut(Qt::Key_F2);
             QObject::connect(mRenameTorrentAction, &QAction::triggered, this, [this] {
                 const auto indexes = mTorrentsView.selectionModel()->selectedRows();
                 if (indexes.size() == 1) {
-                    const auto torrent =
-                        mTorrentsModel.torrentAtIndex(mTorrentsProxyModel.mapToSource(indexes.first()));
-                    const auto id = torrent->data().id;
-                    const auto name = torrent->data().name;
-                    TorrentFilesView::showFileRenameDialog(name, mWindow, [id, name, this](const auto& newName) {
-                        mViewModel.rpc()->renameTorrentFile(id, name, newName);
-                    });
+                    const auto nameIndex =
+                        indexes.first().siblingAtColumn(static_cast<int>(TorrentsModel::Column::Name));
+                    mTorrentsView.setCurrentIndex(nameIndex);
+                    mTorrentsView.edit(nameIndex);
                 }
             });
 
@@ -746,6 +754,54 @@ namespace tremotesf {
                     dialog->setAttribute(Qt::WA_DeleteOnClose);
                     dialog->show();
                 }
+            });
+
+            const auto* const editTrackersAction = mTorrentMenu->addAction(
+                QIcon::fromTheme("network-server"_L1),
+                //: Torrent's context menu item
+                qApp->translate("tremotesf", "Edit &Trackers...")
+            );
+            QObject::connect(editTrackersAction, &QAction::triggered, this, [this] {
+                if (!mTorrentsView.selectionModel()->hasSelection()) {
+                    return;
+                }
+                const auto selectedTorrents =
+                    mTorrentsProxyModel.sourceIndexes(mTorrentsView.selectionModel()->selectedRows())
+                    | std::views::transform([this](const QModelIndex& index) {
+                          return mTorrentsModel.torrentAtIndex(index);
+                      })
+                    | std::ranges::to<std::vector>();
+                showSingleInstanceDialog<EditTrackersDialog>([this, selectedTorrents] {
+                    return new EditTrackersDialog(mViewModel.rpc(), selectedTorrents, mWindow);
+                });
+            });
+
+            const auto* const saveToArchiveAction = mTorrentMenu->addAction(
+                QIcon::fromTheme("tremotesf-file-archive"_L1),
+                //: Torrent's context menu item
+                qApp->translate("tremotesf", "Save to &Archive...")
+            );
+            QObject::connect(saveToArchiveAction, &QAction::triggered, this, [this] {
+                if (!mViewModel.rpc()->serverSettings()->data().hasForkFeature("torrent_archive/v1"_L1)) {
+                    QMessageBox::warning(
+                        mWindow,
+                        qApp->translate("tremotesf", "Save to Archive"),
+                        //: Error message
+                        qApp->translate("tremotesf", "Archiving is not supported by the connected Transmission daemon.")
+                    );
+                    return;
+                }
+                if (!mTorrentsView.selectionModel()->hasSelection()) {
+                    return;
+                }
+                auto torrentIds = mTorrentsProxyModel.sourceIndexes(mTorrentsView.selectionModel()->selectedRows())
+                                  | std::views::transform([this](const QModelIndex& index) {
+                                        return mTorrentsModel.torrentAtIndex(index)->data().id;
+                                    })
+                                  | std::ranges::to<std::vector>();
+                auto dialog = new ArchiveSaveDialog(mViewModel.rpc(), std::move(torrentIds), mWindow);
+                dialog->setAttribute(Qt::WA_DeleteOnClose);
+                dialog->show();
             });
 
             mTorrentMenu->addSeparator();
@@ -793,9 +849,23 @@ namespace tremotesf {
                 ));
             });
 
+            mMetadataOnlyAction = mTorrentMenu->addAction(
+                QIcon::fromTheme("document-preview"_L1),
+                //: Torrent's context menu item
+                qApp->translate("tremotesf", "&Metadata Only")
+            );
+            mMetadataOnlyAction->setCheckable(true);
+            QObject::connect(mMetadataOnlyAction, &QAction::triggered, this, [this](bool checked) {
+                for (const QModelIndex& index :
+                     mTorrentsProxyModel.sourceIndexes(mTorrentsView.selectionModel()->selectedRows())) {
+                    mTorrentsModel.torrentAtIndex(index)->setMetadataOnly(checked);
+                }
+            });
+
             mTorrentMenu->addSeparator();
 
             auto* const queueMenu = mTorrentMenu->addMenu(
+                QIcon::fromTheme("tremotesf-queue"_L1),
                 //: Torrent's context menu item
                 qApp->translate("tremotesf", "&Queue")
             );
@@ -811,23 +881,23 @@ namespace tremotesf {
                 ));
             });
 
-            const auto* const moveTorrentUpAction = queueMenu->addAction(
+            mMoveTorrentUpAction = queueMenu->addAction(
                 QIcon::fromTheme("go-up"_L1),
                 //: Torrent's context menu item
                 qApp->translate("tremotesf", "Move &Up")
             );
-            QObject::connect(moveTorrentUpAction, &QAction::triggered, this, [this] {
+            QObject::connect(mMoveTorrentUpAction, &QAction::triggered, this, [this] {
                 mViewModel.rpc()->moveTorrentsUp(mTorrentsModel.idsFromIndexes(
                     mTorrentsProxyModel.sourceIndexes(mTorrentsView.selectionModel()->selectedRows())
                 ));
             });
 
-            const auto* const moveTorrentDownAction = queueMenu->addAction(
+            mMoveTorrentDownAction = queueMenu->addAction(
                 QIcon::fromTheme("go-down"_L1),
                 //: Torrent's context menu item
                 qApp->translate("tremotesf", "Move &Down")
             );
-            QObject::connect(moveTorrentDownAction, &QAction::triggered, this, [this] {
+            QObject::connect(mMoveTorrentDownAction, &QAction::triggered, this, [this] {
                 mViewModel.rpc()->moveTorrentsDown(mTorrentsModel.idsFromIndexes(
                     mTorrentsProxyModel.sourceIndexes(mTorrentsView.selectionModel()->selectedRows())
                 ));
@@ -857,7 +927,10 @@ namespace tremotesf {
                 }
             };
             //: Torrent's loading priority
-            mHighPriorityAction = priorityMenu->addAction(qApp->translate("tremotesf", "High"));
+            mHighPriorityAction = priorityMenu->addAction(
+                desktoputils::priorityIcon(desktoputils::Priority::High),
+                qApp->translate("tremotesf", "High")
+            );
             QObject::connect(
                 mHighPriorityAction,
                 &QAction::triggered,
@@ -868,7 +941,10 @@ namespace tremotesf {
             priorityGroup->addAction(mHighPriorityAction);
 
             //: Torrent's loading priority
-            mNormalPriorityAction = priorityMenu->addAction(qApp->translate("tremotesf", "Normal"));
+            mNormalPriorityAction = priorityMenu->addAction(
+                desktoputils::priorityIcon(desktoputils::Priority::Normal),
+                qApp->translate("tremotesf", "Normal")
+            );
             QObject::connect(
                 mNormalPriorityAction,
                 &QAction::triggered,
@@ -879,7 +955,10 @@ namespace tremotesf {
             priorityGroup->addAction(mNormalPriorityAction);
 
             //: Torrent's loading priority
-            mLowPriorityAction = priorityMenu->addAction(qApp->translate("tremotesf", "Low"));
+            mLowPriorityAction = priorityMenu->addAction(
+                desktoputils::priorityIcon(desktoputils::Priority::Low),
+                qApp->translate("tremotesf", "Low")
+            );
             QObject::connect(
                 mLowPriorityAction,
                 &QAction::triggered,
@@ -1024,18 +1103,26 @@ namespace tremotesf {
         }
 
         void updateTorrentActions() {
+            mMetadataOnlyAction->setVisible(
+                mViewModel.rpc()->serverSettings()->data().hasForkFeature("metadata_only/v1"_L1)
+            );
+
             const auto actions = mTorrentMenu->actions();
 
             if (!mTorrentsView.selectionModel()->hasSelection()) {
                 for (QAction* action : actions) {
                     action->setEnabled(false);
                 }
+                mMoveTorrentUpAction->setEnabled(false);
+                mMoveTorrentDownAction->setEnabled(false);
                 return;
             }
 
             for (QAction* action : actions) {
                 action->setEnabled(true);
             }
+            mMoveTorrentUpAction->setEnabled(true);
+            mMoveTorrentDownAction->setEnabled(true);
             mHighPriorityAction->setChecked(false);
             mNormalPriorityAction->setChecked(false);
             mLowPriorityAction->setChecked(false);
@@ -1043,6 +1130,7 @@ namespace tremotesf {
             mAutoPriorityAction->setVisible(
                 mViewModel.rpc()->serverSettings()->data().hasForkFeature("auto_priority/v1"_L1)
             );
+            mMetadataOnlyAction->setChecked(false);
             mSetIncompleteDirectoryAction->setVisible(
                 mViewModel.rpc()->serverSettings()->data().hasForkFeature("per_torrent_incomplete_dir/v1"_L1)
             );
@@ -1074,6 +1162,7 @@ namespace tremotesf {
                     break;
                 }
                 mAutoPriorityAction->setChecked(torrent->data().autoPriority);
+                mMetadataOnlyAction->setChecked(torrent->data().metadataOnly);
             } else {
                 mRenameTorrentAction->setEnabled(false);
             }
@@ -1386,13 +1475,13 @@ namespace tremotesf {
             //: Menu bar item
             QMenu* toolsMenu = mWindow->menuBar()->addMenu(qApp->translate("tremotesf", "T&ools"));
 
-            QAction* settingsAction = toolsMenu->addAction(
+            mSettingsAction = toolsMenu->addAction(
                 QIcon::fromTheme("configure"_L1, QIcon::fromTheme("preferences-system"_L1)),
                 qApp->translate("tremotesf", "&Options")
             );
-            settingsAction->setShortcut(QKeySequence::Preferences);
-            settingsAction->setMenuRole(QAction::PreferencesRole);
-            QObject::connect(settingsAction, &QAction::triggered, this, [this] {
+            mSettingsAction->setShortcut(QKeySequence::Preferences);
+            mSettingsAction->setMenuRole(QAction::PreferencesRole);
+            QObject::connect(mSettingsAction, &QAction::triggered, this, [this] {
                 showSingleInstanceDialog<SettingsDialog>([this] {
                     return new SettingsDialog(mViewModel.rpc(), mWindow);
                 });
@@ -1409,21 +1498,41 @@ namespace tremotesf {
                 });
             });
 
+            auto* const archiveManagerAction = toolsMenu->addAction(
+                QIcon::fromTheme("tremotesf-file-archive"_L1),
+                qApp->translate("tremotesf", "Archive &Manager...")
+            );
+            QObject::connect(archiveManagerAction, &QAction::triggered, this, [this] {
+                if (!mViewModel.rpc()->serverSettings()->data().hasForkFeature("torrent_archive/v1"_L1)) {
+                    QMessageBox::warning(
+                        mWindow,
+                        qApp->translate("tremotesf", "Archive Manager"),
+                        //: Error message
+                        qApp->translate("tremotesf", "Archiving is not supported by the connected Transmission daemon.")
+                    );
+                    return;
+                }
+                showSingleInstanceDialog<ArchiveManagerDialog>([this] {
+                    return new ArchiveManagerDialog(mViewModel.rpc(), mWindow);
+                });
+            });
+            mConnectionDependentActions.push_back(archiveManagerAction);
+
             toolsMenu->addSeparator();
 
-            auto serverSettingsAction = new QAction(
+            mServerSettingsAction = new QAction(
                 QIcon::fromTheme("preferences-system-network"_L1, QIcon::fromTheme("preferences-system"_L1)),
                 qApp->translate("tremotesf", "&Server Options"),
                 this
             );
-            serverSettingsAction->setMenuRole(QAction::NoRole);
-            QObject::connect(serverSettingsAction, &QAction::triggered, this, [this] {
+            mServerSettingsAction->setMenuRole(QAction::NoRole);
+            QObject::connect(mServerSettingsAction, &QAction::triggered, this, [this] {
                 showSingleInstanceDialog<ServerSettingsDialog>([this] {
                     return new ServerSettingsDialog(mViewModel.rpc(), mWindow);
                 });
             });
-            mConnectionDependentActions.push_back(serverSettingsAction);
-            toolsMenu->addAction(serverSettingsAction);
+            mConnectionDependentActions.push_back(mServerSettingsAction);
+            toolsMenu->addAction(mServerSettingsAction);
 
             auto serverStatsAction = new QAction(
                 QIcon::fromTheme("view-statistics"_L1),
@@ -1499,8 +1608,38 @@ namespace tremotesf {
             mToolBar.addAction(&mAddTorrentLinkAction);
             mToolBar.addSeparator();
             mToolBar.addAction(mStartTorrentAction);
+            mToolBar.addAction(mStartTorrentNowAction);
             mToolBar.addAction(mPauseTorrentAction);
             mToolBar.addAction(mRemoveTorrentAction);
+            mToolBar.addSeparator();
+            mToolBar.addAction(mTorrentPropertiesAction);
+            mToolBar.addSeparator();
+            mToolBar.addAction(mMoveTorrentUpAction);
+            mToolBar.addAction(mMoveTorrentDownAction);
+            mToolBar.addSeparator();
+
+            mAltSpeedLimitsAction = new QAction(
+                desktoputils::statusIcon(desktoputils::StatusIcon::Speedometer),
+                qApp->translate("tremotesf", "Alternative Speed Limits"),
+                this
+            );
+            mAltSpeedLimitsAction->setCheckable(true);
+            mAltSpeedLimitsAction->setChecked(mViewModel.rpc()->serverSettings()->data().alternativeSpeedLimitsEnabled);
+            QObject::connect(mAltSpeedLimitsAction, &QAction::toggled, this, [this](bool enabled) {
+                mViewModel.rpc()->serverSettings()->setAlternativeSpeedLimitsEnabled(enabled);
+            });
+            QObject::connect(mViewModel.rpc()->serverSettings(), &ServerSettings::changed, this, [this] {
+                const QSignalBlocker blocker(mAltSpeedLimitsAction);
+                mAltSpeedLimitsAction->setChecked(
+                    mViewModel.rpc()->serverSettings()->data().alternativeSpeedLimitsEnabled
+                );
+            });
+            mConnectionDependentActions.push_back(mAltSpeedLimitsAction);
+
+            mToolBar.addAction(mServerSettingsAction);
+            mToolBar.addAction(mAltSpeedLimitsAction);
+            mToolBar.addSeparator();
+            mToolBar.addAction(mSettingsAction);
 
             QObject::connect(&mToolBar, &QToolBar::customContextMenuRequested, this, [this](QPoint pos) {
                 QMenu contextMenu;
@@ -1800,7 +1939,11 @@ namespace tremotesf {
 
     MainWindow::MainWindow(QStringList&& commandLineFiles, QStringList&& commandLineUrls, QWidget* parent)
         : QMainWindow(parent), mImpl(new Impl(std::move(commandLineFiles), std::move(commandLineUrls), this)) {
-        setWindowTitle(TREMOTESF_APP_NAME ""_L1);
+        QString title(TREMOTESF_APP_NAME ""_L1);
+        if (const auto& profile = profileName(); !profile.isEmpty()) {
+            title = QString("%1 (%2)"_L1).arg(title, profile);
+        }
+        setWindowTitle(title);
         setMinimumSize(minimumSizeHint().expandedTo(QSize(384, 256)));
         setContextMenuPolicy(Qt::NoContextMenu);
         setToolButtonStyle(Settings::instance()->get_toolButtonStyle());

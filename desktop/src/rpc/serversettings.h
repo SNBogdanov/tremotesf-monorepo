@@ -58,6 +58,8 @@ namespace tremotesf {
         bool startAddedTorrents = false;
         bool trashTorrentFiles = false;
         bool renameIncompleteFiles = false;
+        bool hasSequentialDownload = false;
+        bool sequentialDownload = false;
         bool incompleteDirectoryEnabled = false;
         QString incompleteDirectory;
 
@@ -122,6 +124,7 @@ namespace tremotesf {
         void setStartAddedTorrents(bool start);
         void setTrashTorrentFiles(bool trash);
         void setRenameIncompleteFiles(bool rename);
+        void setSequentialDownload(bool enabled);
         void setIncompleteDirectoryEnabled(bool enabled);
         void setIncompleteDirectory(const QString& directory);
 

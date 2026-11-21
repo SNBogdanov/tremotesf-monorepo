@@ -26,6 +26,7 @@
 #include "target_os.h"
 #include "settings.h"
 #include "rpc/rpc.h"
+#include "rpc/serversettings.h"
 #include "ui/screens/addtorrent/addtorrentdialog.h"
 #include "ui/screens/addtorrent/addtorrenthelpers.h"
 #include "ui/widgets/torrentremotedirectoryselectionwidget.h"
@@ -33,6 +34,8 @@
 #ifdef Q_OS_WIN
 #    include "ui/systemcolorsprovider.h"
 #endif
+
+using namespace Qt::StringLiterals;
 
 namespace tremotesf {
     namespace {
@@ -308,6 +311,13 @@ namespace tremotesf {
                     const auto parameters = getAddTorrentParameters(rpc);
                     addTorrentParametersWidgets.downloadDirectoryWidget->resetPath(parameters.downloadDirectory);
                     addTorrentParametersWidgets.startTorrentCheckBox->setChecked(parameters.startAfterAdding);
+                    addTorrentParametersWidgets.sequentialDownloadCheckBox->setChecked(parameters.sequentialDownload);
+                    if (addTorrentParametersWidgets.metadataOnlyCheckBox) {
+                        addTorrentParametersWidgets.metadataOnlyCheckBox->setChecked(parameters.metadataOnly);
+                        addTorrentParametersWidgets.metadataOnlyCheckBox->setVisible(
+                            rpc->serverSettings()->data().hasForkFeature("metadata_only/v1"_L1)
+                        );
+                    }
                 }
             });
             QObject::connect(addTorrentParametersResetButton, &QPushButton::clicked, page, [=] {
@@ -375,6 +385,23 @@ namespace tremotesf {
             );
             layout->addWidget(trayIconCheckBox);
 
+            auto closeBehaviorComboBox = new QComboBox(page);
+            closeBehaviorComboBox->addItem(
+                //: Close window behavior
+                qApp->translate("tremotesf", "Hide to notification area"),
+                QVariant::fromValue(Settings::CloseBehavior::HideToTray)
+            );
+            closeBehaviorComboBox->addItem(
+                //: Close window behavior
+                qApp->translate("tremotesf", "Quit application"),
+                QVariant::fromValue(Settings::CloseBehavior::Quit)
+            );
+            //: Options label
+            auto closeBehaviorLayout = new QFormLayout();
+            closeBehaviorLayout->setContentsMargins(0, 0, 0, 0);
+            closeBehaviorLayout->addRow(qApp->translate("tremotesf", "When closing window:"), closeBehaviorComboBox);
+            layout->addLayout(closeBehaviorLayout);
+
             //: Notifications options section
             auto whenConnectingGroupBox =
                 new QGroupBox(qApp->translate("tremotesf", "When connecting to server"), page);
@@ -400,7 +427,11 @@ namespace tremotesf {
             notificationOnAddingTorrentCheckBox->setChecked(settings->get_notificationOnAddingTorrent());
             notificationOfFinishedTorrentsCheckBox->setChecked(settings->get_notificationOfFinishedTorrents());
             trayIconCheckBox->setChecked(settings->get_showTrayIcon());
-            addedSinceLastConnectionCheckBox->setChecked(settings->get_notificationsOnAddedTorrentsSinceLastConnection()
+            closeBehaviorComboBox->setCurrentIndex(
+                closeBehaviorComboBox->findData(QVariant::fromValue(settings->get_closeBehavior()))
+            );
+            addedSinceLastConnectionCheckBox->setChecked(
+                settings->get_notificationsOnAddedTorrentsSinceLastConnection()
             );
             finishedSinceLastConnectionCheckBox->setChecked(
                 settings->get_notificationsOnFinishedTorrentsSinceLastConnection()
@@ -411,6 +442,7 @@ namespace tremotesf {
                 settings->set_notificationOnAddingTorrent(notificationOnAddingTorrentCheckBox->isChecked());
                 settings->set_notificationOfFinishedTorrents(notificationOfFinishedTorrentsCheckBox->isChecked());
                 settings->set_showTrayIcon(trayIconCheckBox->isChecked());
+                settings->set_closeBehavior(closeBehaviorComboBox->currentData().value<Settings::CloseBehavior>());
                 settings->set_notificationsOnAddedTorrentsSinceLastConnection(
                     addedSinceLastConnectionCheckBox->isChecked()
                 );

@@ -54,7 +54,7 @@ namespace tremotesf {
 
     TorrentFilesModel::TorrentFilesModel(Rpc* rpc, QObject* parent)
         : BaseTorrentFilesModel(
-              {Column::Name, Column::Size, Column::ProgressBar, Column::Progress, Column::Priority}, parent
+              {Column::Name, Column::Size, Column::ProgressBar, Column::Progress, Column::Priority, Column::Id}, parent
           ) {
         setRpc(rpc);
     }

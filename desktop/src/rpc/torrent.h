@@ -85,6 +85,7 @@ namespace tremotesf {
         int eta{};
 
         bool metadataComplete{};
+        bool metadataOnly{};
 
         qint64 downloadSpeed{};
         qint64 uploadSpeed{};
@@ -189,6 +190,7 @@ namespace tremotesf {
         void setHonorSessionLimits(bool honor);
         void setBandwidthPriority(TorrentData::Priority priority);
         void setAutoPriority(bool enabled);
+        void setMetadataOnly(bool enabled);
         void setIncompleteDirectory(const QString& directory, bool move);
         void setIdleSeedingLimitMode(TorrentData::IdleSeedingLimitMode mode);
         void setIdleSeedingLimit(int limit);

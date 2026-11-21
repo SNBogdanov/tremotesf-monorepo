@@ -60,8 +60,10 @@ target_sources(tremotesf_objects
     rpc/torrentfile.cpp
     rpc/tracker.cpp
 
+    startup/appprofile.cpp
     startup/commandlineparser.cpp
 
+    ui/filetypeicons.cpp
     ui/iconthemesetup.cpp
     ui/itemmodels/baseproxymodel.cpp
     ui/itemmodels/basetorrentfilesmodel.cpp
@@ -75,6 +77,11 @@ target_sources(tremotesf_objects
     ui/screens/addtorrent/addtorrenthelpers.cpp
     ui/screens/addtorrent/droppedtorrents.cpp
     ui/screens/addtorrent/localtorrentfilesmodel.cpp
+    ui/screens/archive/archivemanagerdialog.cpp
+    ui/screens/archive/archiverestoredialog.cpp
+    ui/screens/archive/archivesavedialog.cpp
+    ui/screens/archive/archiveutils.cpp
+    ui/screens/archive/archiveviewdialog.cpp
     ui/screens/connectionsettings/connectionsettingsdialog.cpp
     ui/screens/connectionsettings/servereditdialog.cpp
     ui/screens/connectionsettings/serversmodel.cpp
@@ -83,6 +90,7 @@ target_sources(tremotesf_objects
     ui/screens/mainwindow/downloaddirectoriesmodel.cpp
     ui/screens/mainwindow/downloaddirectorydelegate.cpp
     ui/screens/mainwindow/editlabelsdialog.cpp
+    ui/screens/mainwindow/edittrackersdialog.cpp
     ui/screens/mainwindow/labelsmodel.cpp
     ui/screens/mainwindow/mainwindow.cpp
     ui/screens/mainwindow/mainwindowsidebar.cpp
@@ -168,9 +176,11 @@ target_sources(tremotesf_objects
     rpc/torrentfile.h
     rpc/tracker.h
 
+    startup/appprofile.h
     startup/commandlineparser.h
     startup/signalhandler.h
 
+    ui/filetypeicons.h
     ui/iconthemesetup.h
     ui/itemmodels/baseproxymodel.h
     ui/itemmodels/basetorrentfilesmodel.h
@@ -186,6 +196,11 @@ target_sources(tremotesf_objects
     ui/screens/addtorrent/addtorrenthelpers.h
     ui/screens/addtorrent/droppedtorrents.h
     ui/screens/addtorrent/localtorrentfilesmodel.h
+    ui/screens/archive/archivemanagerdialog.h
+    ui/screens/archive/archiverestoredialog.h
+    ui/screens/archive/archivesavedialog.h
+    ui/screens/archive/archiveutils.h
+    ui/screens/archive/archiveviewdialog.h
     ui/screens/connectionsettings/connectionsettingsdialog.h
     ui/screens/connectionsettings/servereditdialog.h
     ui/screens/connectionsettings/serversmodel.h
@@ -194,6 +209,7 @@ target_sources(tremotesf_objects
     ui/screens/mainwindow/downloaddirectoriesmodel.h
     ui/screens/mainwindow/downloaddirectorydelegate.h
     ui/screens/mainwindow/editlabelsdialog.h
+    ui/screens/mainwindow/edittrackersdialog.h
     ui/screens/mainwindow/labelsmodel.h
     ui/screens/mainwindow/mainwindow.h
     ui/screens/mainwindow/mainwindowsidebar.h

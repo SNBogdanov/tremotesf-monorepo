@@ -162,6 +162,13 @@ abstract class Servers(
         Timber.i("doSave: elapsed time = $elapsed ms")
     }
 
+    fun restoreServersState(serversState: ServersState) {
+        Timber.i("restoreServersState() called")
+        val (validatedState, _) = serversState.validateLoaded()
+        this.serversState.value = validatedState
+        save()
+    }
+
     fun addOrReplaceServer(newServer: Server, previousName: String? = null) {
         Timber.d("addOrReplaceServer() called with: newServer = $newServer, previousName = $previousName")
         serversState.update { state ->
