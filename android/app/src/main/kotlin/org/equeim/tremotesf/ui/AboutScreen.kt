@@ -186,6 +186,8 @@ private fun AboutTab(innerPadding: PaddingValues, showLicense: () -> Unit) {
         OutlinedButton(onClick = showLicense, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.license))
         }
+
+        CheckForUpdatesButton()
     }
 }
 

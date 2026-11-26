@@ -54,6 +54,14 @@ SPDX-License-Identifier: CC0-1.0
   <developer_name>Alexey Rochev</developer_name>
 
   <releases>
+    <release date="2026-11-26" version="3.0.2">
+      <description>
+        <p>Added</p>
+        <ul>
+          <li>Android: check for updates from GitHub in the About screen</li>
+        </ul>
+      </description>
+    </release>
     <release date="2026-11-26" version="3.0.1">
       <description>
         <p>Changed</p>

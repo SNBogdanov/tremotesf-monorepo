@@ -34,8 +34,8 @@ android {
     defaultConfig {
         // Fork application ID so that this build can be installed alongside the official Tremotesf
         applicationId = "io.github.snbogdanov.tremotesf"
-        versionCode = 30001
-        versionName = "3.0.1"
+        versionCode = 30002
+        versionName = "3.0.2"
     }
 
     if (keystoreProperties != null) {
@@ -44,6 +44,11 @@ android {
             keyPassword = keystoreProperties.keyPassword
             storeFile = rootProject.file(keystoreProperties.storeFile)
             storePassword = keystoreProperties.storePassword
+        }
+        // Debug builds are signed with the same permanent key so that they can be
+        // installed over the release build on the test device without uninstalling it.
+        buildTypes.named("debug") {
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 

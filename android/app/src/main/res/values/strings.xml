@@ -591,6 +591,16 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="fork_notice">This is a fork of Tremotesf.</string>
     <string name="original_project_url">Original project: %1$s</string>
     <string name="translations_url">Translations: %1$s</string>
+    <string name="check_for_updates">Check for updates</string>
+    <string name="checking_for_updates">Checking for updates…</string>
+    <string name="update_available_title">Update available</string>
+    <string name="update_available_message">Version %1$s is available. Install now?</string>
+    <string name="update_up_to_date">You are using the latest version.</string>
+    <string name="update_check_failed">Failed to check for updates: %1$s</string>
+    <string name="update_downloading">Downloading update…</string>
+    <string name="update_download_failed">Failed to download update: %1$s</string>
+    <string name="update_install_failed">Failed to start installer: %1$s</string>
+    <string name="install">Install</string>
     <string name="maintainer">Maintainer</string>
     <string name="contributor">Contributor</string>
 
