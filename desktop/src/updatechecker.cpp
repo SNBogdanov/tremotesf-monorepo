@@ -46,7 +46,7 @@ namespace tremotesf {
             return;
         }
 
-        QNetworkRequest request(QUrl(manifestUrl));
+        QNetworkRequest request{QUrl(manifestUrl)};
         request.setHeader(QNetworkRequest::UserAgentHeader, QStringLiteral("Tremotesf"));
         request.setRawHeader("Accept", "application/json");
 
