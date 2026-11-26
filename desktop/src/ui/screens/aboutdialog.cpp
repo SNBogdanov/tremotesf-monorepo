@@ -38,15 +38,20 @@ namespace tremotesf {
 
         const auto aboutPageTemplate = uR"(
 <p>&#169; 2015-2025 Alexey Rochev &lt;<a href="mailto:equeim@gmail.com">equeim@gmail.com</a>&gt;</p>
-<p>%1
-<a href="https://github.com/equeim/tremotesf2">https://github.com/equeim/tremotesf2</a></p>
+<p>%1</p>
 <p>%2
+<a href="https://github.com/SNBogdanov/tremotesf-monorepo">https://github.com/SNBogdanov/tremotesf-monorepo</a></p>
+<p>%3
+<a href="https://github.com/equeim/tremotesf2">https://github.com/equeim/tremotesf2</a></p>
+<p>%4
 <a href="https://www.transifex.com/equeim/tremotesf">https://www.transifex.com/equeim/tremotesf</a></p>
 )"_s;
 
         auto aboutPageLabel = new QLabel(
             aboutPageTemplate.arg(
+                qApp->translate("tremotesf", "This is a fork of Tremotesf.").toHtmlEscaped(),
                 qApp->translate("tremotesf", "Source code:").toHtmlEscaped(),
+                qApp->translate("tremotesf", "Original project:").toHtmlEscaped(),
                 qApp->translate("tremotesf", "Translations:").toHtmlEscaped()
             ),
             this

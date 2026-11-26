@@ -581,6 +581,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="no_web_seeders">Нет веб-сидов</string>
 
     <string name="source_code_url">Исходный код: %1$s</string>
+    <string name="fork_notice">Это форк Tremotesf.</string>
+    <string name="original_project_url">Оригинальный проект: %1$s</string>
     <string name="translations_url">Переводы: %1$s</string>
     <string name="maintainer">Сопровождающий</string>
     <string name="contributor">Участник</string>

@@ -34,8 +34,8 @@ android {
     defaultConfig {
         // Fork application ID so that this build can be installed alongside the official Tremotesf
         applicationId = "io.github.snbogdanov.tremotesf"
-        versionCode = 30000
-        versionName = "3.0.0"
+        versionCode = 30001
+        versionName = "3.0.1"
     }
 
     if (keystoreProperties != null) {

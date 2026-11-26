@@ -152,9 +152,19 @@ private fun AboutTab(innerPadding: PaddingValues, showLicense: () -> Unit) {
                 appendLine(">")
             }
             pushStyle(ParagraphStyle())
+            appendLine(stringResource(R.string.fork_notice))
+            pop()
+            pushStyle(ParagraphStyle())
             appendLineContainingLinkAndAnnotateIt(
                 stringResource(R.string.source_code_url, SOURCE_CODE_URL),
                 SOURCE_CODE_URL,
+                linkStyles
+            )
+            pop()
+            pushStyle(ParagraphStyle())
+            appendLineContainingLinkAndAnnotateIt(
+                stringResource(R.string.original_project_url, ORIGINAL_SOURCE_CODE_URL),
+                ORIGINAL_SOURCE_CODE_URL,
                 linkStyles
             )
             pop()
@@ -194,7 +204,8 @@ private fun AnnotatedString.Builder.appendLineContainingLinkAndAnnotateIt(
 
 private const val EMAIL = "equeim@gmail.com"
 private const val EMAIL_URL = "mailto:$EMAIL"
-private const val SOURCE_CODE_URL = "https://github.com/equeim/tremotesf-android"
+private const val SOURCE_CODE_URL = "https://github.com/SNBogdanov/tremotesf-monorepo"
+private const val ORIGINAL_SOURCE_CODE_URL = "https://github.com/equeim/tremotesf-android"
 private const val TRANSLATIONS_URL = "https://www.transifex.com/equeim/tremotesf-android"
 
 @Composable

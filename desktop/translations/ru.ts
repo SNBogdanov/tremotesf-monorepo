@@ -15,6 +15,14 @@
         <translation>Исходный код:</translation>
     </message>
     <message>
+        <source>This is a fork of Tremotesf.</source>
+        <translation>Это форк Tremotesf.</translation>
+    </message>
+    <message>
+        <source>Original project:</source>
+        <translation>Оригинальный проект:</translation>
+    </message>
+    <message>
         <source>Translations:</source>
         <translation>Переводы:</translation>
     </message>
