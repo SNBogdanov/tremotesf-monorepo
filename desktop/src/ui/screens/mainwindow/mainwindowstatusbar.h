@@ -7,6 +7,7 @@
 
 #include <QStatusBar>
 
+class QHBoxLayout;
 class QLabel;
 class QToolButton;
 class QAction;
@@ -32,7 +33,7 @@ namespace tremotesf {
         void updateAltSpeedLimitIcon();
 
         const Rpc* mRpc{};
-        QLayout* mLayout{};
+        QHBoxLayout* mLayout{};
         QLabel* mServerLabel{};
         QToolButton* mAltSpeedLimitsButton{};
         QWidget* mServerSpacer{};

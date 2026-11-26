@@ -36,7 +36,7 @@ namespace tremotesf {
         addPermanentWidget(container, 1);
 
         mLayout = new QHBoxLayout(container);
-        // Top/bottom margins are set on mServerLabel below so that they don't affect separators
+        // Set top/bottom margins to zero so that separators can be full-height.
         mLayout->setContentsMargins(8, 0, 8, 0);
 
         mServerLabel = new QLabel(this);
@@ -177,7 +177,8 @@ namespace tremotesf {
     namespace {
         auto widgetsAfter(QWidget* widget, QLayout* layout) {
             return std::views::iota(layout->indexOf(widget) + 1, layout->count())
-                   | std::views::transform([layout](int i) { return layout->itemAt(i)->widget(); });
+                   | std::views::transform([layout](int i) { return layout->itemAt(i)->widget(); })
+                   | std::views::filter([](QWidget* w) { return w != nullptr; });
         }
     }
 
