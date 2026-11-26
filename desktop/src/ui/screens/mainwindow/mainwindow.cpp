@@ -2289,7 +2289,7 @@ namespace tremotesf {
 
     MainWindow::MainWindow(QStringList&& commandLineFiles, QStringList&& commandLineUrls, QWidget* parent)
         : QMainWindow(parent), mImpl(new Impl(std::move(commandLineFiles), std::move(commandLineUrls), this)) {
-        QString title(TREMOTESF_APP_NAME ""_L1);
+        QString title(QString("%1 %2"_L1).arg(TREMOTESF_APP_NAME ""_L1, qApp->applicationVersion()));
         if (const auto& profile = profileName(); !profile.isEmpty()) {
             title = QString("%1 (%2)"_L1).arg(title, profile);
         }

@@ -11,6 +11,7 @@ class QLabel;
 class QPushButton;
 class QTableWidget;
 class QTextEdit;
+class QShowEvent;
 
 namespace tremotesf {
     class ScriptJobsManager;
@@ -22,6 +23,9 @@ namespace tremotesf {
         explicit ScriptJobsDialog(ScriptJobsManager* manager, QWidget* parent = nullptr);
 
         void showJob(const QString& jobId);
+
+    protected:
+        void showEvent(QShowEvent* event) override;
 
     private:
         void refresh();

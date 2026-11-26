@@ -16,6 +16,7 @@
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QScrollBar>
+#include <QShowEvent>
 #include <QSplitter>
 #include <QTabWidget>
 #include <QTableWidget>
@@ -191,6 +192,13 @@ namespace tremotesf {
                 break;
             }
         }
+    }
+
+    void ScriptJobsDialog::showEvent(QShowEvent* event) {
+        QDialog::showEvent(event);
+        // Jobs can keep running while this window is hidden, so always rebuild the
+        // table and the selected job's output from the manager state on reopening.
+        refresh();
     }
 
     void ScriptJobsDialog::refresh() {

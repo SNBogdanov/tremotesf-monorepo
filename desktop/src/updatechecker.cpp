@@ -22,6 +22,8 @@
 #include <QUrl>
 #include <QVersionNumber>
 
+#include "log/log.h"
+
 #ifdef Q_OS_WIN
 #    include <windows.h>
 #    include <shellapi.h>
@@ -49,6 +51,8 @@ namespace tremotesf {
         QNetworkRequest request{QUrl(manifestUrl)};
         request.setHeader(QNetworkRequest::UserAgentHeader, QStringLiteral("Tremotesf"));
         request.setRawHeader("Accept", "application/json");
+        request.setAttribute(QNetworkRequest::Http2AllowedAttribute, false);
+        info().log("Checking for updates, current version: {}", currentVersion());
 
         mReply = mNetwork->get(request);
         auto* timeout = new QTimer(mReply);
@@ -61,6 +65,7 @@ namespace tremotesf {
             reply->deleteLater();
 
             if (reply->error() != QNetworkReply::NoError) {
+                warning().log("Update check failed: {}", reply->errorString());
                 if (!silent) {
                     showError(
                         qApp->translate("tremotesf", "Failed to check for updates: %1").arg(reply->errorString())
@@ -90,6 +95,7 @@ namespace tremotesf {
             }
 
             if (QVersionNumber::compare(remoteVersion, localVersion) <= 0) {
+                info().log("No updates available, latest version: {}", version);
                 if (!silent) {
                     QMessageBox::information(
                         mParentWindow,
@@ -118,6 +124,7 @@ namespace tremotesf {
                 QMessageBox::Yes | QMessageBox::No,
                 mParentWindow
             );
+            info().log("Update available: {}", version);
             dialog.setDefaultButton(QMessageBox::Yes);
             if (dialog.exec() != QMessageBox::Yes) {
                 return;
@@ -159,6 +166,7 @@ namespace tremotesf {
 
         QNetworkRequest request(url);
         request.setHeader(QNetworkRequest::UserAgentHeader, QStringLiteral("Tremotesf"));
+        request.setAttribute(QNetworkRequest::Http2AllowedAttribute, false);
         mDownloadReply = mNetwork->get(request);
         auto* reply = mDownloadReply;
 

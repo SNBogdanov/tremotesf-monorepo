@@ -269,6 +269,11 @@ private val AUTHORS = listOf(
         type = Author.Type.Maintainer,
     ),
     Author(
+        name = "Sergey Bogdanov",
+        email = "smbogdanov1968@gmail.com",
+        type = Author.Type.Maintainer,
+    ),
+    Author(
         name = "Kevin Richter",
         email = "me@kevinrichter.nl",
         type = Author.Type.Contributor,

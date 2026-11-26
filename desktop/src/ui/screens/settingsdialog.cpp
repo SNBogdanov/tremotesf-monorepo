@@ -20,6 +20,7 @@
 #include <QJsonObject>
 #include <QLabel>
 #include <QLineEdit>
+#include <QLocale>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -180,6 +181,60 @@ namespace tremotesf {
             layout->addRow(displayRelativeTimeCheckBox);
             displayRelativeTimeCheckBox->setChecked(settings->get_displayRelativeTime());
 
+            auto languageComboBox = new QComboBox(page);
+            const std::array languageCodes{
+                u""_s,
+                u"en"_s,
+                u"ru"_s,
+                u"de"_s,
+                u"es"_s,
+                u"es_ES"_s,
+                u"fr"_s,
+                u"it_IT"_s,
+                u"nl"_s,
+                u"nl_BE"_s,
+                u"pl"_s,
+                u"tr"_s,
+                u"zh_CN"_s
+            };
+            for (const auto& code : languageCodes) {
+                if (code.isEmpty()) {
+                    languageComboBox->addItem(qApp->translate("tremotesf", "System default"), QString());
+                } else {
+                    const QLocale locale(code);
+                    auto name = locale.nativeLanguageName();
+                    if (name.isEmpty()) {
+                        name = QLocale::languageToString(locale.language());
+                    }
+                    languageComboBox->addItem(name, code);
+                }
+            }
+            const auto currentLanguageIndex = languageComboBox->findData(settings->get_language());
+            if (currentLanguageIndex >= 0) {
+                languageComboBox->setCurrentIndex(currentLanguageIndex);
+            }
+            layout->addRow(qApp->translate("tremotesf", "Language:"), languageComboBox);
+
+            auto languageRestartMessage = new KMessageWidget(page);
+            languageRestartMessage->setMessageType(KMessageWidget::Information);
+            languageRestartMessage->setCloseButtonVisible(false);
+            languageRestartMessage->setText(
+                qApp->translate("tremotesf", "Restart Tremotesf to apply the language change")
+            );
+            languageRestartMessage->setVisible(false);
+            layout->addRow(languageRestartMessage);
+            const auto updateLanguageRestartMessage = [=] {
+                languageRestartMessage->setVisible(
+                    languageComboBox->currentData().toString() != settings->get_language()
+                );
+            };
+            QObject::connect(
+                languageComboBox,
+                &QComboBox::currentIndexChanged,
+                languageRestartMessage,
+                updateLanguageRestartMessage
+            );
+
             auto displayFullDownloadDirectoryPathCheckBox = new QCheckBox(
                 //: Check box label
                 qApp->translate("tremotesf", "Display full path of download directories in sidebar and torrents list"),
@@ -213,6 +268,7 @@ namespace tremotesf {
                 }
                 settings->set_connectOnStartup(connectOnStartupCheckBox->isChecked());
                 settings->set_displayRelativeTime(displayRelativeTimeCheckBox->isChecked());
+                settings->set_language(languageComboBox->currentData().toString());
                 settings->set_displayFullDownloadDirectoryPath(displayFullDownloadDirectoryPathCheckBox->isChecked());
                 settings->set_checkForUpdates(checkForUpdatesCheckBox->isChecked());
             };

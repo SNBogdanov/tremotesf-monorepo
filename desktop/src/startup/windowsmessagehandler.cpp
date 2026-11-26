@@ -12,6 +12,7 @@
 #include <optional>
 #include <thread>
 
+#include <QCoreApplication>
 #include <QDateTime>
 #include <QFile>
 #include <QDir>
@@ -110,7 +111,8 @@ namespace tremotesf {
                     mCv.notify_one();
                 });
 
-                const auto dirPath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+                const auto dirPath = QDir(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation))
+                                         .filePath(QCoreApplication::organizationName() + "/logs"_L1);
                 debug().log("FileLogger: creating logs directory {}", QDir::toNativeSeparators(dirPath));
                 try {
                     fs::create_directories(fs::path(getCWString(dirPath)));

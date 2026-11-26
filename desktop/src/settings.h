@@ -96,6 +96,8 @@ namespace tremotesf {
 
         SETTINGS_PROPERTY(bool, displayRelativeTime)
 
+        SETTINGS_PROPERTY(QString, language)
+
         SETTINGS_PROPERTY(bool, displayFullDownloadDirectoryPath)
 
     public:

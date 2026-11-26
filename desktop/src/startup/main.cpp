@@ -18,6 +18,7 @@
 #include "signalhandler.h"
 #include "ipc/ipcclient.h"
 #include "log/log.h"
+#include "settings.h"
 #include "rpc/servers.h"
 #include "startup/appprofile.h"
 #include "ui/iconthemesetup.h"
@@ -199,6 +200,14 @@ int main(int argc, char** argv) {
 
     logLocaleInfo();
 
+    const auto languageSetting = Settings::instance()->get_language();
+    const QLocale uiLocale = languageSetting.isEmpty() ? QLocale{} : QLocale(languageSetting);
+    info().log(
+        "UI language: {} (setting: {})",
+        uiLocale.name(),
+        languageSetting.isEmpty() ? QStringLiteral("system") : languageSetting
+    );
+
     QTranslator qtTranslator;
     {
         const QString qtTranslationsPath =
@@ -207,20 +216,20 @@ int main(int argc, char** argv) {
 #else
             QLibraryInfo::path(QLibraryInfo::TranslationsPath);
 #endif
-        if (qtTranslator.load(QLocale{}, "qt"_L1, "_"_L1, qtTranslationsPath)) {
+        if (qtTranslator.load(uiLocale, "qt"_L1, "_"_L1, qtTranslationsPath)) {
             info().log("Loaded Qt translation {}", qtTranslator.filePath());
             qApp->installTranslator(&qtTranslator);
         } else {
-            warning().log("Failed to load Qt translation for {} from {}", QLocale(), qtTranslationsPath);
+            warning().log("Failed to load Qt translation for {} from {}", uiLocale, qtTranslationsPath);
         }
     }
 
     QTranslator appTranslator;
-    if (appTranslator.load(QLocale{}, {}, {}, ":/translations/"_L1)) {
+    if (appTranslator.load(uiLocale, {}, {}, ":/translations/"_L1)) {
         info().log("Loaded Tremotesf translation {}", appTranslator.filePath());
         qApp->installTranslator(&appTranslator);
     } else {
-        warning().log("Failed to load Tremotesf translation for {}", QLocale{});
+        warning().log("Failed to load Tremotesf translation for {}", uiLocale);
     }
 
     const SaveWindowStateDispatcher saveStateDispatcher{};

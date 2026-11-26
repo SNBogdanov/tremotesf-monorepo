@@ -26,11 +26,17 @@ SPDX-License-Identifier: GPL-3.0-or-later
             <DialogRef Id="ResumeDlg" />
             <DialogRef Id="UserExit" />
             <DialogRef Id="TremotesfInstallDirDlg" />
+            <DialogRef Id="TremotesfUpgradeDlg" />
 
             <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999" />
 
-            <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg" Condition="NOT Installed" />
+            <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="TremotesfUpgradeDlg" Condition="NOT Installed AND WIX_UPGRADE_DETECTED" />
+            <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg" Condition="NOT Installed AND NOT WIX_UPGRADE_DETECTED" />
+            <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceWelcomeDlg" Condition="Installed AND NOT PATCH" />
             <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Condition="Installed AND PATCH" />
+
+            <Publish Dialog="TremotesfUpgradeDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" />
+            <Publish Dialog="TremotesfUpgradeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" />
 
             <Publish Dialog="LicenseAgreementDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" />
             <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog" Value="TremotesfInstallDirDlg" Condition="LicenseAccepted = &quot;1&quot;" />
@@ -42,7 +48,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
             <Publish Dialog="TremotesfInstallDirDlg" Control="Next" Event="CheckTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1" />
             <Publish Dialog="TremotesfInstallDirDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="4" />
 
-            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="TremotesfInstallDirDlg" Order="1" Condition="NOT Installed" />
+            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="TremotesfUpgradeDlg" Order="0" Condition="NOT Installed AND WIX_UPGRADE_DETECTED" />
+            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="TremotesfInstallDirDlg" Order="1" Condition="NOT Installed AND NOT WIX_UPGRADE_DETECTED" />
             <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2" Condition="Installed AND NOT PATCH" />
             <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2" Condition="Installed AND PATCH" />
 
@@ -52,7 +59,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
             <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg" />
             <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg" />
 
-            <Property Id="ARPNOMODIFY" Value="1" />
+
         </UI>
 
         <UIRef Id="WixUI_Common" />
@@ -88,6 +95,22 @@ SPDX-License-Identifier: GPL-3.0-or-later
                     CheckBoxValue="1"
                     Text="Create a shortcut on the Desktop"
                 />
+            </Dialog>
+
+            <Dialog Id="TremotesfUpgradeDlg" Width="370" Height="270" Title="Upgrade Tremotesf">
+                <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WixUINext)" />
+                <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
+                <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
+                    <Publish Event="SpawnDialog" Value="CancelDlg" />
+                </Control>
+
+                <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes" Text="The existing version of Tremotesf will be upgraded." />
+                <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="Upgrade Tremotesf" />
+                <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="!(loc.InstallDirDlgBannerBitmap)" />
+                <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="373" Height="0" />
+                <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="373" Height="0" />
+
+                <Control Id="UpgradeText" Type="Text" X="20" Y="70" Width="320" Height="90" Transparent="yes" NoPrefix="yes" Text="Setup will upgrade the installed version of Tremotesf. Settings, servers and downloaded data will be preserved." />
             </Dialog>
         </UI>
     </Fragment>

@@ -3045,5 +3045,17 @@ Download and install it now?</source>
         <source>Update installation is supported only on Windows</source>
         <translation>Установка обновлений поддерживается только в Windows</translation>
     </message>
+    <message>
+        <source>Language:</source>
+        <translation>Язык:</translation>
+    </message>
+    <message>
+        <source>System default</source>
+        <translation>Системный</translation>
+    </message>
+    <message>
+        <source>Restart Tremotesf to apply the language change</source>
+        <translation>Перезапустите Tremotesf, чтобы применить смену языка</translation>
+    </message>
 </context>
 </TS>
