@@ -381,7 +381,10 @@ class TorrentPropertiesScreenViewModel(
 
     private companion object {
         fun Tracker.calculateEta(): java.time.Duration? =
-            nextUpdateTime?.let { java.time.Duration.between(Instant.now(), it) }
+            nextUpdateTime?.let {
+                val eta = java.time.Duration.between(Instant.now(), it)
+                if (eta.isNegative) java.time.Duration.ZERO else eta
+            }
     }
 }
 

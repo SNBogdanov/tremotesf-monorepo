@@ -61,6 +61,10 @@ open class TorrentFilesTree(
 
         override fun setItemWantedRecursively(wanted: Boolean, ids: MutableList<Int>) {
             super.setItemWantedRecursively(wanted, ids)
+            item = item.copy(
+                wantedSize = if (wanted) item.size else 0L,
+                wantedCompletedSize = if (wanted) item.completedSize else 0L,
+            )
             ids.add(item.fileId)
         }
 
@@ -119,7 +123,18 @@ open class TorrentFilesTree(
             if (id < 0) throw IllegalArgumentException("fileId can't be less than zero")
             val path = NodePath(this.path.indices + children.size)
             val node = FileNode(
-                Item(id, name, size, completedSize, wantedState, priority, path), path
+                Item(
+                    id,
+                    name,
+                    size,
+                    completedSize,
+                    wantedState,
+                    priority,
+                    path,
+                    wantedSize = if (wantedState == Item.WantedState.Wanted) size else 0L,
+                    wantedCompletedSize = if (wantedState == Item.WantedState.Wanted) completedSize else 0L,
+                ),
+                path
             )
             addChild(name, node)
             return node
@@ -173,6 +188,8 @@ open class TorrentFilesTree(
         var wantedState: WantedState = WantedState.Wanted,
         var priority: Priority = Priority.Normal,
         val nodePath: NodePath = NodePath(intArrayOf()),
+        var wantedSize: Long = 0,
+        var wantedCompletedSize: Long = 0,
     ) {
         val isDirectory: Boolean
             get() = (fileId == -1)
@@ -184,6 +201,15 @@ open class TorrentFilesTree(
                     return 0.0f
                 }
                 return (completedSize.toFloat() / bytes.toFloat())
+            }
+
+        val wantedProgress: Float
+            get() {
+                val bytes = wantedSize
+                if (bytes == 0L) {
+                    return 0.0f
+                }
+                return (wantedCompletedSize.toFloat() / bytes.toFloat()).coerceIn(0.0f, 1.0f)
             }
 
         enum class WantedState {
@@ -212,6 +238,8 @@ open class TorrentFilesTree(
         internal fun calculateFromChildren(children: List<Node>) {
             size = 0L
             completedSize = 0L
+            wantedSize = 0L
+            wantedCompletedSize = 0L
             children.first().item.let {
                 wantedState = it.wantedState
                 priority = it.priority
@@ -221,6 +249,8 @@ open class TorrentFilesTree(
                 val childItem = child.item
                 size += childItem.size
                 completedSize += childItem.completedSize
+                wantedSize += childItem.wantedSize
+                wantedCompletedSize += childItem.wantedCompletedSize
                 if (wantedState != WantedState.Mixed && childItem.wantedState != wantedState) {
                     wantedState = WantedState.Mixed
                 }
@@ -444,7 +474,11 @@ open class TorrentFilesTree(
             node.item = node.item.copy(name = newName)
         }
         for (node in unwantedFiles) {
-            node.item.wantedState = Item.WantedState.Unwanted
+            node.item = node.item.copy(
+                wantedState = Item.WantedState.Unwanted,
+                wantedSize = 0L,
+                wantedCompletedSize = 0L,
+            )
         }
         for (node in lowPriorityFiles) {
             node.item.priority = Item.Priority.Low
@@ -514,5 +548,38 @@ open class TorrentFilesTree(
     @AnyThread
     fun getCurrentNodeChildByIndexPath(path: NodePath): Item? {
         return currentNode.children.getOrNull(path.indices.last())?.item
+    }
+
+    fun getFileIdsForNodePaths(paths: List<NodePath>): List<Int> {
+        val ids = ArrayList<Int>()
+        for (path in paths) {
+            val node = currentNode.children.getOrNull(path.indices.last()) ?: continue
+            collectFileIds(node, ids)
+        }
+        return ids.distinct().sorted()
+    }
+
+    fun getCompletedFilesSize(): Long {
+        var size = 0L
+        fun addCompletedFilesSize(node: Node) {
+            when (node) {
+                is FileNode -> {
+                    val item = node.item
+                    if (item.size > 0 && item.completedSize >= item.size) {
+                        size += item.size
+                    }
+                }
+                is DirectoryNode -> node.children.forEach { addCompletedFilesSize(it) }
+            }
+        }
+        addCompletedFilesSize(rootNode)
+        return size
+    }
+
+    private fun collectFileIds(node: Node, ids: MutableList<Int>) {
+        when (node) {
+            is FileNode -> ids.add(node.item.fileId)
+            is DirectoryNode -> node.children.forEach { collectFileIds(it, ids) }
+        }
     }
 }

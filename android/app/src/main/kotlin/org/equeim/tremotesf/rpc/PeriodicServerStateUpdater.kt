@@ -26,8 +26,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.equeim.tremotesf.TremotesfApplication
+import org.equeim.tremotesf.rpc.requests.FileSize
 import org.equeim.tremotesf.rpc.requests.RpcTorrentFinishedState
 import org.equeim.tremotesf.rpc.requests.SessionStatsResponseArguments
+import org.equeim.tremotesf.rpc.requests.getDownloadDirFreeSpace
 import org.equeim.tremotesf.rpc.requests.getSessionStats
 import org.equeim.tremotesf.rpc.requests.getTorrentsFinishedState
 import org.equeim.tremotesf.service.NotificationsController
@@ -51,6 +53,12 @@ object PeriodicServerStateUpdater {
             coroutineScope,
             sessionStateRefreshRequests
         ) { getSessionStats() }
+
+    val downloadDirFreeSpace: StateFlow<RpcRequestState<FileSize>> =
+        GlobalRpcClient.performPeriodicRequestIntoStateFlow(
+            coroutineScope,
+            sessionStateRefreshRequests
+        ) { getDownloadDirFreeSpace() }
 
     val updatingTorrentsOnTorrentsListScreen = MutableStateFlow(false)
 

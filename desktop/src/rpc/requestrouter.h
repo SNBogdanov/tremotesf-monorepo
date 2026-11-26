@@ -76,6 +76,7 @@ namespace tremotesf::impl {
 
         struct Response {
             QJsonObject arguments{};
+            QString result{};
             bool success{};
         };
 

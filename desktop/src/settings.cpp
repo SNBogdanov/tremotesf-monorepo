@@ -125,6 +125,13 @@ namespace tremotesf {
     SETTINGS_PROPERTY_DEF(bool, showTrayIcon, "showTrayIcon", true)
     SETTINGS_PROPERTY_DEF(Qt::ToolButtonStyle, toolButtonStyle, "toolButtonStyle", Qt::ToolButtonFollowStyle)
     SETTINGS_PROPERTY_DEF(bool, toolBarLocked, "toolBarLocked", true)
+    SETTINGS_PROPERTY_DEF(bool, enlargedIcons, "enlargedIcons", false)
+    SETTINGS_PROPERTY_DEF(QString, scriptRunnerClientId, "scriptRunnerClientId", QString())
+    SETTINGS_PROPERTY_DEF(QString, scriptRunParameters, "scriptRunParameters", QString())
+    SETTINGS_PROPERTY_DEF(QString, whisparrUrl, "whisparrUrl", QString())
+    SETTINGS_PROPERTY_DEF(QString, whisparrApiKey, "whisparrApiKey", QString())
+    SETTINGS_PROPERTY_DEF(bool, whisparrIgnoreSslErrors, "whisparrIgnoreSslErrors", false)
+    SETTINGS_PROPERTY_DEF(bool, checkForUpdates, "checkForUpdates", true)
     SETTINGS_PROPERTY_DEF(bool, sideBarVisible, "sideBarVisible", true)
     SETTINGS_PROPERTY_DEF(bool, statusBarVisible, "statusBarVisible", true)
     SETTINGS_PROPERTY_DEF(bool, showTorrentPropertiesInMainWindow, "showTorrentPropertiesInMainWindow", false)
@@ -144,6 +151,8 @@ namespace tremotesf {
     SETTINGS_PROPERTY_DEF(QByteArray, minFreeSpaceTableHeaderState, "minFreeSpaceTableHeaderState", {})
     SETTINGS_PROPERTY_DEF(QByteArray, archiveViewDialogGeometry, "archiveViewDialogGeometry", {})
     SETTINGS_PROPERTY_DEF(QByteArray, archiveViewHeaderState, "archiveViewHeaderState", {})
+    SETTINGS_PROPERTY_DEF(QByteArray, whisparrRenameDialogHeaderState, "whisparrRenameDialogHeaderState", {})
+    SETTINGS_PROPERTY_DEF(QByteArray, whisparrRenameDialogMultiHeaderState, "whisparrRenameDialogMultiHeaderState", {})
 
     SETTINGS_PROPERTY_DEF(
         Settings::DarkThemeMode, darkThemeMode, "darkThemeMode", Settings::DarkThemeMode::FollowSystem

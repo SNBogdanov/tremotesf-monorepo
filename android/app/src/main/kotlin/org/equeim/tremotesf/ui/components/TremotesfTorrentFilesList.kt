@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
@@ -67,6 +68,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import org.equeim.tremotesf.R
+import org.equeim.tremotesf.rpc.GlobalRpcClient
+import org.equeim.tremotesf.rpc.requests.ScriptFileSelection
+import org.equeim.tremotesf.rpc.requests.ScriptRunResponseArguments
+import org.equeim.tremotesf.rpc.requests.ScriptSelection
 import org.equeim.tremotesf.torrentfile.TorrentFilesTree
 import org.equeim.tremotesf.torrentfile.TorrentFilesTree.Item.Priority
 import org.equeim.tremotesf.torrentfile.TorrentFilesTree.Item.WantedState
@@ -75,10 +80,13 @@ import org.equeim.tremotesf.ui.FileDownload
 import org.equeim.tremotesf.ui.FileTypeIcons
 import org.equeim.tremotesf.ui.Folder
 import org.equeim.tremotesf.ui.LowPriority
+import org.equeim.tremotesf.ui.scripts.ScriptJobDialog
+import org.equeim.tremotesf.ui.scripts.ScriptsBottomSheet
 
 @Composable
 fun TremotesfTorrentsFilesList(
     filesTree: TorrentFilesTree,
+    torrentHashString: String,
     contentPadding: PaddingValues,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
@@ -88,6 +96,9 @@ fun TremotesfTorrentsFilesList(
     val isAtRoot: Boolean by filesTree.isAtRoot.collectAsStateWithLifecycle()
     val selectionState =
         rememberTremotesfMultiSelectionState(listItems = filesTree.items.collectAsStateWithLifecycle()) { it.nodePath }
+
+    var runningScriptName by remember { mutableStateOf("") }
+    var runningScriptJob by remember { mutableStateOf<ScriptRunResponseArguments?>(null) }
 
     val navigateAndWaitForNewItems: suspend CoroutineScope.(() -> Unit) -> Unit = { navigate ->
         val newItemsEventChannel = Channel<Unit>()
@@ -255,10 +266,23 @@ fun TremotesfTorrentsFilesList(
         SelectionPanel(
             selectionState = selectionState,
             filesTree = filesTree,
+            torrentHashString = torrentHashString,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(contentPadding)
+                .padding(contentPadding),
+            onScriptStarted = { scriptName, job ->
+                runningScriptName = scriptName
+                runningScriptJob = job
+            }
         )
+
+        runningScriptJob?.let { job ->
+            ScriptJobDialog(
+                scriptName = runningScriptName,
+                job = job,
+                onDismiss = { runningScriptJob = null }
+            )
+        }
     }
 }
 
@@ -280,8 +304,12 @@ private data class FilesListScrollPosition(
 private fun SelectionPanel(
     selectionState: TremotesfMultiSelectionState<TorrentFilesTree.Item, TorrentFilesTree.NodePath>,
     filesTree: TorrentFilesTree,
-    modifier: Modifier = Modifier
+    torrentHashString: String,
+    modifier: Modifier = Modifier,
+    onScriptStarted: (scriptName: String, job: ScriptRunResponseArguments) -> Unit
 ) {
+    var showScripts by rememberSaveable { mutableStateOf(false) }
+
     TremotesfMultiSelectionPanel(
         state = selectionState,
         selectedItemsString = R.plurals.files_selected,
@@ -375,6 +403,12 @@ private fun SelectionPanel(
             showRenameDialogForNodePath = selectionState.selectedKeys.firstOrNull()
         }
 
+        if (torrentHashString.isNotEmpty() && GlobalRpcClient.serverCapabilities?.supportsScriptRunner == true) {
+            TremotesfIconButtonWithTooltip(Icons.Filled.Build, R.string.script_scripts) {
+                showScripts = true
+            }
+        }
+
         showRenameDialogForNodePath?.let { nodePath ->
             var newName: String by rememberSaveable {
                 mutableStateOf(filesTree.getCurrentNodeChildByIndexPath(nodePath)?.name.orEmpty())
@@ -411,6 +445,27 @@ private fun SelectionPanel(
                     }
                 }
             )
+        }
+
+        if (showScripts) {
+            val descriptor = GlobalRpcClient.serverCapabilities?.scriptRunner
+            if (descriptor != null) {
+                val fileIds = filesTree.getFileIdsForNodePaths(selectionState.selectedKeys.toList())
+                val selection = ScriptSelection(
+                    files = fileIds.map { ScriptFileSelection(hash = torrentHashString, fileIndex = it) }
+                )
+                ScriptsBottomSheet(
+                    descriptor = descriptor,
+                    selection = selection,
+                    context = "file",
+                    onDismiss = { showScripts = false },
+                    onStarted = { script, job ->
+                        onScriptStarted(script.name, job)
+                    }
+                )
+            } else {
+                showScripts = false
+            }
         }
     }
 }

@@ -215,6 +215,22 @@ private fun SettingsScreen(navigateUp: () -> Unit, properties: SettingsScreenVie
             )
 
             TremotesfSwitchWithText(
+                checked = properties.rememberScriptParameters.value,
+                onCheckedChange = properties.rememberScriptParameters::set,
+                text = R.string.prefs_remember_script_parameters_title,
+                modifier = Modifier.fillMaxWidth(),
+                horizontalContentPadding = horizontalPadding
+            )
+
+            TremotesfSwitchWithText(
+                checked = properties.closeScriptDialogOnCompletion.value,
+                onCheckedChange = properties.closeScriptDialogOnCompletion::set,
+                text = R.string.prefs_close_script_dialog_on_completion_title,
+                modifier = Modifier.fillMaxWidth(),
+                horizontalContentPadding = horizontalPadding
+            )
+
+            TremotesfSwitchWithText(
                 checked = properties.askForMergingTrackersWhenAddingExistingTorrent.value,
                 onCheckedChange = properties.askForMergingTrackersWhenAddingExistingTorrent::set,
                 text = R.string.prefs_ask_for_merging_trackers_when_adding_existing_torrent_title,
@@ -414,6 +430,8 @@ class SettingsScreenViewModel : ViewModel() {
         deleteFiles = SettingsProperty(Settings.deleteFiles),
         fillTorrentLinkFromClipboard = SettingsProperty(Settings.fillTorrentLinkFromClipboard),
         rememberAddTorrentParameters = SettingsProperty(Settings.rememberAddTorrentParameters),
+        rememberScriptParameters = SettingsProperty(Settings.rememberScriptParameters),
+        closeScriptDialogOnCompletion = SettingsProperty(Settings.closeScriptDialogOnCompletion),
         askForMergingTrackersWhenAddingExistingTorrent = SettingsProperty(Settings.askForMergingTrackersWhenAddingExistingTorrent),
         mergeTrackersWhenAddingExistingTorrent = SettingsProperty(Settings.mergeTrackersWhenAddingExistingTorrent),
         notifyOnFinished = SettingsProperty(Settings.notifyOnFinished),
@@ -434,6 +452,8 @@ class SettingsScreenViewModel : ViewModel() {
         val deleteFiles: SettingsProperty<Boolean>,
         val fillTorrentLinkFromClipboard: SettingsProperty<Boolean>,
         val rememberAddTorrentParameters: SettingsProperty<Boolean>,
+        val rememberScriptParameters: SettingsProperty<Boolean>,
+        val closeScriptDialogOnCompletion: SettingsProperty<Boolean>,
         val askForMergingTrackersWhenAddingExistingTorrent: SettingsProperty<Boolean>,
         val mergeTrackersWhenAddingExistingTorrent: SettingsProperty<Boolean>,
         val notifyOnFinished: SettingsProperty<Boolean>,
@@ -486,6 +506,8 @@ private fun SettingsScreenPreview() = ScreenPreview {
             deleteFiles = SettingsProperty(true),
             fillTorrentLinkFromClipboard = SettingsProperty(false),
             rememberAddTorrentParameters = SettingsProperty(true),
+            rememberScriptParameters = SettingsProperty(true),
+            closeScriptDialogOnCompletion = SettingsProperty(false),
             askForMergingTrackersWhenAddingExistingTorrent = SettingsProperty(false),
             mergeTrackersWhenAddingExistingTorrent = SettingsProperty(true),
             notifyOnFinished = SettingsProperty(false),

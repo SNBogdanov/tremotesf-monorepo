@@ -7,6 +7,7 @@
 
 #include <QChar>
 #include <QDialog>
+#include <QString>
 
 class QCheckBox;
 class QComboBox;
@@ -19,10 +20,13 @@ class QTableWidget;
 class QTimeEdit;
 
 class KMessageWidget;
+class KPageWidget;
+class KPageWidgetItem;
 
 namespace tremotesf {
     class RemoteDirectorySelectionWidget;
     class Rpc;
+    class ScriptParametersPage;
 
     class ServerSettingsDialog final : public QDialog {
         Q_OBJECT
@@ -34,6 +38,7 @@ namespace tremotesf {
     private:
         void setupUi();
         void loadSettings();
+        void updateScriptParametersPage();
 
         void addMinFreeSpaceRow(const QString& path = {}, quint64 value = 0, QChar unit = u'G');
         void removeSelectedMinFreeSpaceRows();
@@ -42,6 +47,10 @@ namespace tremotesf {
         Rpc* mRpc;
 
         KMessageWidget* mDisconnectedMessageWidget = nullptr;
+        KPageWidget* mPageWidget = nullptr;
+        ScriptParametersPage* mScriptParametersPage = nullptr;
+        KPageWidgetItem* mScriptParametersPageItem = nullptr;
+        QString mScriptParametersRevision;
 
         QWidget* mDownloadingPageWidget = nullptr;
         RemoteDirectorySelectionWidget* mDownloadDirectoryWidget = nullptr;

@@ -21,6 +21,7 @@
 #include <QIcon>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QTableWidget>
 #include <QTimeEdit>
@@ -39,6 +40,7 @@
 #include "rpc/pathutils.h"
 #include "rpc/rpc.h"
 #include "rpc/serversettings.h"
+#include "scriptparameterspage.h"
 #include "ui/widgets/remotedirectoryselectionwidget.h"
 
 using namespace Qt::StringLiterals;
@@ -124,6 +126,7 @@ namespace tremotesf {
         setWindowTitle(qApp->translate("tremotesf", "Server Options"));
 
         setupUi();
+        mScriptParametersPage = new ScriptParametersPage(mRpc, this);
         if (!restoreGeometry(Settings::instance()->get_serverSettingsDialogGeometry())) {
             resize(sizeHint().expandedTo(QSize(700, 550)));
         }
@@ -143,6 +146,7 @@ namespace tremotesf {
                 mSpeedPageWidget->setEnabled(true);
                 mNetworkPageWidget->setEnabled(true);
                 loadSettings();
+                updateScriptParametersPage();
             } else {
                 mDisconnectedMessageWidget->hide();
                 mDisconnectedMessageWidget->animatedShow();
@@ -155,12 +159,16 @@ namespace tremotesf {
         };
         QObject::connect(mRpc, &Rpc::connectedChanged, this, onConnectedChanged);
         onConnectedChanged();
+        QObject::connect(
+            mRpc->serverSettings(),
+            &ServerSettings::changed,
+            this,
+            &ServerSettingsDialog::updateScriptParametersPage
+        );
 
         QObject::connect(this, &QDialog::finished, this, [this] {
             Settings::instance()->set_serverSettingsDialogGeometry(saveGeometry());
-            Settings::instance()->set_minFreeSpaceTableHeaderState(
-                mMinFreeSpaceTable->horizontalHeader()->saveState()
-            );
+            Settings::instance()->set_minFreeSpaceTableHeaderState(mMinFreeSpaceTable->horizontalHeader()->saveState());
         });
     }
 
@@ -319,10 +327,28 @@ namespace tremotesf {
         settings->setMaximumPeersPerTorrent(mTorrentPeerLimitSpinBox->value());
         settings->setMaximumPeersGlobally(mGlobalPeerLimitSpinBox->value());
 
-        settings->save();
-        settings->setSaveOnSet(true);
+        const auto finish = [this, settings] {
+            settings->save();
+            settings->setSaveOnSet(true);
+            QDialog::accept();
+        };
 
-        QDialog::accept();
+        if (mScriptParametersPage && mScriptParametersPageItem && mScriptParametersPage->hasChanges()) {
+            mScriptParametersPage->save([this, finish](bool success, const QString& error) {
+                if (!success) {
+                    QMessageBox::warning(
+                        this,
+                        qApp->translate("tremotesf", "Failed to save script settings"),
+                        error
+                    );
+                    return;
+                }
+                finish();
+            });
+            return;
+        }
+
+        finish();
     }
 
     void ServerSettingsDialog::setupUi() {
@@ -340,12 +366,12 @@ namespace tremotesf {
         mDisconnectedMessageWidget->setVisible(false);
         layout->addWidget(mDisconnectedMessageWidget);
 
-        auto pageWidget = new KPageWidget(this);
+        mPageWidget = new KPageWidget(this);
 
         // Downloading page
         mDownloadingPageWidget = new QWidget(this);
 
-        KPageWidgetItem* downloadingPageItem = pageWidget->addPage(
+        KPageWidgetItem* downloadingPageItem = mPageWidget->addPage(
             mDownloadingPageWidget,
             //: "Downloading" server setting page
             qApp->translate("tremotesf", "Downloading", "Noun")
@@ -480,7 +506,7 @@ namespace tremotesf {
 
         // Seeding page
         mSeedingPageWidget = new QWidget(this);
-        KPageWidgetItem* seedingPageItem = pageWidget->addPage(
+        KPageWidgetItem* seedingPageItem = mPageWidget->addPage(
             mSeedingPageWidget,
             //: "Seeding" server setting page
             qApp->translate("tremotesf", "Seeding", "Noun")
@@ -532,7 +558,7 @@ namespace tremotesf {
 
         // Queue page
         mQueuePageWidget = new QWidget(this);
-        KPageWidgetItem* queuePageItem = pageWidget->addPage(
+        KPageWidgetItem* queuePageItem = mPageWidget->addPage(
             mQueuePageWidget,
             //: "Queue" server settings page
             qApp->translate("tremotesf", "Queue")
@@ -644,7 +670,7 @@ namespace tremotesf {
 
         // Speed page
         mSpeedPageWidget = new QWidget(this);
-        KPageWidgetItem* speedPageItem = pageWidget->addPage(
+        KPageWidgetItem* speedPageItem = mPageWidget->addPage(
             mSpeedPageWidget,
             //: "Speed" server settings page
             qApp->translate("tremotesf", "Speed")
@@ -806,7 +832,7 @@ namespace tremotesf {
 
         // Network page
         mNetworkPageWidget = new QWidget(this);
-        KPageWidgetItem* networkPageItem = pageWidget->addPage(
+        KPageWidgetItem* networkPageItem = mPageWidget->addPage(
             mNetworkPageWidget,
             //: "Network" server settings page
             qApp->translate("tremotesf", "Network")
@@ -896,12 +922,39 @@ namespace tremotesf {
         networkPageResizer->addWidgetsFromLayout(connectionGroupBoxLayout);
         networkPageResizer->addWidgetsFromLayout(peerLimitsGroupBoxLayout);
 
-        layout->addWidget(pageWidget);
+        layout->addWidget(mPageWidget);
 
         auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
         QObject::connect(dialogButtonBox, &QDialogButtonBox::accepted, this, &ServerSettingsDialog::accept);
         QObject::connect(dialogButtonBox, &QDialogButtonBox::rejected, this, &ServerSettingsDialog::reject);
-        pageWidget->setPageFooter(dialogButtonBox);
+        mPageWidget->setPageFooter(dialogButtonBox);
+    }
+
+    void ServerSettingsDialog::updateScriptParametersPage() {
+        if (!mScriptParametersPage) {
+            return;
+        }
+
+        const auto& data = mRpc->serverSettings()->data();
+        const bool available = mRpc->isConnected() && mScriptParametersPage->isAvailable();
+
+        if (available && !mScriptParametersPageItem) {
+            mScriptParametersPageItem =
+                mPageWidget->addPage(mScriptParametersPage, qApp->translate("tremotesf", "Script parameters"));
+            mScriptParametersPageItem->setIcon(QIcon::fromTheme("system-run"_L1));
+            mScriptParametersRevision = data.scriptRunner.has_value() ? data.scriptRunner->revision : QString();
+            mScriptParametersPage->load();
+        } else if (!available && mScriptParametersPageItem) {
+            mPageWidget->removePage(mScriptParametersPageItem);
+            mScriptParametersPageItem = nullptr;
+            mScriptParametersRevision.clear();
+        } else if (available) {
+            const auto revision = data.scriptRunner.has_value() ? data.scriptRunner->revision : QString();
+            if (revision != mScriptParametersRevision) {
+                mScriptParametersRevision = revision;
+                mScriptParametersPage->load();
+            }
+        }
     }
 
     void ServerSettingsDialog::loadSettings() {

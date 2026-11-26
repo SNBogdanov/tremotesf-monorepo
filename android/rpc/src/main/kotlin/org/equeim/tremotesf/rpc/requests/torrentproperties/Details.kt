@@ -60,6 +60,8 @@ data class TorrentDetails(
     val ratio: Double,
     @SerialName("totalSize")
     val totalSize: FileSize,
+    @SerialName("sizeWhenDone")
+    val sizeWhenDone: FileSize,
     @SerialName("haveValid")
     val completedSize: FileSize,
     @SerialName("uploadedEver")

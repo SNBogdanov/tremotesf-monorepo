@@ -8,6 +8,7 @@
 
 #include <array>
 #include <concepts>
+#include <memory>
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -15,9 +16,18 @@
 #include <QDialogButtonBox>
 #include <QFormLayout>
 #include <QGroupBox>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QLabel>
-#include <QVBoxLayout>
+#include <QLineEdit>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QPushButton>
+#include <QSslError>
+#include <QTimer>
+#include <QUrl>
+#include <QVBoxLayout>
 
 #include <KMessageWidget>
 #include <KPageWidget>
@@ -29,6 +39,7 @@
 #include "rpc/serversettings.h"
 #include "ui/screens/addtorrent/addtorrentdialog.h"
 #include "ui/screens/addtorrent/addtorrenthelpers.h"
+#include "ui/whisparr/whisparrutils.h"
 #include "ui/widgets/torrentremotedirectoryselectionwidget.h"
 
 #ifdef Q_OS_WIN
@@ -177,6 +188,14 @@ namespace tremotesf {
             layout->addRow(displayFullDownloadDirectoryPathCheckBox);
             displayFullDownloadDirectoryPathCheckBox->setChecked(settings->get_displayFullDownloadDirectoryPath());
 
+            auto checkForUpdatesCheckBox = new QCheckBox(
+                //: Check box label
+                qApp->translate("tremotesf", "Check for updates on startup"),
+                page
+            );
+            layout->addRow(checkForUpdatesCheckBox);
+            checkForUpdatesCheckBox->setChecked(settings->get_checkForUpdates());
+
             return [=] {
 #ifdef Q_OS_WIN
                 if (const auto index = darkThemeComboBox->currentIndex(); index != -1) {
@@ -195,6 +214,143 @@ namespace tremotesf {
                 settings->set_connectOnStartup(connectOnStartupCheckBox->isChecked());
                 settings->set_displayRelativeTime(displayRelativeTimeCheckBox->isChecked());
                 settings->set_displayFullDownloadDirectoryPath(displayFullDownloadDirectoryPathCheckBox->isChecked());
+                settings->set_checkForUpdates(checkForUpdatesCheckBox->isChecked());
+            };
+        }
+
+        std::invocable auto createWhisparrPage(KPageWidget* pageWidget, Settings* settings) {
+            auto page = new QWidget();
+            pageWidget->addPage(page, qApp->translate("tremotesf", "Whisparr"))
+                ->setIcon(QIcon::fromTheme("tremotesf-whisparr"_L1));
+            auto layout = new QFormLayout(page);
+            layout->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
+
+            auto urlEdit = new QLineEdit(page);
+            urlEdit->setPlaceholderText("http://localhost:6969"_L1);
+            layout->addRow(qApp->translate("tremotesf", "URL:"), urlEdit);
+
+            auto apiKeyEdit = new QLineEdit(page);
+            apiKeyEdit->setEchoMode(QLineEdit::Password);
+            layout->addRow(qApp->translate("tremotesf", "API key:"), apiKeyEdit);
+
+            auto ignoreSslErrorsCheckBox =
+                new QCheckBox(qApp->translate("tremotesf", "Allow self-signed certificates (unsafe)"), page);
+            layout->addRow(ignoreSslErrorsCheckBox);
+
+            auto testButton = new QPushButton(qApp->translate("tremotesf", "Test connection"), page);
+            layout->addRow(testButton);
+
+            auto statusWidget = new KMessageWidget(page);
+            statusWidget->setCloseButtonVisible(false);
+            statusWidget->setVisible(false);
+            layout->addRow(statusWidget);
+
+            urlEdit->setText(settings->get_whisparrUrl());
+            apiKeyEdit->setText(settings->get_whisparrApiKey());
+            ignoreSslErrorsCheckBox->setChecked(settings->get_whisparrIgnoreSslErrors());
+
+            auto* network = new QNetworkAccessManager(page);
+            const auto showStatus = [statusWidget](KMessageWidget::MessageType type, const QString& text) {
+                statusWidget->setMessageType(type);
+                statusWidget->setText(text);
+                statusWidget->animatedShow();
+            };
+
+            QObject::connect(testButton, &QPushButton::clicked, page, [=] {
+                const auto baseText = urlEdit->text().trimmed();
+                const auto apiKey = apiKeyEdit->text().trimmed();
+                if (baseText.isEmpty()) {
+                    showStatus(KMessageWidget::Warning, qApp->translate("tremotesf", "Enter Whisparr URL"));
+                    return;
+                }
+                if (apiKey.isEmpty()) {
+                    showStatus(KMessageWidget::Warning, qApp->translate("tremotesf", "Enter Whisparr API key"));
+                    return;
+                }
+
+                QUrl url(baseText);
+                if (url.scheme() != "http"_L1 && url.scheme() != "https"_L1) {
+                    url = QUrl("http://"_L1 + baseText);
+                }
+                if (!url.isValid() || url.host().isEmpty()) {
+                    showStatus(KMessageWidget::Warning, qApp->translate("tremotesf", "Invalid Whisparr URL"));
+                    return;
+                }
+                QString path = url.path();
+                while (path.endsWith(u'/')) {
+                    path.chop(1);
+                }
+                if (!path.endsWith("/api/v3/system/status"_L1)) {
+                    path += "/api/v3/system/status"_L1;
+                }
+                url.setPath(path);
+
+                QNetworkRequest request(url);
+                request.setRawHeader("X-Api-Key", apiKey.toUtf8());
+                request.setHeader(QNetworkRequest::UserAgentHeader, QStringLiteral("Tremotesf"));
+
+                testButton->setEnabled(false);
+                statusWidget->animatedHide();
+                auto* reply = network->get(request);
+                auto sslErrors = std::make_shared<QList<QSslError>>();
+                QObject::connect(reply, &QNetworkReply::sslErrors, reply, [sslErrors](const QList<QSslError>& errors) {
+                    *sslErrors = errors;
+                });
+                whisparr::applySelfSignedCertificatePolicy(reply, ignoreSslErrorsCheckBox->isChecked());
+                auto* timeout = new QTimer(reply);
+                timeout->setSingleShot(true);
+                timeout->start(10000);
+                QObject::connect(timeout, &QTimer::timeout, reply, &QNetworkReply::abort);
+                QObject::connect(reply, &QNetworkReply::finished, page, [=] {
+                    testButton->setEnabled(true);
+                    const int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+                    if (reply->error() == QNetworkReply::OperationCanceledError) {
+                        showStatus(
+                            KMessageWidget::Warning,
+                            qApp->translate("tremotesf", "Connection to Whisparr timed out")
+                        );
+                    } else if (reply->error() != QNetworkReply::NoError) {
+                        QString errorText = reply->errorString();
+                        if (!sslErrors->isEmpty()) {
+                            errorText += QStringLiteral("\n")
+                                         + qApp->translate("tremotesf", "TLS errors:")
+                                         + QStringLiteral("\n")
+                                         + whisparr::sslErrorsText(*sslErrors);
+                        }
+                        showStatus(KMessageWidget::Warning, errorText);
+                    } else if (httpStatus == 401) {
+                        showStatus(KMessageWidget::Warning, qApp->translate("tremotesf", "Invalid Whisparr API key"));
+                    } else if (httpStatus != 200) {
+                        showStatus(
+                            KMessageWidget::Warning,
+                            qApp->translate("tremotesf", "Whisparr returned HTTP status %1").arg(httpStatus)
+                        );
+                    } else {
+                        const auto data = reply->readAll();
+                        QJsonParseError parseError{};
+                        const auto document = QJsonDocument::fromJson(data, &parseError);
+                        if (parseError.error != QJsonParseError::NoError || !document.isObject()) {
+                            showStatus(KMessageWidget::Positive, qApp->translate("tremotesf", "Whisparr is available"));
+                        } else {
+                            const auto object = document.object();
+                            const auto appName = object.value("appName"_L1).toString("Whisparr"_L1);
+                            const auto version = object.value("version"_L1).toString();
+                            showStatus(
+                                KMessageWidget::Positive,
+                                version.isEmpty()
+                                    ? qApp->translate("tremotesf", "Connected to %1").arg(appName)
+                                    : qApp->translate("tremotesf", "Connected to %1 %2").arg(appName, version)
+                            );
+                        }
+                    }
+                    reply->deleteLater();
+                });
+            });
+
+            return [=] {
+                settings->set_whisparrUrl(urlEdit->text().trimmed());
+                settings->set_whisparrApiKey(apiKeyEdit->text().trimmed());
+                settings->set_whisparrIgnoreSslErrors(ignoreSslErrorsCheckBox->isChecked());
             };
         }
 
@@ -338,12 +494,14 @@ namespace tremotesf {
                 settings->set_rememberAddTorrentParameters(rememberAddTorrentParametersCheckBox->isChecked());
                 addTorrentParametersWidgets.saveToSettings();
                 if (showMainWindowWhenAddingTorrentsCheckBox) {
-                    settings->set_showMainWindowWhenAddingTorrent(showMainWindowWhenAddingTorrentsCheckBox->isChecked()
+                    settings->set_showMainWindowWhenAddingTorrent(
+                        showMainWindowWhenAddingTorrentsCheckBox->isChecked()
                     );
                 }
                 settings->set_showAddTorrentDialog(showDialogWhenAddingTorrentsCheckBox->isChecked());
                 settings->set_fillTorrentLinkFromClipboard(fillTorrentLinkFromKeyboardCheckBox->isChecked());
-                settings->set_askForMergingTrackersWhenAddingExistingTorrent(askForMergingTrackersCheckBox->isChecked()
+                settings->set_askForMergingTrackersWhenAddingExistingTorrent(
+                    askForMergingTrackersCheckBox->isChecked()
                 );
                 settings->set_mergeTrackersWhenAddingExistingTorrent(mergeTrackersCheckBox->isChecked());
             };
@@ -466,6 +624,7 @@ namespace tremotesf {
         auto settings = Settings::instance();
 
         const auto saveGeneralPage = createGeneralPage(pageWidget, settings);
+        const auto saveWhisparrPage = createWhisparrPage(pageWidget, settings);
         const auto saveAddingTorrentsPage = createAddingTorrentsPage(pageWidget, settings, rpc);
         const auto saveNotificationsPage = createNotificationsPage(pageWidget, settings);
 
@@ -476,6 +635,7 @@ namespace tremotesf {
 
         QObject::connect(this, &SettingsDialog::accepted, this, [=] {
             saveGeneralPage();
+            saveWhisparrPage();
             saveAddingTorrentsPage();
             saveNotificationsPage();
         });

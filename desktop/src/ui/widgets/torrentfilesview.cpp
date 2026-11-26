@@ -4,9 +4,12 @@
 
 #include "torrentfilesview.h"
 
+#include <algorithm>
+
 #include <QAction>
 #include <QActionGroup>
 #include <QCoreApplication>
+#include <QEvent>
 #include <QHeaderView>
 #include <QItemSelectionModel>
 #include <QKeyEvent>
@@ -24,6 +27,7 @@
 #include "ui/itemmodels/torrentfilesproxymodel.h"
 #include "ui/screens/addtorrent/localtorrentfilesmodel.h"
 #include "ui/screens/torrentproperties/torrentfilesmodel.h"
+#include "ui/scripts/scriptsmenu.h"
 
 #include "progressbardelegate.h"
 #include "textinputdialog.h"
@@ -105,6 +109,25 @@ namespace tremotesf {
         }
     }
 
+    bool TorrentFilesView::event(QEvent* event) {
+        switch (event->type()) {
+        case QEvent::DevicePixelRatioChange:
+        case QEvent::ScreenChangeInternal:
+            updateFontSize();
+            break;
+        default:
+            break;
+        }
+        return QTreeView::event(event);
+    }
+
+    void TorrentFilesView::updateFontSize() {
+        setFont(desktoputils::scaledFont(mBaseFont, devicePixelRatioF(), Settings::instance()->get_enlargedIcons()));
+        if (model()) {
+            doItemsLayout();
+        }
+    }
+
     void TorrentFilesView::keyPressEvent(QKeyEvent* event) {
         if (event->key() == Qt::Key_F2 && (mLocalFile || mRpc->serverSettings()->data().canRenameFiles())) {
             const auto current = currentIndex();
@@ -124,6 +147,14 @@ namespace tremotesf {
     TorrentFilesProxyModel* TorrentFilesView::proxyModel() const { return mProxyModel; }
 
     void TorrentFilesView::init() {
+        mBaseFont = font();
+        updateFontSize();
+        QObject::connect(
+            Settings::instance(),
+            &Settings::enlargedIconsChanged,
+            this,
+            &TorrentFilesView::updateFontSize
+        );
         setCommonTreeViewProperties(this, false);
         header()->setFirstSectionMovable(true);
         setContextMenuPolicy(Qt::CustomContextMenu);
@@ -303,6 +334,37 @@ namespace tremotesf {
                 setCurrentIndex(proxyIndex);
                 edit(proxyIndex);
             });
+        }
+
+        if (!mLocalFile && mRpc->serverSettings()->data().hasScriptRunner()) {
+            const auto* torrent = static_cast<const TorrentFilesModel*>(mModel)->torrent();
+            if (torrent) {
+                std::vector<int> fileIds{};
+                for (const auto& index : sourceIndexes) {
+                    static_cast<const TorrentFilesModelEntry*>(index.internalPointer())->getFileIds(fileIds);
+                }
+                std::ranges::sort(fileIds);
+                fileIds.erase(std::ranges::unique(fileIds).begin(), fileIds.end());
+                if (!fileIds.empty()) {
+                    ScriptSelection selection{};
+                    selection.files.reserve(static_cast<qsizetype>(fileIds.size()));
+                    for (const int fileId : fileIds) {
+                        selection.files.push_back({torrent->data().hashString, fileId});
+                    }
+                    contextMenu.addSeparator();
+                    QMenu* scriptsMenu = contextMenu.addMenu(
+                        QIcon::fromTheme("tremotesf-scripts"_L1),
+                        qApp->translate("tremotesf", "Scripts")
+                    );
+                    scripts::populateScriptsMenu(
+                        scriptsMenu,
+                        mRpc,
+                        ScriptContext::File,
+                        selection,
+                        nativeParentWidget() ? nativeParentWidget() : this
+                    );
+                }
+            }
         }
 
         contextMenu.exec(viewport()->mapToGlobal(pos));

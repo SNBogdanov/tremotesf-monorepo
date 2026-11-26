@@ -8,8 +8,8 @@
 #include <QStatusBar>
 
 class QLabel;
-class QMenu;
 class QToolButton;
+class QAction;
 
 namespace tremotesf {
     class Rpc;
@@ -20,7 +20,7 @@ namespace tremotesf {
         Q_OBJECT
 
     public:
-        explicit MainWindowStatusBar(const Rpc* rpc, QWidget* parent = nullptr);
+        explicit MainWindowStatusBar(const Rpc* rpc, QAction* altSpeedLimitsAction, QWidget* parent = nullptr);
 
     protected:
         bool event(QEvent* event) override;
@@ -28,21 +28,18 @@ namespace tremotesf {
     private:
         void updateLayout();
         void updateServerText();
-        void updateServerMenu();
         void updateStatusLabels();
         void updateAltSpeedLimitIcon();
 
         const Rpc* mRpc{};
         QLayout* mLayout{};
-        QToolButton* mServerButton{};
-        QMenu* mServerMenu{};
+        QLabel* mServerLabel{};
+        QToolButton* mAltSpeedLimitsButton{};
         QWidget* mServerSpacer{};
         StatusBarSeparator* mFirstSeparator{};
         QLabel* mStatusLabel{};
+        QLabel* mTemporaryFreeSpaceLabel{};
         QAction* mAltSpeedLimitsAction{};
-
-    signals:
-        void showConnectionSettingsDialog();
     };
 
     class StatusBarSeparator final : public QWidget {

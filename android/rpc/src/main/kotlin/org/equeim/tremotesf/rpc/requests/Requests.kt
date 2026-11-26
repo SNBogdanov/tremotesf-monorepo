@@ -72,7 +72,25 @@ internal enum class RpcMethod {
     SessionStats,
 
     @SerialName("free-space")
-    FreeSpace;
+    FreeSpace,
+
+    @SerialName("script_run")
+    ScriptRun,
+
+    @SerialName("script_status")
+    ScriptStatus,
+
+    @SerialName("script_cancel")
+    ScriptCancel,
+
+    @SerialName("script_settings_get")
+    ScriptSettingsGet,
+
+    @SerialName("script_settings_set")
+    ScriptSettingsSet,
+
+    @SerialName("script_restart_daemon")
+    ScriptRestartDaemon;
 
     override fun toString(): String = serializer().descriptor.getElementName(ordinal)
 }

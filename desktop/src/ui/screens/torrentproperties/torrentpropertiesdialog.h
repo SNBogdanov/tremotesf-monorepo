@@ -6,8 +6,11 @@
 #define TREMOTESF_TORRENTPROPERTIESDIALOG_H
 
 #include <QDialog>
+#include <QFont>
 
 #include "ui/savewindowstatedispatcher.h"
+
+class QEvent;
 
 namespace tremotesf {
     class Rpc;
@@ -24,8 +27,14 @@ namespace tremotesf {
 
     private:
         void saveState();
+        void updateFontSize();
 
+    protected:
+        bool event(QEvent* event) override;
+
+    private:
         TorrentPropertiesWidget* mTorrentPropertiesWidget;
+        QFont mBaseFont{};
 
         SaveWindowStateHandler mSaveStateHandler{this, [this] { saveState(); }};
     };

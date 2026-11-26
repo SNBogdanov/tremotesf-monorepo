@@ -55,6 +55,8 @@ target_sources(tremotesf_objects
     rpc/rpc.cpp
     rpc/servers.cpp
     rpc/serversettings.cpp
+    rpc/scriptrunner.cpp
+    rpc/scriptjobsmanager.cpp
     rpc/serverstats.cpp
     rpc/torrent.cpp
     rpc/torrentfile.cpp
@@ -62,6 +64,8 @@ target_sources(tremotesf_objects
 
     startup/appprofile.cpp
     startup/commandlineparser.cpp
+
+    updatechecker.cpp
 
     ui/filetypeicons.cpp
     ui/iconthemesetup.cpp
@@ -109,6 +113,13 @@ target_sources(tremotesf_objects
     ui/screens/torrentproperties/torrentpropertieswidget.cpp
     ui/screens/torrentproperties/trackersmodel.cpp
     ui/screens/torrentproperties/trackersviewwidget.cpp
+    ui/screens/serversettings/scriptparameterspage.cpp
+    ui/scripts/scriptparametersform.cpp
+    ui/scripts/scriptrundialog.cpp
+    ui/scripts/scriptsmenu.cpp
+    ui/scripts/ansitext.cpp
+    ui/scripts/scriptjobsdialog.cpp
+    ui/whisparr/whisparrrenamedialog.cpp
     ui/stylehelpers.cpp
     ui/widgets/basetreeview.cpp
 
@@ -171,6 +182,8 @@ target_sources(tremotesf_objects
     rpc/rpc.h
     rpc/servers.h
     rpc/serversettings.h
+    rpc/scriptrunner.h
+    rpc/scriptjobsmanager.h
     rpc/serverstats.h
     rpc/torrent.h
     rpc/torrentfile.h
@@ -191,6 +204,7 @@ target_sources(tremotesf_objects
     ui/itemmodels/torrentfilestreebuilder.h
     ui/notificationscontroller.h
     ui/savewindowstatedispatcher.h
+    updatechecker.h
     ui/screens/aboutdialog.h
     ui/screens/addtorrent/addtorrentdialog.h
     ui/screens/addtorrent/addtorrenthelpers.h
@@ -228,6 +242,14 @@ target_sources(tremotesf_objects
     ui/screens/torrentproperties/torrentpropertieswidget.h
     ui/screens/torrentproperties/trackersmodel.h
     ui/screens/torrentproperties/trackersviewwidget.h
+    ui/screens/serversettings/scriptparameterspage.h
+    ui/scripts/scriptparametersform.h
+    ui/scripts/scriptrundialog.h
+    ui/scripts/scriptsmenu.h
+    ui/scripts/ansitext.h
+    ui/scripts/scriptjobsdialog.h
+    ui/whisparr/whisparrrenamedialog.h
+    ui/whisparr/whisparrutils.h
     ui/stylehelpers.h
     ui/systemcolorsprovider.h
     ui/widgets/basetreeview.h
@@ -499,6 +521,10 @@ if (BUILD_TESTING)
     add_executable(tracker_test rpc/tracker_test.cpp)
     add_test(NAME tracker_test COMMAND tracker_test)
     target_link_libraries(tracker_test PRIVATE tremotesf_objects Qt::Test)
+
+    add_executable(scriptrunner_test rpc/scriptrunner_test.cpp)
+    add_test(NAME scriptrunner_test COMMAND scriptrunner_test)
+    target_link_libraries(scriptrunner_test PRIVATE tremotesf_objects Qt::Test)
 
     add_executable(servers_test rpc/servers_test.cpp)
     add_test(NAME servers_test COMMAND servers_test)

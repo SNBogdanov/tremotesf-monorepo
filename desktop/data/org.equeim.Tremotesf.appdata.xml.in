@@ -54,6 +54,16 @@ SPDX-License-Identifier: CC0-1.0
   <developer_name>Alexey Rochev</developer_name>
 
   <releases>
+    <release date="2026-11-26" version="3.0.0">
+      <description>
+        <p>Added</p>
+        <ul>
+          <li>Whisparr integration: episode recognition, torrent file renaming and archive naming</li>
+          <li>Script runner support</li>
+          <li>Archive manager</li>
+        </ul>
+      </description>
+    </release>
     <release date="2026-07-28" version="2.10.1">
       <description>
         <p>Fixed</p>

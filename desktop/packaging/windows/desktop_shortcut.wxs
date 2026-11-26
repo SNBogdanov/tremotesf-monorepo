@@ -7,7 +7,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
     <Fragment>
         <StandardDirectory Id="DesktopFolder">
-            <Component Id="DesktopShortcutComponent" Guid="*">
+            <Component Id="DesktopShortcutComponent" Guid="*" Condition="DESKTOPSHORTCUT">
                 <Shortcut
                     Id="DesktopShortcut"
                     Name="Tremotesf"
@@ -25,15 +25,5 @@ SPDX-License-Identifier: GPL-3.0-or-later
                 />
             </Component>
         </StandardDirectory>
-
-        <Feature
-            Id="DesktopShortcutFeature"
-            Title="Desktop shortcut"
-            Description="Create a Tremotesf shortcut on the Desktop"
-            Level="1"
-            AllowAbsent="yes"
-        >
-            <ComponentRef Id="DesktopShortcutComponent" />
-        </Feature>
     </Fragment>
 </Wix>

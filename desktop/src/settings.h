@@ -65,6 +65,13 @@ namespace tremotesf {
         SETTINGS_PROPERTY(bool, showTrayIcon)
         SETTINGS_PROPERTY(Qt::ToolButtonStyle, toolButtonStyle)
         SETTINGS_PROPERTY(bool, toolBarLocked)
+        SETTINGS_PROPERTY(bool, enlargedIcons)
+        SETTINGS_PROPERTY(QString, scriptRunnerClientId)
+        SETTINGS_PROPERTY(QString, scriptRunParameters)
+        SETTINGS_PROPERTY(QString, whisparrUrl)
+        SETTINGS_PROPERTY(QString, whisparrApiKey)
+        SETTINGS_PROPERTY(bool, whisparrIgnoreSslErrors)
+        SETTINGS_PROPERTY(bool, checkForUpdates)
         SETTINGS_PROPERTY(bool, sideBarVisible)
         SETTINGS_PROPERTY(bool, statusBarVisible)
         SETTINGS_PROPERTY(bool, showTorrentPropertiesInMainWindow)
@@ -84,6 +91,8 @@ namespace tremotesf {
         SETTINGS_PROPERTY(QByteArray, minFreeSpaceTableHeaderState)
         SETTINGS_PROPERTY(QByteArray, archiveViewDialogGeometry)
         SETTINGS_PROPERTY(QByteArray, archiveViewHeaderState)
+        SETTINGS_PROPERTY(QByteArray, whisparrRenameDialogHeaderState)
+        SETTINGS_PROPERTY(QByteArray, whisparrRenameDialogMultiHeaderState)
 
         SETTINGS_PROPERTY(bool, displayRelativeTime)
 

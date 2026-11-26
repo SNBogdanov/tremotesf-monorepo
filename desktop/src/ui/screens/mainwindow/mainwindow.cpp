@@ -9,6 +9,7 @@
 #include <array>
 #include <cmath>
 #include <functional>
+#include <memory>
 #include <ranges>
 #include <unordered_map>
 
@@ -18,8 +19,10 @@
 #include <QCheckBox>
 #include <QClipboard>
 #include <QCloseEvent>
+#include <QComboBox>
 #include <QDialogButtonBox>
 #include <QFileDialog>
+#include <QFont>
 #include <QIcon>
 #include <QItemSelectionModel>
 #include <QKeySequence>
@@ -30,10 +33,14 @@
 #include <QMessageBox>
 #include <QPointer>
 #include <QPushButton>
+#include <QSet>
 #include <QShortcut>
 #include <QSplitter>
 #include <QSystemTrayIcon>
 #include <QToolBar>
+#include <QToolButton>
+#include <QTimer>
+#include <QVector>
 
 #ifdef TREMOTESF_UNIX_FREEDESKTOP
 #    include <KStartupInfo>
@@ -43,6 +50,8 @@
 
 #include "log/log.h"
 #include "rpc/serverstats.h"
+#include "rpc/scriptjobsmanager.h"
+#include "rpc/rpc.h"
 #include "rpc/mounteddirectoriesutils.h"
 #include "rpc/serversettings.h"
 #include "rpc/torrent.h"
@@ -62,7 +71,11 @@
 #include "ui/screens/archive/archivesavedialog.h"
 #include "ui/screens/torrentproperties/torrentpropertiesdialog.h"
 #include "ui/screens/torrentproperties/torrentpropertieswidget.h"
+#include "ui/scripts/scriptjobsdialog.h"
+#include "ui/scripts/scriptsmenu.h"
+#include "ui/whisparr/whisparrrenamedialog.h"
 #include "ui/widgets/listplaceholder.h"
+#include "updatechecker.h"
 #include "ui/widgets/torrentremotedirectoryselectionwidget.h"
 #include "ui/widgets/torrentfilesview.h"
 
@@ -81,7 +94,6 @@
 #include "torrentsmodel.h"
 #include "torrentsproxymodel.h"
 #include "torrentsview.h"
-
 using namespace Qt::StringLiterals;
 
 SPECIALIZE_FORMATTER_FOR_QDEBUG(QRect)
@@ -312,18 +324,17 @@ namespace tremotesf {
 
             mWindow->setCentralWidget(&mHorizontalSplitter);
 
-            auto* const statusBar = new MainWindowStatusBar(mViewModel.rpc());
+            setupAltSpeedLimitsAction();
+
+            auto* const statusBar = new MainWindowStatusBar(mViewModel.rpc(), mAltSpeedLimitsAction, mWindow);
             mWindow->setStatusBar(statusBar);
             if (!Settings::instance()->get_statusBarVisible()) {
                 statusBar->hide();
             }
-            QObject::connect(statusBar, &MainWindowStatusBar::showConnectionSettingsDialog, this, [this] {
-                showSingleInstanceDialog<ConnectionSettingsDialog>([this] {
-                    return new ConnectionSettingsDialog(mWindow);
-                });
-            });
 
             setupActions();
+
+            mUpdateChecker = new UpdateChecker(mWindow);
 
             updateTorrentActions();
             QObject::connect(mViewModel.rpc(), &Rpc::torrentsUpdated, this, &MainWindow::Impl::updateTorrentActions);
@@ -336,6 +347,9 @@ namespace tremotesf {
 
             setupMenuBar();
             setupToolBar();
+            if (Settings::instance()->get_checkForUpdates()) {
+                QTimer::singleShot(5000, this, [this] { mUpdateChecker->checkForUpdates(true); });
+            }
 
             setupTrayIcon();
             mViewModel.setupNotificationsController(&mTrayIcon);
@@ -437,6 +451,8 @@ namespace tremotesf {
             }
         }
 
+        void minimizeToTray() { hideWindows(); }
+
         /**
          * @return true if event should be ignored, false otherwise
          */
@@ -509,6 +525,13 @@ namespace tremotesf {
         };
 
         QMenu* mTorrentMenu{};
+        QMenu* mTorrentScriptsMenu{};
+        QMenu* mSystemScriptsMenu{};
+        QAction* mWhisparrRenameAction{};
+        QAction* mScriptJobsAction{};
+        QAction* mRestartDaemonAction{};
+        ScriptJobsDialog* mScriptJobsDialog{};
+        UpdateChecker* mUpdateChecker{};
         QAction* mTorrentPropertiesAction{};
         QAction* mStartTorrentAction{};
         QAction* mStartTorrentNowAction{};
@@ -538,6 +561,8 @@ namespace tremotesf {
         QMenu* mFileMenu{};
 
         QToolBar mToolBar{};
+        QComboBox* mServerComboBox{};
+        QFont mToolBarBaseFont{};
         QAction* mToolBarAction{};
 
         QSystemTrayIcon mTrayIcon{QIcon::fromTheme("tremotesf-tray-icon"_L1, mWindow->windowIcon())};
@@ -548,6 +573,102 @@ namespace tremotesf {
 
         SaveWindowStateHandler mSaveStateHandler{mWindow, [this] { saveState(); }};
         ApplicationQuitEventFilter mAppQuitEventFilter{};
+
+        void updateAltSpeedLimitsAction() {
+            const bool enabled = mAltSpeedLimitsAction->isChecked();
+            mAltSpeedLimitsAction->setIcon(
+                QIcon::fromTheme(enabled ? "tremotesf-slow-mode"_L1 : "tremotesf-fast-mode"_L1)
+            );
+            if (auto* button = qobject_cast<QToolButton*>(mToolBar.widgetForAction(mAltSpeedLimitsAction))) {
+                button->setAutoRaise(!enabled);
+            }
+        }
+
+        void updateScriptsMenuVisibility() {
+            const bool hasScriptRunner = mViewModel.rpc()->serverSettings()->data().hasScriptRunner();
+            if (mTorrentScriptsMenu) {
+                mTorrentScriptsMenu->menuAction()->setVisible(hasScriptRunner);
+            }
+            if (mSystemScriptsMenu) {
+                mSystemScriptsMenu->menuAction()->setVisible(hasScriptRunner);
+            }
+            if (mScriptJobsAction) {
+                mScriptJobsAction->setVisible(hasScriptRunner);
+            }
+            if (mRestartDaemonAction) {
+                mRestartDaemonAction->setVisible(
+                    hasScriptRunner && mViewModel.rpc()->serverSettings()->data().hasRestartDaemon()
+                );
+            }
+        }
+
+        void showScriptJobs(const QString& jobId = {}) {
+            if (!mScriptJobsDialog) {
+                mScriptJobsDialog = new ScriptJobsDialog(mViewModel.rpc()->scriptJobsManager(), mWindow);
+                mScriptJobsDialog->setAttribute(Qt::WA_DeleteOnClose, false);
+            }
+            if (!jobId.isEmpty()) {
+                mScriptJobsDialog->showJob(jobId);
+            }
+            mScriptJobsDialog->show();
+            mScriptJobsDialog->raise();
+            mScriptJobsDialog->activateWindow();
+        }
+
+        void restartDaemon() {
+            const auto answer = QMessageBox::question(
+                mWindow,
+                qApp->translate("tremotesf", "Restart daemon"),
+                qApp->translate(
+                    "tremotesf",
+                    "The Transmission daemon will be restarted. The connection will be interrupted. Continue?"
+                ),
+                QMessageBox::Yes | QMessageBox::No,
+                QMessageBox::No
+            );
+            if (answer != QMessageBox::Yes) {
+                return;
+            }
+
+            mViewModel.rpc()->requestScriptRestartDaemon({}, this, [this](ScriptResponse response) {
+                if (response.success) {
+                    QMessageBox::information(
+                        mWindow,
+                        qApp->translate("tremotesf", "Restart daemon"),
+                        qApp->translate("tremotesf", "Daemon restart has been scheduled")
+                    );
+                } else {
+                    QMessageBox::warning(
+                        mWindow,
+                        qApp->translate("tremotesf", "Failed to restart daemon"),
+                        scripts::scriptErrorMessage(response.result)
+                    );
+                }
+            });
+        }
+
+        void setupAltSpeedLimitsAction() {
+            mAltSpeedLimitsAction = new QAction(
+                QIcon::fromTheme("tremotesf-fast-mode"_L1),
+                qApp->translate("tremotesf", "Alternative Speed Limits"),
+                this
+            );
+            mAltSpeedLimitsAction->setCheckable(true);
+            mAltSpeedLimitsAction->setChecked(mViewModel.rpc()->serverSettings()->data().alternativeSpeedLimitsEnabled);
+            updateAltSpeedLimitsAction();
+            QObject::connect(mAltSpeedLimitsAction, &QAction::toggled, this, [this](bool enabled) {
+                updateAltSpeedLimitsAction();
+                mViewModel.rpc()->serverSettings()->setAlternativeSpeedLimitsEnabled(enabled);
+            });
+            QObject::connect(mViewModel.rpc()->serverSettings(), &ServerSettings::changed, this, [this] {
+                const QSignalBlocker blocker(mAltSpeedLimitsAction);
+                mAltSpeedLimitsAction->setChecked(
+                    mViewModel.rpc()->serverSettings()->data().alternativeSpeedLimitsEnabled
+                );
+                updateAltSpeedLimitsAction();
+            });
+            mConnectionDependentActions.push_back(mAltSpeedLimitsAction);
+        }
 
         void setupActions() {
             updateShowHideAction();
@@ -650,8 +771,115 @@ namespace tremotesf {
 
             mTorrentMenu->addSeparator();
 
+            mWhisparrRenameAction = mTorrentMenu->addAction(
+                QIcon::fromTheme("tremotesf-whisparr"_L1),
+                qApp->translate("tremotesf", "Whisparr: recognize and rename")
+            );
+            QObject::connect(mWhisparrRenameAction, &QAction::triggered, this, [this] {
+                QVector<QPointer<Torrent>> torrents;
+                const auto selectedRows = mTorrentsView.selectionModel()->selectedRows();
+                torrents.reserve(selectedRows.size());
+                for (const auto& row : selectedRows) {
+                    if (auto* torrent = mTorrentsModel.torrentAtIndex(mTorrentsProxyModel.mapToSource(row))) {
+                        torrents.push_back(torrent);
+                    }
+                }
+                if (torrents.isEmpty()) {
+                    return;
+                }
+
+                auto waiting = std::make_shared<QSet<Torrent*>>();
+                for (const auto& torrent : torrents) {
+                    if (torrent && torrent->files().empty()) {
+                        torrent->setFilesEnabled(true);
+                        waiting->insert(torrent.data());
+                    }
+                }
+                if (waiting->isEmpty()) {
+                    showWhisparrRenameDialog(torrents);
+                    return;
+                }
+
+                for (auto* torrent : *waiting) {
+                    auto connection = std::make_shared<QMetaObject::Connection>();
+                    *connection = QObject::connect(
+                        torrent,
+                        &Torrent::filesUpdated,
+                        this,
+                        [this, torrent, torrents, waiting, connection] {
+                            QObject::disconnect(*connection);
+                            waiting->remove(torrent);
+                            if (waiting->isEmpty()) {
+                                showWhisparrRenameDialog(torrents);
+                            }
+                        }
+                    );
+                }
+            });
+            mWhisparrRenameAction->setVisible(isWhisparrConfigured());
+            QObject::connect(Settings::instance(), &Settings::whisparrUrlChanged, this, [this] {
+                mWhisparrRenameAction->setVisible(isWhisparrConfigured());
+            });
+            QObject::connect(Settings::instance(), &Settings::whisparrApiKeyChanged, this, [this] {
+                mWhisparrRenameAction->setVisible(isWhisparrConfigured());
+            });
+
+            mTorrentScriptsMenu = mTorrentMenu->addMenu(
+                QIcon::fromTheme("tremotesf-scripts"_L1),
+                qApp->translate("tremotesf", "Scripts")
+            );
+            QObject::connect(mTorrentScriptsMenu, &QMenu::aboutToShow, this, [this] {
+                ScriptSelection selection{};
+                const auto indexes = mTorrentsProxyModel.sourceIndexes(mTorrentsView.selectionModel()->selectedRows());
+                for (const auto& index : indexes) {
+                    if (const auto* torrent = mTorrentsModel.torrentAtIndex(index)) {
+                        selection.torrentHashes.push_back(torrent->data().hashString);
+                    }
+                }
+                scripts::populateScriptsMenu(
+                    mTorrentScriptsMenu,
+                    mViewModel.rpc(),
+                    ScriptContext::Torrent,
+                    selection,
+                    mWindow
+                );
+            });
+            updateScriptsMenuVisibility();
+            QObject::connect(
+                mViewModel.rpc()->serverSettings(),
+                &ServerSettings::changed,
+                this,
+                &MainWindow::Impl::updateScriptsMenuVisibility
+            );
+            QObject::connect(
+                mViewModel.rpc(),
+                &Rpc::connectedChanged,
+                this,
+                &MainWindow::Impl::updateScriptsMenuVisibility
+            );
+
+            auto* const scriptJobsManager = mViewModel.rpc()->scriptJobsManager();
+            QObject::connect(scriptJobsManager, &ScriptJobsManager::jobAdded, this, [this](const QString& jobId) {
+                showScriptJobs(jobId);
+            });
+            QObject::connect(
+                scriptJobsManager,
+                &ScriptJobsManager::jobStartFailed,
+                this,
+                [this](const QString& scriptName, const QString& result) {
+                    QMessageBox::warning(
+                        mWindow,
+                        qApp->translate("tremotesf", "Failed to start script"),
+                        qApp->translate("tremotesf", "Script \"%1\": %2")
+                            .arg(scriptName, scripts::scriptErrorMessage(result))
+                    );
+                }
+            );
+
+            mTorrentMenu->addSeparator();
+
             mRemoveTorrentAction = mTorrentMenu->addAction(
-                QIcon::fromTheme("edit-delete"_L1),
+                QIcon::fromTheme("tremotesf-delete-torrent"_L1),
                 //: Torrent's context menu item
                 qApp->translate("tremotesf", "&Delete")
             );
@@ -794,12 +1022,15 @@ namespace tremotesf {
                 if (!mTorrentsView.selectionModel()->hasSelection()) {
                     return;
                 }
-                auto torrentIds = mTorrentsProxyModel.sourceIndexes(mTorrentsView.selectionModel()->selectedRows())
-                                  | std::views::transform([this](const QModelIndex& index) {
-                                        return mTorrentsModel.torrentAtIndex(index)->data().id;
-                                    })
-                                  | std::ranges::to<std::vector>();
-                auto dialog = new ArchiveSaveDialog(mViewModel.rpc(), std::move(torrentIds), mWindow);
+                QVector<Torrent*> torrents;
+                const auto selectedRows = mTorrentsView.selectionModel()->selectedRows();
+                torrents.reserve(selectedRows.size());
+                for (const auto& index : selectedRows) {
+                    if (auto* torrent = mTorrentsModel.torrentAtIndex(mTorrentsProxyModel.mapToSource(index))) {
+                        torrents.push_back(torrent);
+                    }
+                }
+                auto dialog = new ArchiveSaveDialog(mViewModel.rpc(), std::move(torrents), mWindow);
                 dialog->setAttribute(Qt::WA_DeleteOnClose);
                 dialog->show();
             });
@@ -1102,7 +1333,34 @@ namespace tremotesf {
             );
         }
 
+        [[nodiscard]] bool isWhisparrConfigured() const {
+            const auto* settings = Settings::instance();
+            return !settings->get_whisparrUrl().trimmed().isEmpty()
+                   && !settings->get_whisparrApiKey().trimmed().isEmpty();
+        }
+
+        void showWhisparrRenameDialog(const QVector<QPointer<Torrent>>& torrents) {
+            QVector<Torrent*> actualTorrents{};
+            actualTorrents.reserve(torrents.size());
+            for (const auto& torrent : torrents) {
+                if (torrent) {
+                    actualTorrents.push_back(torrent.data());
+                }
+            }
+            if (actualTorrents.isEmpty()) {
+                return;
+            }
+            WhisparrRenameDialog dialog(
+                std::move(actualTorrents),
+                Settings::instance()->get_whisparrUrl(),
+                Settings::instance()->get_whisparrApiKey(),
+                mWindow
+            );
+            dialog.exec();
+        }
+
         void updateTorrentActions() {
+            mWhisparrRenameAction->setVisible(isWhisparrConfigured());
             mMetadataOnlyAction->setVisible(
                 mViewModel.rpc()->serverSettings()->data().hasForkFeature("metadata_only/v1"_L1)
             );
@@ -1242,7 +1500,7 @@ namespace tremotesf {
             dialog.setDefaultButton(QMessageBox::Cancel);
             const auto okButton = dialog.button(QMessageBox::Ok);
             if (dialog.style()->styleHint(QStyle::SH_DialogButtonBox_ButtonsHaveIcons)) {
-                okButton->setIcon(QIcon::fromTheme("edit-delete"_L1));
+                okButton->setIcon(QIcon::fromTheme("tremotesf-delete-torrent"_L1));
             }
 
             //: Check box label
@@ -1432,6 +1690,17 @@ namespace tremotesf {
             mToolBarAction->setCheckable(true);
             QObject::connect(mToolBarAction, &QAction::triggered, &mToolBar, &QToolBar::setVisible);
 
+            QAction* enlargedIconsAction = viewMenu->addAction(qApp->translate("tremotesf", "&Enlarged Icons"));
+            enlargedIconsAction->setCheckable(true);
+            enlargedIconsAction->setChecked(Settings::instance()->get_enlargedIcons());
+            QObject::connect(enlargedIconsAction, &QAction::triggered, this, [this](bool checked) {
+                Settings::instance()->set_enlargedIcons(checked);
+                updateIconSizes();
+            });
+            QObject::connect(Settings::instance(), &Settings::enlargedIconsChanged, this, [enlargedIconsAction] {
+                enlargedIconsAction->setChecked(Settings::instance()->get_enlargedIcons());
+            });
+
             QAction* sideBarAction = viewMenu->addAction(qApp->translate("tremotesf", "&Sidebar"));
             sideBarAction->setCheckable(true);
             sideBarAction->setChecked(Settings::instance()->get_sideBarVisible());
@@ -1486,6 +1755,29 @@ namespace tremotesf {
                     return new SettingsDialog(mViewModel.rpc(), mWindow);
                 });
             });
+
+            mSystemScriptsMenu =
+                toolsMenu->addMenu(QIcon::fromTheme("tremotesf-scripts"_L1), qApp->translate("tremotesf", "Scripts"));
+            QObject::connect(mSystemScriptsMenu, &QMenu::aboutToShow, this, [this] {
+                scripts::populateScriptsMenu(
+                    mSystemScriptsMenu,
+                    mViewModel.rpc(),
+                    ScriptContext::System,
+                    ScriptSelection{},
+                    mWindow
+                );
+            });
+            mScriptJobsAction = toolsMenu->addAction(
+                QIcon::fromTheme("tremotesf-script-jobs"_L1),
+                qApp->translate("tremotesf", "Script &jobs")
+            );
+            QObject::connect(mScriptJobsAction, &QAction::triggered, this, [this] { showScriptJobs(); });
+            mRestartDaemonAction = toolsMenu->addAction(
+                QIcon::fromTheme("view-refresh"_L1),
+                qApp->translate("tremotesf", "Restart &daemon")
+            );
+            QObject::connect(mRestartDaemonAction, &QAction::triggered, this, &MainWindow::Impl::restartDaemon);
+            updateScriptsMenuVisibility();
 
             QAction* serversAction = toolsMenu->addAction(
                 QIcon::fromTheme("network-server"_L1),
@@ -1576,6 +1868,17 @@ namespace tremotesf {
             //: Menu bar item
             QMenu* helpMenu = mWindow->menuBar()->addMenu(qApp->translate("tremotesf", "&Help"));
 
+            QAction* checkForUpdatesAction = helpMenu->addAction(
+                QIcon::fromTheme("system-software-update"_L1),
+                //: Menu item checking for program updates
+                qApp->translate("tremotesf", "Check for &Updates...")
+            );
+            checkForUpdatesAction->setMenuRole(QAction::ApplicationSpecificRole);
+            QObject::connect(checkForUpdatesAction, &QAction::triggered, this, [this] {
+                mUpdateChecker->checkForUpdates(false);
+            });
+            helpMenu->addSeparator();
+
             QAction* aboutAction = helpMenu->addAction(
                 QIcon::fromTheme("help-about"_L1),
                 //: Menu item opening "About" dialog
@@ -1589,17 +1892,69 @@ namespace tremotesf {
 
     public:
         void updateIconSizes() {
-            const int size = desktoputils::iconSizeForDevicePixelRatio(mWindow->devicePixelRatio());
+            const bool enlarged = Settings::instance()->get_enlargedIcons();
+            const int size = desktoputils::iconSizeForDevicePixelRatio(mWindow->devicePixelRatio(), enlarged);
             mToolBar.setIconSize(QSize(size, size));
+            mToolBar.setFont(desktoputils::scaledFont(mToolBarBaseFont, mWindow->devicePixelRatio(), enlarged));
         }
 
     private:
+        void updateServerComboBox() {
+            if (!mServerComboBox) {
+                return;
+            }
+            const QSignalBlocker blocker(mServerComboBox);
+            const auto servers = Servers::instance()->servers();
+            const auto currentServerName = Servers::instance()->currentServerName();
+            mServerComboBox->clear();
+            for (const auto& server : servers) {
+                mServerComboBox->addItem(server.name, server.name);
+            }
+            mServerComboBox->setEnabled(!servers.empty());
+            const auto index = mServerComboBox->findData(currentServerName);
+            if (index >= 0) {
+                mServerComboBox->setCurrentIndex(index);
+            }
+        }
+
         void setupToolBar() {
             mToolBar.setObjectName("toolBar"_L1);
-            updateIconSizes();
             mToolBar.setContextMenuPolicy(Qt::CustomContextMenu);
             mToolBar.setMovable(!Settings::instance()->get_toolBarLocked());
             mWindow->addToolBar(Qt::TopToolBarArea, &mToolBar);
+            mToolBarBaseFont = mToolBar.font();
+            updateIconSizes();
+
+            mServerComboBox = new QComboBox(&mToolBar);
+            mServerComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+            mServerComboBox->setToolTip(qApp->translate("tremotesf", "Server"));
+            mToolBar.addWidget(mServerComboBox);
+            mToolBar.addSeparator();
+            QObject::connect(mServerComboBox, &QComboBox::currentIndexChanged, this, [this](int index) {
+                const auto name = mServerComboBox->itemData(index).toString();
+                if (!name.isEmpty() && name != Servers::instance()->currentServerName()) {
+                    Servers::instance()->setCurrentServer(name);
+                }
+            });
+            updateServerComboBox();
+            QObject::connect(
+                Servers::instance(),
+                &Servers::currentServerChanged,
+                this,
+                &MainWindow::Impl::updateServerComboBox
+            );
+            QObject::connect(
+                Servers::instance(),
+                &Servers::serversChanged,
+                this,
+                &MainWindow::Impl::updateServerComboBox
+            );
+            QObject::connect(
+                Servers::instance(),
+                &Servers::hasServersChanged,
+                this,
+                &MainWindow::Impl::updateServerComboBox
+            );
 
             mToolBar.addAction(&mConnectAction);
             mToolBar.addAction(&mDisconnectAction);
@@ -1618,26 +1973,9 @@ namespace tremotesf {
             mToolBar.addAction(mMoveTorrentDownAction);
             mToolBar.addSeparator();
 
-            mAltSpeedLimitsAction = new QAction(
-                desktoputils::statusIcon(desktoputils::StatusIcon::Speedometer),
-                qApp->translate("tremotesf", "Alternative Speed Limits"),
-                this
-            );
-            mAltSpeedLimitsAction->setCheckable(true);
-            mAltSpeedLimitsAction->setChecked(mViewModel.rpc()->serverSettings()->data().alternativeSpeedLimitsEnabled);
-            QObject::connect(mAltSpeedLimitsAction, &QAction::toggled, this, [this](bool enabled) {
-                mViewModel.rpc()->serverSettings()->setAlternativeSpeedLimitsEnabled(enabled);
-            });
-            QObject::connect(mViewModel.rpc()->serverSettings(), &ServerSettings::changed, this, [this] {
-                const QSignalBlocker blocker(mAltSpeedLimitsAction);
-                mAltSpeedLimitsAction->setChecked(
-                    mViewModel.rpc()->serverSettings()->data().alternativeSpeedLimitsEnabled
-                );
-            });
-            mConnectionDependentActions.push_back(mAltSpeedLimitsAction);
-
             mToolBar.addAction(mServerSettingsAction);
             mToolBar.addAction(mAltSpeedLimitsAction);
+            updateAltSpeedLimitsAction();
             mToolBar.addSeparator();
             mToolBar.addAction(mSettingsAction);
 
@@ -1908,6 +2246,18 @@ namespace tremotesf {
                     qApp->translate("tremotesf", "Error adding torrent «%1»").arg(filePathOrUrl)
                 );
             });
+
+            QObject::connect(
+                mViewModel.rpc(),
+                &Rpc::torrentFileRenameFailed,
+                this,
+                [=](const QString& path, const QString& error) {
+                    showError(
+                        qApp->translate("tremotesf", "Failed to rename file"),
+                        qApp->translate("tremotesf", "Could not rename «%1»: %2").arg(path, error)
+                    );
+                }
+            );
         }
 
         void showDelayedTorrentAddDialog(const QStringList& torrents, std::optional<QByteArray> windowActivationToken) {
@@ -1965,6 +2315,13 @@ namespace tremotesf {
 
     bool MainWindow::event(QEvent* event) {
         if (event->type() == QEvent::WindowStateChange) {
+            if (isMinimized()
+                && !isHidden()
+                && Settings::instance()->get_closeBehavior() == Settings::CloseBehavior::Quit
+                && Settings::instance()->get_showTrayIcon()
+                && QSystemTrayIcon::isSystemTrayAvailable()) {
+                QMetaObject::invokeMethod(this, [this] { mImpl->minimizeToTray(); }, Qt::QueuedConnection);
+            }
             // This may be called in Impl constructor from restoreGeometry(), when mImpl is still uninitialized, so access it inside the lambda
             QMetaObject::invokeMethod(this, [this] { mImpl->updateShowHideAction(); }, Qt::QueuedConnection);
         } else if (event->type() == QEvent::DevicePixelRatioChange || event->type() == QEvent::ScreenChangeInternal) {

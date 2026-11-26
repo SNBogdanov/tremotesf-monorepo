@@ -43,6 +43,7 @@ import org.equeim.tremotesf.common.AlphanumericComparator
 import org.equeim.tremotesf.rpc.GlobalRpcClient
 import org.equeim.tremotesf.rpc.GlobalServers
 import org.equeim.tremotesf.rpc.PeriodicServerStateUpdater
+import org.equeim.tremotesf.rpc.requests.FileSize
 import org.equeim.tremotesf.rpc.RpcClient
 import org.equeim.tremotesf.rpc.RpcRequestError
 import org.equeim.tremotesf.rpc.RpcRequestState
@@ -82,18 +83,21 @@ class TorrentsListScreenViewModel(application: Application, savedStateHandle: Sa
         it?.let(::TitleState)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, GlobalServers.serversState.value.currentServer?.let(::TitleState))
 
-    data class SubtitleState(val downloadSpeed: TransferRate, val uploadSpeed: TransferRate)
+    data class SubtitleState(val downloadSpeed: TransferRate, val uploadSpeed: TransferRate, val freeSpace: FileSize?)
 
     val subtitleState: StateFlow<SubtitleState?> =
-        PeriodicServerStateUpdater.sessionStats
-            .map {
-                (it as? RpcRequestState.Loaded)?.let { stats ->
-                    SubtitleState(
-                        stats.response.downloadSpeed,
-                        stats.response.uploadSpeed
-                    )
-                }
+        combine(
+            PeriodicServerStateUpdater.sessionStats,
+            PeriodicServerStateUpdater.downloadDirFreeSpace
+        ) { stats, freeSpace ->
+            (stats as? RpcRequestState.Loaded)?.let { loaded ->
+                SubtitleState(
+                    loaded.response.downloadSpeed,
+                    loaded.response.uploadSpeed,
+                    (freeSpace as? RpcRequestState.Loaded)?.response
+                )
             }
+        }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     val currentServer: StateFlow<String?> = GlobalServers.currentServer.map { it?.name }.stateIn(
@@ -107,6 +111,30 @@ class TorrentsListScreenViewModel(application: Application, savedStateHandle: Sa
         SharingStarted.Eagerly,
         GlobalServers.serversState.value.servers.map(Server::name)
     )
+
+    init {
+        viewModelScope.launch {
+            var previousServer: Server? = null
+            GlobalServers.currentServer.collect { server ->
+                val previous = previousServer
+                if (previous != null && previous != server) {
+                    PerServerFilters.setLabel(previous, Settings.torrentsLabelFilter.get())
+                    PerServerFilters.setTracker(previous, Settings.torrentsTrackerFilter.get())
+                    PerServerFilters.setDirectory(previous, Settings.torrentsDirectoryFilter.get())
+                }
+                if (server != null) {
+                    Settings.torrentsLabelFilter.set(PerServerFilters.label(server))
+                    Settings.torrentsTrackerFilter.set(PerServerFilters.tracker(server))
+                    Settings.torrentsDirectoryFilter.set(PerServerFilters.directory(server))
+                } else {
+                    Settings.torrentsLabelFilter.set("")
+                    Settings.torrentsTrackerFilter.set("")
+                    Settings.torrentsDirectoryFilter.set("")
+                }
+                previousServer = server
+            }
+        }
+    }
 
     val alternativeSpeedLimitsEnabled: StateFlow<RpcRequestState<Boolean>> =
         GlobalRpcClient.performRecoveringRequestIntoStateFlow(viewModelScope) { checkIfAlternativeSpeedLimitsEnabled() }
@@ -187,15 +215,25 @@ class TorrentsListScreenViewModel(application: Application, savedStateHandle: Sa
         }
 
         fun setLabelFilter(label: String) {
-            GlobalScope.launch { Settings.torrentsLabelFilter.set(label) }
+            GlobalScope.launch {
+                Settings.torrentsLabelFilter.set(label)
+                GlobalServers.serversState.value.currentServer?.let { PerServerFilters.setLabel(it, label) }
+            }
         }
 
         fun setTrackerFilter(tracker: String) {
-            GlobalScope.launch { Settings.torrentsTrackerFilter.set(tracker) }
+            GlobalScope.launch {
+                Settings.torrentsTrackerFilter.set(tracker)
+                GlobalServers.serversState.value.currentServer?.let { PerServerFilters.setTracker(it, tracker) }
+            }
         }
 
         fun setDirectoryFilter(directory: NormalizedRpcPath?) {
-            GlobalScope.launch { Settings.torrentsDirectoryFilter.set(directory?.value.orEmpty()) }
+            GlobalScope.launch {
+                val value = directory?.value.orEmpty()
+                Settings.torrentsDirectoryFilter.set(value)
+                GlobalServers.serversState.value.currentServer?.let { PerServerFilters.setDirectory(it, value) }
+            }
         }
 
         fun reset() {

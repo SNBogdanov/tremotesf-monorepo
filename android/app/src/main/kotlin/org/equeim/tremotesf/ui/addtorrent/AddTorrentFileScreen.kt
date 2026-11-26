@@ -446,6 +446,7 @@ private fun FilesTab(
     val fileSizeFormatter = rememberFileSizeFormatter()
     TremotesfTorrentsFilesList(
         filesTree = filesTree,
+        torrentHashString = "",
         contentPadding = innerPadding,
         itemSupportingContent = { Text(fileSizeFormatter.formatFileSize(FileSize.fromBytes(it.size))) },
         modifier = Modifier.fillMaxSize()

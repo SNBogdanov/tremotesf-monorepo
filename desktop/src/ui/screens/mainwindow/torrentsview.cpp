@@ -26,6 +26,9 @@
 
 namespace tremotesf {
     TorrentsView::TorrentsView(TorrentsProxyModel* model, QWidget* parent) : QTreeView(parent) {
+        mBaseFont = font();
+        updateFontSize();
+        QObject::connect(Settings::instance(), &Settings::enlargedIconsChanged, this, &TorrentsView::updateFontSize);
         setCommonTreeViewProperties(this, true);
         updateIconSize();
         setContextMenuPolicy(Qt::CustomContextMenu);
@@ -112,6 +115,7 @@ namespace tremotesf {
         case QEvent::DevicePixelRatioChange:
         case QEvent::ScreenChangeInternal:
             updateIconSize();
+            updateFontSize();
             break;
         default:
             break;
@@ -139,9 +143,13 @@ namespace tremotesf {
 
     void TorrentsView::showEvent(QShowEvent* event) {
         updateIconSize();
+        updateFontSize();
         if (!mScreenChangeConnected) {
             if (auto* window = windowHandle()) {
-                QObject::connect(window, &QWindow::screenChanged, this, [this] { updateIconSize(); });
+                QObject::connect(window, &QWindow::screenChanged, this, [this] {
+                    updateIconSize();
+                    updateFontSize();
+                });
                 mScreenChangeConnected = true;
             }
         }
@@ -189,6 +197,12 @@ namespace tremotesf {
         setIconSize(QSize(size, size));
     }
 
-    void TorrentsView::saveState() { Settings::instance()->set_torrentsViewHeaderState(header()->saveState()); }
+    void TorrentsView::updateFontSize() {
+        setFont(desktoputils::scaledFont(mBaseFont, devicePixelRatioF(), Settings::instance()->get_enlargedIcons()));
+        if (model()) {
+            doItemsLayout();
+        }
+    }
 
+    void TorrentsView::saveState() { Settings::instance()->set_torrentsViewHeaderState(header()->saveState()); }
 }

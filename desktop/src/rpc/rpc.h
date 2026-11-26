@@ -25,6 +25,7 @@
 namespace tremotesf {
     class ServerSettings;
     class ServerStats;
+    class ScriptJobsManager;
 }
 #endif
 
@@ -38,6 +39,12 @@ namespace tremotesf {
     struct ArchiveResponse {
         bool success{};
         QJsonObject arguments{};
+    };
+
+    struct ScriptResponse {
+        bool success{};
+        QJsonObject arguments{};
+        QString result{};
     };
 
     struct ConnectionConfiguration {
@@ -107,6 +114,7 @@ namespace tremotesf {
 
         ServerSettings* serverSettings() const;
         ServerStats* serverStats() const;
+        ScriptJobsManager* scriptJobsManager() const;
 
         const std::vector<std::unique_ptr<Torrent>>& torrents() const;
         Torrent* torrentByHash(const QString& hash) const;
@@ -195,6 +203,17 @@ namespace tremotesf {
 
         void requestArchive(QJsonObject arguments, QObject* context, std::function<void(ArchiveResponse)> callback);
 
+        void requestScriptRun(QJsonObject arguments, QObject* context, std::function<void(ScriptResponse)> callback);
+        void requestScriptStatus(QJsonObject arguments, QObject* context, std::function<void(ScriptResponse)> callback);
+        void requestScriptCancel(QJsonObject arguments, QObject* context, std::function<void(ScriptResponse)> callback);
+        void
+        requestScriptSettingsGet(QJsonObject arguments, QObject* context, std::function<void(ScriptResponse)> callback);
+        void
+        requestScriptSettingsSet(QJsonObject arguments, QObject* context, std::function<void(ScriptResponse)> callback);
+        void requestScriptRestartDaemon(
+            QJsonObject arguments, QObject* context, std::function<void(ScriptResponse)> callback
+        );
+
         void shutdownServer();
 
     private:
@@ -248,6 +267,15 @@ namespace tremotesf {
         Coroutine<> requestArchiveImpl(
             QJsonObject arguments, QPointer<QObject> context, std::function<void(ArchiveResponse)> callback
         );
+        void requestScriptMethod(
+            QLatin1String method, QJsonObject arguments, QObject* context, std::function<void(ScriptResponse)> callback
+        );
+        Coroutine<> requestScriptMethodImpl(
+            QLatin1String method,
+            QJsonObject arguments,
+            QPointer<QObject> context,
+            std::function<void(ScriptResponse)> callback
+        );
         Coroutine<> shutdownServerImpl();
 
         Coroutine<> getServerSettings();
@@ -278,6 +306,7 @@ namespace tremotesf {
         ServerSettings* mServerSettings{};
         std::vector<std::unique_ptr<Torrent>> mTorrents{};
         ServerStats* mServerStats{};
+        std::unique_ptr<ScriptJobsManager> mScriptJobsManager{};
 
         Status mStatus{};
 
@@ -300,6 +329,8 @@ namespace tremotesf {
 
         void torrentAddDuplicate();
         void torrentAddError(const QString& filePathOrUrl);
+
+        void torrentFileRenameFailed(const QString& path, const QString& error);
     };
 }
 

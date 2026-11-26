@@ -39,6 +39,7 @@ import org.equeim.tremotesf.ui.components.TremotesfErrorPlaceholder
 import org.equeim.tremotesf.ui.components.TremotesfLoadingPlaceholder
 import org.equeim.tremotesf.ui.components.TremotesfTorrentsFilesList
 import org.equeim.tremotesf.ui.utils.rememberFileSizeFormatter
+import org.equeim.tremotesf.ui.utils.formatTorrentProgress
 import org.equeim.tremotesf.ui.utils.rememberNumberFormat
 import java.text.DecimalFormat
 
@@ -46,6 +47,7 @@ import java.text.DecimalFormat
 fun FilesTab(
     innerPadding: PaddingValues,
     filesTree: TorrentFilesTree,
+    torrentHashString: String,
     filesTreeState: StateFlow<TorrentPropertiesScreenViewModel.FilesTreeState>,
     toolbarClicked: Flow<Unit>,
 ) {
@@ -98,15 +100,20 @@ fun FilesTab(
             val progressFormatter = rememberNumberFormat { DecimalFormat("0.#") }
             TremotesfTorrentsFilesList(
                 filesTree = filesTree,
+                torrentHashString = torrentHashString,
                 listState = listState,
                 contentPadding = innerPadding,
                 itemSupportingContent = {
-                    val downloaded = it.progress >= 1f
+                    val isDirectory = it.isDirectory
+                    val completed = if (isDirectory) it.wantedCompletedSize else it.completedSize
+                    val total = if (isDirectory) it.wantedSize else it.size
+                    val progress = if (isDirectory) it.wantedProgress else it.progress
+                    val downloaded = progress >= 1f
                     val progressColor =
                         if (downloaded) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.primary
                     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Dimens.SpacingSmall)) {
                         LinearProgressIndicator(
-                            progress = { it.progress },
+                            progress = { progress },
                             color = progressColor,
                             gapSize = 0.dp,
                             drawStopIndicator = {}
@@ -114,9 +121,9 @@ fun FilesTab(
                         Text(
                             stringResource(
                                 R.string.completed_string,
-                                fileSizeFormatter.formatFileSize(FileSize.fromBytes(it.completedSize)),
-                                fileSizeFormatter.formatFileSize(FileSize.fromBytes(it.size)),
-                                progressFormatter.format(it.progress * 100)
+                                fileSizeFormatter.formatFileSize(FileSize.fromBytes(completed)),
+                                fileSizeFormatter.formatFileSize(FileSize.fromBytes(total)),
+                                formatTorrentProgress(progress.toDouble(), progressFormatter)
                             ),
                             color = if (downloaded) MaterialTheme.colorScheme.outline else Color.Unspecified
                         )

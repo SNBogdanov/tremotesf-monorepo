@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "desktoputils.h"
+#include "settings.h"
 #include "rpc/rpc.h"
 #include "rpc/serversettings.h"
 #include "rpc/torrent.h"
@@ -53,7 +54,9 @@ namespace tremotesf {
                 : QListView(parent), mTorrentsProxyModel(torrentsProxyModel), mModel(model) {
                 mModel->setParent(this);
                 setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-                updateIconSize();
+                mBaseFont = font();
+                updateSizes();
+                QObject::connect(Settings::instance(), &Settings::enlargedIconsChanged, this, &BaseListView::updateSizes);
                 if (delegate) {
                     delegate->setParent(this);
                     setItemDelegate(delegate);
@@ -79,10 +82,15 @@ namespace tremotesf {
                 return {sizeHintForColumn(0), height};
             }
 
-            void updateIconSize() {
-                const int size = desktoputils::iconSizeForDevicePixelRatio(devicePixelRatio());
+            void updateSizes() {
+                const bool enlarged = Settings::instance()->get_enlargedIcons();
+                const int size = desktoputils::iconSizeForDevicePixelRatio(devicePixelRatio(), enlarged);
                 setIconSize(QSize(size, size));
+                setFont(desktoputils::scaledFont(mBaseFont, devicePixelRatioF(), enlarged));
                 updateGeometry();
+                if (model()) {
+                    doItemsLayout();
+                }
             }
 
             void setFilterEnabled(bool enabled) {
@@ -95,7 +103,7 @@ namespace tremotesf {
                 switch (event->type()) {
                 case QEvent::DevicePixelRatioChange:
                 case QEvent::ScreenChangeInternal:
-                    updateIconSize();
+                    updateSizes();
                     break;
                 default:
                     break;
@@ -104,10 +112,10 @@ namespace tremotesf {
             }
 
             void showEvent(QShowEvent* event) override {
-                updateIconSize();
+                updateSizes();
                 if (!mScreenChangeConnected) {
                     if (auto* window = windowHandle()) {
-                        QObject::connect(window, &QWindow::screenChanged, this, [this] { updateIconSize(); });
+                        QObject::connect(window, &QWindow::screenChanged, this, [this] { updateSizes(); });
                         mScreenChangeConnected = true;
                     }
                 }
@@ -117,12 +125,7 @@ namespace tremotesf {
             void init(Rpc* rpc, std::optional<int> sortByRole = {}) {
                 mRpc = rpc;
                 setContextMenuPolicy(Qt::CustomContextMenu);
-                QObject::connect(
-                    this,
-                    &QWidget::customContextMenuRequested,
-                    this,
-                    &BaseListView::showContextMenu
-                );
+                QObject::connect(this, &QWidget::customContextMenuRequested, this, &BaseListView::showContextMenu);
                 setSelectionMode(QAbstractItemView::ExtendedSelection);
                 QAbstractItemModel* actualModel{};
                 if (sortByRole.has_value()) {
@@ -246,6 +249,7 @@ namespace tremotesf {
             BaseTorrentsFiltersSettingsModel* mModel;
             BaseProxyModel* mProxyModel{};
             bool mScreenChangeConnected = false;
+            QFont mBaseFont{};
         };
 
         class StatusFiltersListView final : public BaseListView {
@@ -389,6 +393,7 @@ namespace tremotesf {
 
     MainWindowSideBar::MainWindowSideBar(Rpc* rpc, TorrentsProxyModel* proxyModel, QWidget* parent)
         : QScrollArea(parent) {
+        mBaseFont = font();
         setFrameShape(QFrame::NoFrame);
         setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         setWidgetResizable(true);
@@ -411,14 +416,9 @@ namespace tremotesf {
             searchLineEdit->setFocus();
         });
 
-        QFont checkBoxFont(QApplication::font());
-        checkBoxFont.setBold(true);
-        checkBoxFont.setCapitalization(QFont::AllUppercase);
-
         //: Title of torrents status filters list
         auto statusCheckBox = new QCheckBox(qApp->translate("tremotesf", "Status"), this);
         statusCheckBox->setChecked(true);
-        statusCheckBox->setFont(checkBoxFont);
         layout->addWidget(statusCheckBox);
 
         auto statusFiltersListView = new StatusFiltersListView(rpc, proxyModel, this);
@@ -434,7 +434,6 @@ namespace tremotesf {
         //: Title of torrents label filters list
         auto labelsCheckBox = new QCheckBox(qApp->translate("tremotesf", "Labels"), this);
         labelsCheckBox->setChecked(proxyModel->isLabelFilterEnabled());
-        labelsCheckBox->setFont(checkBoxFont);
         layout->addWidget(labelsCheckBox);
 
         auto labelsListView = new LabelsListView(rpc, proxyModel, this);
@@ -456,7 +455,6 @@ namespace tremotesf {
         //: Title of torrents download directory filters list
         auto directoriesCheckBox = new QCheckBox(qApp->translate("tremotesf", "Directories"), this);
         directoriesCheckBox->setChecked(true);
-        directoriesCheckBox->setFont(checkBoxFont);
         layout->addWidget(directoriesCheckBox);
 
         auto directoriesListView = new DirectoriesListView(rpc, proxyModel, this);
@@ -472,7 +470,6 @@ namespace tremotesf {
         //: Title of torrents tracker filters list
         auto trackersCheckBox = new QCheckBox(qApp->translate("tremotesf", "Trackers"), this);
         trackersCheckBox->setChecked(true);
-        trackersCheckBox->setFont(checkBoxFont);
         layout->addWidget(trackersCheckBox);
 
         auto trackersListView = new TrackersListView(rpc, proxyModel, this);
@@ -483,6 +480,32 @@ namespace tremotesf {
         layout->addStretch();
 
         setWidget(contentWidget);
+
+        updateFonts();
+        QObject::connect(Settings::instance(), &Settings::enlargedIconsChanged, this, &MainWindowSideBar::updateFonts);
+    }
+
+    bool MainWindowSideBar::event(QEvent* event) {
+        switch (event->type()) {
+        case QEvent::DevicePixelRatioChange:
+        case QEvent::ScreenChangeInternal:
+            updateFonts();
+            break;
+        default:
+            break;
+        }
+        return QScrollArea::event(event);
+    }
+
+    void MainWindowSideBar::updateFonts() {
+        const bool enlarged = Settings::instance()->get_enlargedIcons();
+        setFont(desktoputils::scaledFont(mBaseFont, devicePixelRatioF(), enlarged));
+        QFont checkBoxFont = desktoputils::scaledFont(mBaseFont, devicePixelRatioF(), enlarged);
+        checkBoxFont.setBold(true);
+        checkBoxFont.setCapitalization(QFont::AllUppercase);
+        for (auto* checkBox : findChildren<QCheckBox*>()) {
+            checkBox->setFont(checkBoxFont);
+        }
     }
 }
 

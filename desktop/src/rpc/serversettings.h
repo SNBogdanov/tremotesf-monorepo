@@ -10,6 +10,7 @@
 #include <QTime>
 
 #include "pathutils.h"
+#include "scriptrunner.h"
 
 class QJsonObject;
 
@@ -46,10 +47,14 @@ namespace tremotesf {
         [[nodiscard]] bool hasTrackerListProperty() const;
         [[nodiscard]] bool hasLabelsProperty() const;
         [[nodiscard]] bool hasForkFeature(QLatin1String feature) const;
+        [[nodiscard]] bool hasScriptRunner() const;
+        [[nodiscard]] bool hasScriptRunnerSettings() const;
+        [[nodiscard]] bool hasRestartDaemon() const;
 
         int rpcVersion = 0;
         int minimumRpcVersion = 0;
         QStringList forkFeatures;
+        std::optional<ScriptRunnerData> scriptRunner{};
 
         QString configDirectory;
         PathOs pathOs = PathOs::Unix;

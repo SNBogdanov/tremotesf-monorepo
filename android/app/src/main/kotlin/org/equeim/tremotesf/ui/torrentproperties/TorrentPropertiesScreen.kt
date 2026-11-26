@@ -54,10 +54,14 @@ import org.equeim.tremotesf.R
 import org.equeim.tremotesf.rpc.GlobalRpcClient
 import org.equeim.tremotesf.rpc.RpcRequestState
 import org.equeim.tremotesf.rpc.requests.TorrentStatus
+import org.equeim.tremotesf.rpc.requests.ScriptRunResponseArguments
+import org.equeim.tremotesf.rpc.requests.ScriptSelection
 import org.equeim.tremotesf.rpc.requests.torrentproperties.Peer
 import org.equeim.tremotesf.rpc.requests.torrentproperties.TorrentDetails
 import org.equeim.tremotesf.rpc.requests.torrentproperties.TorrentLimits
 import org.equeim.tremotesf.rpc.toNativeSeparators
+import org.equeim.tremotesf.ui.scripts.ScriptJobDialog
+import org.equeim.tremotesf.ui.scripts.ScriptsBottomSheet
 import org.equeim.tremotesf.torrentfile.TorrentFilesTree
 import org.equeim.tremotesf.ui.Destination
 import org.equeim.tremotesf.ui.Dimens
@@ -167,6 +171,20 @@ private fun TorrentPropertiesScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val pagerState = rememberPagerState { Tab.entries.size }
 
+    var showTorrentScripts by rememberSaveable { mutableStateOf(false) }
+    var runningScriptName by remember { mutableStateOf("") }
+    var runningScriptJob by remember { mutableStateOf<ScriptRunResponseArguments?>(null) }
+
+    val filesTreeStateValue by filesTreeState.collectAsStateWithLifecycle()
+    val filesTreeItems by filesTree.items.collectAsStateWithLifecycle()
+    val completedFilesSize = remember(filesTreeStateValue, filesTreeItems) {
+        if (filesTreeStateValue is TorrentPropertiesScreenViewModel.FilesTreeState.Loaded) {
+            filesTree.getCompletedFilesSize()
+        } else {
+            null
+        }
+    }
+
     val navigateToLabelsEditDialog = {
         val torrentDetails = (torrentDetails.value as? RpcRequestState.Loaded)?.response
         if (torrentDetails != null) {
@@ -212,7 +230,8 @@ private fun TorrentPropertiesScreen(
                             torrentOperations = torrentOperations,
                             navigateToLabelsEditDialog = navigateToLabelsEditDialog,
                             navigateToSetLocationDialog = navigateToSetLocationDialog,
-                            navigateToSetIncompleteDirDialog = navigateToSetIncompleteDirDialog
+                            navigateToSetIncompleteDirDialog = navigateToSetIncompleteDirDialog,
+                            onScriptsClicked = { showTorrentScripts = true }
                         )
                     }
                 }
@@ -274,6 +293,7 @@ private fun TorrentPropertiesScreen(
                         Tab.Details -> DetailsTab(
                             innerPadding = innerPadding,
                             torrentDetails = torrentDetails,
+                            completedFilesSize = completedFilesSize,
                             shouldShowLabels = shouldShowLabels,
                             navigateToLabelsEditDialog = navigateToLabelsEditDialog
                         )
@@ -281,6 +301,7 @@ private fun TorrentPropertiesScreen(
                         Tab.Files -> FilesTab(
                             innerPadding = innerPadding,
                             filesTree = filesTree,
+                            torrentHashString = torrentDetails.hashString,
                             filesTreeState = filesTreeState,
                             toolbarClicked = toolbarClicked,
                         )
@@ -314,6 +335,33 @@ private fun TorrentPropertiesScreen(
             }
         )
     }
+
+    if (showTorrentScripts) {
+        val descriptor = GlobalRpcClient.serverCapabilities?.scriptRunner
+        val details = (torrentDetails.value as? RpcRequestState.Loaded)?.response
+        if (descriptor != null && details != null) {
+            ScriptsBottomSheet(
+                descriptor = descriptor,
+                selection = ScriptSelection(hashes = listOf(details.hashString)),
+                context = "torrent",
+                onDismiss = { showTorrentScripts = false },
+                onStarted = { script, job ->
+                    runningScriptName = script.name
+                    runningScriptJob = job
+                }
+            )
+        } else {
+            showTorrentScripts = false
+        }
+    }
+
+    runningScriptJob?.let { job ->
+        ScriptJobDialog(
+            scriptName = runningScriptName,
+            job = job,
+            onDismiss = { runningScriptJob = null }
+        )
+    }
 }
 
 @Composable
@@ -323,7 +371,8 @@ private fun TopAppBarMenuActions(
     torrentOperations: TorrentOperations,
     navigateToLabelsEditDialog: () -> Unit,
     navigateToSetLocationDialog: () -> Unit,
-    navigateToSetIncompleteDirDialog: (incompleteDirectory: String) -> Unit
+    navigateToSetIncompleteDirDialog: (incompleteDirectory: String) -> Unit,
+    onScriptsClicked: () -> Unit
 ) {
     val paused = remember {
         derivedStateOf { torrentDetails.value?.status == TorrentStatus.Paused }
@@ -396,6 +445,15 @@ private fun TopAppBarMenuActions(
                 text = { Text(stringResource(R.string.edit_labels)) },
                 onClick = {
                     navigateToLabelsEditDialog()
+                    dismiss()
+                }
+            )
+        }
+        if (GlobalRpcClient.serverCapabilities?.supportsScriptRunner == true) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.script_scripts)) },
+                onClick = {
+                    onScriptsClicked()
                     dismiss()
                 }
             )

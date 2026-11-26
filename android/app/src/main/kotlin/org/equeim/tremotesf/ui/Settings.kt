@@ -159,6 +159,12 @@ object Settings {
 
     val notifyOnFinished: Property<Boolean> = PrefsProperty(key = "notifyOnFinished", defaultValue = true)
 
+    val closeScriptDialogOnCompletion: Property<Boolean> =
+        PrefsProperty(key = "closeScriptDialogOnCompletion", defaultValue = false)
+
+    val rememberScriptParameters: Property<Boolean> =
+        PrefsProperty(key = "rememberScriptParameters", defaultValue = true)
+
     val notifyOnAdded: Property<Boolean> = PrefsProperty(key = "notifyOnAdded", defaultValue = false)
 
     enum class BackgroundUpdateInterval(override val prefsValue: String, val duration: Duration) : MappedPrefsEnum {

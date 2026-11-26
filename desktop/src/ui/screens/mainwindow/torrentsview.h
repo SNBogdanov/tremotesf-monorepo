@@ -5,6 +5,7 @@
 #ifndef TREMOTESF_TORRENTSVIEW_H
 #define TREMOTESF_TORRENTSVIEW_H
 
+#include <QFont>
 #include <QTreeView>
 
 class QEvent;
@@ -31,11 +32,13 @@ namespace tremotesf {
 
     private:
         void updateIconSize();
+        void updateFontSize();
         void updateAlternateRowColor();
         void ensureSelection();
 
         bool mScreenChangeConnected = false;
         int mRowToSelectAfterRemoval = -1;
+        QFont mBaseFont{};
     };
 }
 

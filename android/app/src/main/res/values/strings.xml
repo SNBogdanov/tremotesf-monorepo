@@ -5,7 +5,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name" translatable="false">Tremotesf (parallel)</string>
+    <string name="app_name" translatable="false">Tremotesf</string>
 
     <string name="disconnected">Disconnected</string>
     <string name="connecting">Connecting\u2026</string>
@@ -24,6 +24,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="server_returned_error_result">Server returned \'%1$s\'</string>
 
     <string name="main_activity_subtitle">\u2193 %1$s    \u2191 %2$s</string>
+    <string name="main_activity_subtitle_with_free_space">\u2193 %1$s    \u2191 %2$s    Free: %3$s</string>
 
     <string name="current_server_string">%1$s (%2$s)</string>
 
@@ -124,6 +125,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="last_activity">Last activity</string>
 
     <string name="total_size">Total size</string>
+    <string name="wanted_size">Size of wanted files</string>
+    <string name="completed_size">Size of completed files</string>
     <string name="location">Location</string>
     <string name="hash">Hash</string>
     <string name="created_by">Created by</string>
@@ -394,6 +397,10 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="torrent_queued_with_error">Queued (%s)</string>
     <string name="torrent_checking">Checking: %s%%</string>
     <string name="torrent_checking_with_error">Checking: %1$s%% (%2$s)</string>
+    <string name="torrent_status_downloading">Downloading</string>
+    <string name="torrent_status_seeding">Seeding</string>
+    <string name="torrent_status_queued">Queued</string>
+    <string name="torrent_status_checking">Checking</string>
     <string name="torrent_queued_for_checking">Queued for checking</string>
     <string name="torrent_queued_for_checking_with_error">Queued for checking (%s)</string>
 
@@ -606,4 +613,43 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <string name="backup_restore_success">Settings imported. Restart Tremotesf to apply all changes.</string>
     <string name="backup_error">Backup failed: %1$s</string>
     <string name="backup_warning">The backup file contains server passwords and other sensitive data.</string>
+
+    <string name="script_scripts">Scripts</string>
+    <string name="script_run">Run</string>
+    <string name="script_cancel">Cancel</string>
+    <string name="script_job">Script job</string>
+    <string name="script_state">State: %1$s</string>
+    <string name="script_stdout">stdout</string>
+    <string name="script_stderr">stderr</string>
+    <string name="script_no_scripts">No scripts</string>
+    <string name="script_selected_torrents">Selected torrents: %1$d</string>
+    <string name="script_parameter_hint_array">Comma-separated values</string>
+    <string name="script_parameter_required">Parameter \"%1$s\" is required</string>
+    <string name="script_parameter_invalid_number">Parameter \"%1$s\" must be a number</string>
+    <string name="script_start_failed">Failed to start script: %1$s</string>
+    <string name="script_queued">Queued</string>
+    <string name="script_running">Running</string>
+    <string name="script_finished">Finished</string>
+    <string name="script_failed">Failed</string>
+    <string name="script_canceled">Canceled</string>
+    <string name="script_timed_out">Timed out</string>
+    <string name="script_jobs_channel_name">Finished script jobs</string>
+    <string name="script_job_notification_finished">Script finished</string>
+    <string name="script_job_notification_failed">Script failed</string>
+    <string name="script_job_notification_canceled">Script canceled</string>
+    <string name="script_job_notification_timed_out">Script timed out</string>
+    <string name="script_job_notification_text_with_exit_code">%1$s (exit code %2$d)</string>
+    <string name="script_output_truncated">[output truncated]</string>
+    <string name="script_parameters">Script parameters</string>
+    <string name="script_settings_saved">Script settings saved</string>
+    <string name="script_settings_no_changes">No changes</string>
+    <string name="script_settings_save_failed">Failed to save script settings: %1$s</string>
+    <string name="script_runner_unavailable">Script runner is not available</string>
+    <string name="required_parameters_missing">Required parameters are missing</string>
+    <string name="prefs_remember_script_parameters_title">Remember last script parameters</string>
+    <string name="prefs_close_script_dialog_on_completion_title">Close script dialog when script finishes</string>
+    <string name="restart_daemon">Restart daemon</string>
+    <string name="restart_daemon_confirm">Restart the Transmission daemon? The connection will be interrupted.</string>
+    <string name="restart_daemon_scheduled">Daemon restart has been scheduled</string>
+    <string name="restart_daemon_failed">Failed to restart daemon: %1$s</string>
 '</resources>

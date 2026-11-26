@@ -9,6 +9,7 @@
 #include <QApplication>
 #include <QDesktopServices>
 #include <QDir>
+#include <QFont>
 #include <QIcon>
 #include <QMessageBox>
 #include <QRegularExpression>
@@ -52,9 +53,34 @@ namespace {
 }
 
 namespace tremotesf::desktoputils {
-    int iconSizeForDevicePixelRatio(qreal devicePixelRatio) {
+    int iconSizeForDevicePixelRatio(qreal devicePixelRatio, bool enlarged) {
         // 16x16 icons on a 100% screen, 24x24 on a 150% screen, 32x32 on a 200% screen, etc.
-        return qMax(16, qRound(16.0 * devicePixelRatio));
+        const int size = qMax(16, qRound(16.0 * devicePixelRatio));
+        if (!enlarged) {
+            return size;
+        }
+        for (const int candidate : {16, 24, 32, 48, 64, 96}) {
+            if (candidate > size) {
+                return candidate;
+            }
+        }
+        return size;
+    }
+
+    QFont scaledFont(const QFont& font, qreal devicePixelRatio, bool enlarged) {
+        const int normalSize = iconSizeForDevicePixelRatio(devicePixelRatio);
+        const int enlargedSize = iconSizeForDevicePixelRatio(devicePixelRatio, true);
+        if (!enlarged || normalSize == enlargedSize) {
+            return font;
+        }
+        const double factor = static_cast<double>(enlargedSize) / static_cast<double>(normalSize);
+        QFont scaled = font;
+        if (font.pointSizeF() > 0) {
+            scaled.setPointSizeF(font.pointSizeF() * factor);
+        } else if (font.pixelSize() > 0) {
+            scaled.setPixelSize(qRound(static_cast<double>(font.pixelSize()) * factor));
+        }
+        return scaled;
     }
 
     const QIcon& statusIcon(StatusIcon icon) {

@@ -234,11 +234,20 @@ private fun TorrentsListScreen(
                         if (subtitle != null) {
                             val fileSizeFormatter = rememberFileSizeFormatter()
                             Text(
-                                text = stringResource(
-                                    R.string.main_activity_subtitle,
-                                    fileSizeFormatter.formatTransferRate(subtitle.downloadSpeed),
-                                    fileSizeFormatter.formatTransferRate(subtitle.uploadSpeed)
-                                ),
+                                text = if (subtitle.freeSpace != null) {
+                                    stringResource(
+                                        R.string.main_activity_subtitle_with_free_space,
+                                        fileSizeFormatter.formatTransferRate(subtitle.downloadSpeed),
+                                        fileSizeFormatter.formatTransferRate(subtitle.uploadSpeed),
+                                        fileSizeFormatter.formatFileSize(subtitle.freeSpace)
+                                    )
+                                } else {
+                                    stringResource(
+                                        R.string.main_activity_subtitle,
+                                        fileSizeFormatter.formatTransferRate(subtitle.downloadSpeed),
+                                        fileSizeFormatter.formatTransferRate(subtitle.uploadSpeed)
+                                    )
+                                },
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 style = MaterialTheme.typography.labelMedium,

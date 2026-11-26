@@ -6,11 +6,13 @@
 
 #include <QCoreApplication>
 #include <QDialogButtonBox>
+#include <QEvent>
 #include <QPushButton>
 #include <QVBoxLayout>
 
 #include <KMessageWidget>
 
+#include "desktoputils.h"
 #include "torrentpropertieswidget.h"
 #include "settings.h"
 #include "log/log.h"
@@ -22,6 +24,7 @@ SPECIALIZE_FORMATTER_FOR_QDEBUG(QRect)
 namespace tremotesf {
     TorrentPropertiesDialog::TorrentPropertiesDialog(Torrent* torrent, Rpc* rpc, QWidget* parent)
         : QDialog(parent), mTorrentPropertiesWidget(new TorrentPropertiesWidget(rpc, false, this)) {
+        mBaseFont = font();
         auto layout = new QVBoxLayout(this);
         auto messageWidget = new KMessageWidget(this);
         layout->addWidget(messageWidget);
@@ -71,6 +74,30 @@ namespace tremotesf {
         });
 
         restoreGeometry(Settings::instance()->get_torrentPropertiesDialogGeometry());
+
+        updateFontSize();
+        QObject::connect(
+            Settings::instance(),
+            &Settings::enlargedIconsChanged,
+            this,
+            &TorrentPropertiesDialog::updateFontSize
+        );
+    }
+
+    bool TorrentPropertiesDialog::event(QEvent* event) {
+        switch (event->type()) {
+        case QEvent::DevicePixelRatioChange:
+        case QEvent::ScreenChangeInternal:
+            updateFontSize();
+            break;
+        default:
+            break;
+        }
+        return QDialog::event(event);
+    }
+
+    void TorrentPropertiesDialog::updateFontSize() {
+        setFont(desktoputils::scaledFont(mBaseFont, devicePixelRatioF(), Settings::instance()->get_enlargedIcons()));
     }
 
     void TorrentPropertiesDialog::saveState() {

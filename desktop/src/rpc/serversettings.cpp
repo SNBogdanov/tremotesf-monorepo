@@ -142,6 +142,20 @@ namespace tremotesf {
         return false;
     }
 
+    bool ServerSettingsData::hasScriptRunner() const {
+        return scriptRunner.has_value() && hasForkFeature("script_runner/v1"_L1);
+    }
+
+    bool ServerSettingsData::hasScriptRunnerSettings() const {
+        return scriptRunner.has_value() && hasForkFeature("script_runner_settings/v1"_L1);
+    }
+
+    bool ServerSettingsData::hasRestartDaemon() const {
+        return scriptRunner.has_value()
+               && scriptRunner->restartDaemon.enabled
+               && hasForkFeature("script_restart_daemon/v1"_L1);
+    }
+
     ServerSettings::ServerSettings(Rpc* rpc, QObject* parent) : QObject(parent), mRpc(rpc), mSaveOnSet(true) {}
 
     void ServerSettings::setDownloadDirectory(const QString& directory) {
@@ -534,6 +548,23 @@ namespace tremotesf {
             forkFeatures.append(feature.toString());
         }
         setChanged(mData.forkFeatures, std::move(forkFeatures), changed);
+
+        const auto scriptRunnerValue = serverSettings.value("script_runner"_L1);
+        if (mData.hasForkFeature("script_runner/v1"_L1) && scriptRunnerValue.isObject()) {
+            const auto revision = scriptRunnerValue.toObject().value("revision"_L1).toString();
+            if (!mData.scriptRunner.has_value() || mData.scriptRunner->revision != revision) {
+                auto parsed = parseScriptRunner(scriptRunnerValue.toObject());
+                if (parsed.has_value()) {
+                    mData.scriptRunner = std::move(parsed);
+                } else {
+                    mData.scriptRunner.reset();
+                }
+                changed = true;
+            }
+        } else if (mData.scriptRunner.has_value()) {
+            mData.scriptRunner.reset();
+            changed = true;
+        }
 
         if (const auto newConfigDir = serverSettings.value("config-dir"_L1).toString();
             newConfigDir != mData.configDirectory) {

@@ -63,6 +63,7 @@ import kotlin.time.Duration.Companion.seconds
 fun DetailsTab(
     innerPadding: PaddingValues,
     torrentDetails: TorrentDetails,
+    completedFilesSize: Long?,
     shouldShowLabels: State<Boolean>,
     navigateToLabelsEditDialog: () -> Unit
 ) {
@@ -131,8 +132,19 @@ fun DetailsTab(
         )
 
         CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.bodyMedium) {
+            Text(stringResource(R.string.status))
+            Text(torrentStatusString(torrentDetails.status))
+
             Text(stringResource(R.string.total_size))
             Text(fileSizeFormatter.formatFileSize(torrentDetails.totalSize))
+
+            Text(stringResource(R.string.wanted_size))
+            Text(fileSizeFormatter.formatFileSize(torrentDetails.sizeWhenDone))
+
+            if (completedFilesSize != null) {
+                Text(stringResource(R.string.completed_size))
+                Text(fileSizeFormatter.formatFileSize(FileSize.fromBytes(completedFilesSize)))
+            }
 
             Text(stringResource(R.string.location))
             SelectionContainer {
@@ -198,6 +210,21 @@ fun DetailsTab(
 }
 
 @Composable
+private fun torrentStatusString(status: TorrentStatus): String = when (status) {
+    TorrentStatus.Paused -> stringResource(R.string.torrent_paused)
+    TorrentStatus.PausedDueToSpace -> stringResource(R.string.torrent_paused_due_to_space)
+    TorrentStatus.WaitingForSpaceToMove -> stringResource(R.string.torrent_waiting_for_space_to_move)
+    TorrentStatus.RunningScript -> stringResource(R.string.torrent_running_script)
+    TorrentStatus.Moving -> stringResource(R.string.torrent_moving)
+    TorrentStatus.Downloading -> stringResource(R.string.torrent_status_downloading)
+    TorrentStatus.Seeding -> stringResource(R.string.torrent_status_seeding)
+    TorrentStatus.QueuedForDownloading,
+    TorrentStatus.QueuedForSeeding -> stringResource(R.string.torrent_status_queued)
+    TorrentStatus.Checking -> stringResource(R.string.torrent_status_checking)
+    TorrentStatus.QueuedForChecking -> stringResource(R.string.torrent_queued_for_checking)
+}
+
+@Composable
 private fun rememberTimeFormatter(): (Instant) -> String {
     val dateTimeFormatter = rememberDateTimeFormatter {
         DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
@@ -252,6 +279,7 @@ private fun DetailsTabPreview() = ComponentPreview {
     DetailsTab(
         innerPadding = PaddingValues(),
         torrentDetails = TORRENT_DETAILS_FOR_PREVIEW,
+        completedFilesSize = 12345678L,
         shouldShowLabels = remember { mutableStateOf(true) },
         navigateToLabelsEditDialog = {}
     )
@@ -268,6 +296,7 @@ private val TORRENT_DETAILS_FOR_PREVIEW: TorrentDetails by lazy {
         eta = 666.seconds,
         ratio = 6.9,
         totalSize = FileSize.fromBytes(11111111),
+        sizeWhenDone = FileSize.fromBytes(9999999),
         completedSize = FileSize.fromBytes(1),
         totalUploaded = FileSize.fromBytes(777),
         downloadSpeed = TransferRate.fromKiloBytesPerSecond(100000),

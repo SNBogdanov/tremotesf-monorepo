@@ -2,7 +2,7 @@
 Name=Color
 Comment=Color icon theme
 Inherits=breeze
-Directories=16x16/actions,24x24/actions,32x32/actions,48x48/actions,64x64/actions,96x96/actions
+Directories=16x16/actions,24x24/actions,32x32/actions,48x48/actions,64x64/actions,96x96/actions,128x128/actions,256x256/actions,512x512/actions
 
 [16x16/actions]
 Size=16
@@ -31,5 +31,20 @@ Context=Actions
 
 [96x96/actions]
 Size=96
+Type=Fixed
+Context=Actions
+
+[128x128/actions]
+Size=128
+Type=Fixed
+Context=Actions
+
+[256x256/actions]
+Size=256
+Type=Fixed
+Context=Actions
+
+[512x512/actions]
+Size=512
 Type=Fixed
 Context=Actions

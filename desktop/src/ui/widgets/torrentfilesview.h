@@ -7,8 +7,10 @@
 
 #include <functional>
 
+#include <QFont>
 #include <QTreeView>
 
+class QEvent;
 class QKeyEvent;
 
 namespace tremotesf {
@@ -36,10 +38,12 @@ namespace tremotesf {
         [[nodiscard]] TorrentFilesProxyModel* proxyModel() const;
 
     protected:
+        bool event(QEvent* event) override;
         void keyPressEvent(QKeyEvent* event) override;
 
     private:
         void init();
+        void updateFontSize();
         void onModelReset();
         void showContextMenu(QPoint pos);
 
@@ -47,6 +51,7 @@ namespace tremotesf {
         BaseTorrentFilesModel* mModel;
         TorrentFilesProxyModel* mProxyModel;
         Rpc* mRpc;
+        QFont mBaseFont{};
     };
 }
 

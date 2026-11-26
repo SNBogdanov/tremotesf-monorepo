@@ -74,12 +74,17 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import org.equeim.tremotesf.R
+import org.equeim.tremotesf.rpc.GlobalRpcClient
 import org.equeim.tremotesf.rpc.normalizePath
 import org.equeim.tremotesf.rpc.requests.FileSize
+import org.equeim.tremotesf.rpc.requests.ScriptRunResponseArguments
+import org.equeim.tremotesf.rpc.requests.ScriptSelection
 import org.equeim.tremotesf.rpc.requests.Torrent
 import org.equeim.tremotesf.rpc.requests.TorrentStatus
 import org.equeim.tremotesf.rpc.requests.TransferRate
 import org.equeim.tremotesf.rpc.toNativeSeparators
+import org.equeim.tremotesf.ui.scripts.ScriptJobDialog
+import org.equeim.tremotesf.ui.scripts.ScriptsBottomSheet
 import org.equeim.tremotesf.ui.ArrowDownward
 import org.equeim.tremotesf.ui.ArrowUpward
 import org.equeim.tremotesf.ui.ComponentPreview
@@ -136,6 +141,9 @@ fun TorrentsList(
     }
 
     val selectionState = rememberTremotesfMultiSelectionState(torrents, Torrent::id)
+
+    var runningScriptName by remember { mutableStateOf("") }
+    var runningScriptJob by remember { mutableStateOf<ScriptRunResponseArguments?>(null) }
 
     val fileSizeFormatter = rememberFileSizeFormatter()
     val progressFormatter = rememberNumberFormat { DecimalFormat("0.#") }
@@ -203,8 +211,20 @@ fun TorrentsList(
             torrents = rememberUpdatedState(torrents),
             torrentsOperations = torrentsOperations,
             navigateToSetLocationDialog = navigateToSetLocationDialog,
-            navigateToLabelsEditDialog = navigateToLabelsEditDialog
+            navigateToLabelsEditDialog = navigateToLabelsEditDialog,
+            onScriptStarted = { scriptName, job ->
+                runningScriptName = scriptName
+                runningScriptJob = job
+            }
         )
+
+        runningScriptJob?.let { job ->
+            ScriptJobDialog(
+                scriptName = runningScriptName,
+                job = job,
+                onDismiss = { runningScriptJob = null }
+            )
+        }
     }
 }
 
@@ -583,7 +603,8 @@ private fun BoxScope.SelectionPanel(
     torrents: State<List<Torrent>>,
     torrentsOperations: TorrentsOperations,
     navigateToSetLocationDialog: (torrentHashStrings: List<String>, location: String) -> Unit,
-    navigateToLabelsEditDialog: (torrentHashStrings: List<String>, enabledLabels: List<String>) -> Unit
+    navigateToLabelsEditDialog: (torrentHashStrings: List<String>, enabledLabels: List<String>) -> Unit,
+    onScriptStarted: (scriptName: String, job: ScriptRunResponseArguments) -> Unit
 ) {
     TremotesfMultiSelectionPanel(
         state = selectionState,
@@ -630,6 +651,7 @@ private fun BoxScope.SelectionPanel(
 
         var showRenameDialogForHashStringAndName: Pair<String, String>? by rememberSaveable { mutableStateOf(null) }
         var showRemoveDialogForHashStrings: List<String>? by rememberSaveable { mutableStateOf(null) }
+        var showScripts by rememberSaveable { mutableStateOf(false) }
 
         TremotesfIconButtonWithTooltipAndMenu(Icons.Filled.MoreVert, R.string.more_options) {
             DropdownMenuItem(
@@ -701,6 +723,15 @@ private fun BoxScope.SelectionPanel(
                     }
                 )
             }
+            if (GlobalRpcClient.serverCapabilities?.supportsScriptRunner == true) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.script_scripts)) },
+                    onClick = {
+                        showScripts = true
+                        dismiss()
+                    }
+                )
+            }
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.remove)) },
                 onClick = {
@@ -726,6 +757,26 @@ private fun BoxScope.SelectionPanel(
                 removeTorrents = torrentsOperations::remove,
                 onDismissRequest = { showRemoveDialogForHashStrings = null }
             )
+        }
+
+        if (showScripts) {
+            val descriptor = GlobalRpcClient.serverCapabilities?.scriptRunner
+            if (descriptor != null) {
+                val hashStrings = torrents.value
+                    .filter { selectionState.isSelected(it.id) }
+                    .map { it.hashString }
+                ScriptsBottomSheet(
+                    descriptor = descriptor,
+                    selection = ScriptSelection(hashes = hashStrings),
+                    context = "torrent",
+                    onDismiss = { showScripts = false },
+                    onStarted = { script, job ->
+                        onScriptStarted(script.name, job)
+                    }
+                )
+            } else {
+                showScripts = false
+            }
         }
     }
 }

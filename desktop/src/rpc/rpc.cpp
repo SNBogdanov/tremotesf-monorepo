@@ -23,6 +23,7 @@
 #include "jsonutils.h"
 #include "itemlistupdater.h"
 #include "log/log.h"
+#include "scriptjobsmanager.h"
 #include "requestrouter.h"
 #include "serversettings.h"
 #include "serverstats.h"
@@ -89,6 +90,7 @@ namespace tremotesf {
           mRequestRouter(new RequestRouter(this)),
           mServerSettings(new ServerSettings(this, this)),
           mServerStats(new ServerStats(this)) {
+        mScriptJobsManager = std::make_unique<ScriptJobsManager>(this);
         QObject::connect(mRequestRouter, &RequestRouter::requestFailed, this, &Rpc::onRequestFailed);
     }
 
@@ -97,6 +99,8 @@ namespace tremotesf {
     ServerSettings* Rpc::serverSettings() const { return mServerSettings; }
 
     ServerStats* Rpc::serverStats() const { return mServerStats; }
+
+    ScriptJobsManager* Rpc::scriptJobsManager() const { return mScriptJobsManager.get(); }
 
     const std::vector<std::unique_ptr<Torrent>>& Rpc::torrents() const { return mTorrents; }
 
@@ -626,19 +630,15 @@ namespace tremotesf {
                 emit torrent->fileRenamed(filePathFromReponse, newNameFromReponse);
                 mBackgroundRequestsCoroutineScope.launch(updateData());
             }
+        } else {
+            emit torrentFileRenameFailed(filePath, response.result);
         }
     }
 
     Coroutine<std::optional<qint64>> Rpc::getDownloadDirFreeSpaceImpl() {
         const auto& serverSettings = mServerSettings->data();
-        QString path = serverSettings.downloadDirectory;
-        if (serverSettings.incompleteDirectoryEnabled
-            && !serverSettings.incompleteDirectory.isEmpty()
-            && serverSettings.incompleteDirectory != serverSettings.downloadDirectory) {
-            path = serverSettings.incompleteDirectory;
-        }
         if (serverSettings.canShowFreeSpaceForPath()) {
-            co_return co_await getFreeSpaceForPathImpl(std::move(path));
+            co_return co_await getFreeSpaceForPathImpl(serverSettings.downloadDirectory);
         }
         co_return co_await getDownloadDirFreeSpaceLegacyMethod();
     }
@@ -695,9 +695,9 @@ namespace tremotesf {
     void
     Rpc::requestFreeSpaceForPath(QString path, QObject* context, std::function<void(std::optional<qint64>)> callback) {
         info().log("requestFreeSpaceForPath: requesting free space for '{}'", path);
-        mBackgroundRequestsCoroutineScope.launch(requestFreeSpaceForPathImpl(
-            std::move(path), QPointer<QObject>(context), std::move(callback)
-        ));
+        mBackgroundRequestsCoroutineScope.launch(
+            requestFreeSpaceForPathImpl(std::move(path), QPointer<QObject>(context), std::move(callback))
+        );
     }
 
     Coroutine<> Rpc::requestFreeSpaceForPathImpl(
@@ -715,9 +715,7 @@ namespace tremotesf {
         }
     }
 
-    void Rpc::requestArchive(
-        QJsonObject arguments, QObject* context, std::function<void(ArchiveResponse)> callback
-    ) {
+    void Rpc::requestArchive(QJsonObject arguments, QObject* context, std::function<void(ArchiveResponse)> callback) {
         if (!isConnected()) {
             if (callback) {
                 callback({});
@@ -735,6 +733,64 @@ namespace tremotesf {
         const auto response = co_await mRequestRouter->postRequest("torrent_archive"_L1, std::move(arguments));
         if (context && callback) {
             callback(ArchiveResponse{response.success, response.arguments});
+        }
+    }
+
+    void Rpc::requestScriptRun(QJsonObject arguments, QObject* context, std::function<void(ScriptResponse)> callback) {
+        requestScriptMethod("script_run"_L1, std::move(arguments), context, std::move(callback));
+    }
+
+    void
+    Rpc::requestScriptStatus(QJsonObject arguments, QObject* context, std::function<void(ScriptResponse)> callback) {
+        requestScriptMethod("script_status"_L1, std::move(arguments), context, std::move(callback));
+    }
+
+    void
+    Rpc::requestScriptCancel(QJsonObject arguments, QObject* context, std::function<void(ScriptResponse)> callback) {
+        requestScriptMethod("script_cancel"_L1, std::move(arguments), context, std::move(callback));
+    }
+
+    void Rpc::requestScriptSettingsGet(
+        QJsonObject arguments, QObject* context, std::function<void(ScriptResponse)> callback
+    ) {
+        requestScriptMethod("script_settings_get"_L1, std::move(arguments), context, std::move(callback));
+    }
+
+    void Rpc::requestScriptSettingsSet(
+        QJsonObject arguments, QObject* context, std::function<void(ScriptResponse)> callback
+    ) {
+        requestScriptMethod("script_settings_set"_L1, std::move(arguments), context, std::move(callback));
+    }
+
+    void Rpc::requestScriptRestartDaemon(
+        QJsonObject arguments, QObject* context, std::function<void(ScriptResponse)> callback
+    ) {
+        requestScriptMethod("script_restart_daemon"_L1, std::move(arguments), context, std::move(callback));
+    }
+
+    void Rpc::requestScriptMethod(
+        QLatin1String method, QJsonObject arguments, QObject* context, std::function<void(ScriptResponse)> callback
+    ) {
+        if (!isConnected()) {
+            if (callback) {
+                callback({});
+            }
+            return;
+        }
+        mBackgroundRequestsCoroutineScope.launch(
+            requestScriptMethodImpl(method, std::move(arguments), QPointer<QObject>(context), std::move(callback))
+        );
+    }
+
+    Coroutine<> Rpc::requestScriptMethodImpl(
+        QLatin1String method,
+        QJsonObject arguments,
+        QPointer<QObject> context,
+        std::function<void(ScriptResponse)> callback
+    ) {
+        const auto response = co_await mRequestRouter->postRequest(method, std::move(arguments));
+        if (context && callback) {
+            callback(ScriptResponse{response.success, response.arguments, response.result});
         }
     }
 
@@ -899,10 +955,9 @@ namespace tremotesf {
         // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
         bool updateItem(std::unique_ptr<Torrent>& torrent, NewTorrent&& newTorrent) override {
             const bool wasFinished = torrent->data().isFinished();
-            const bool wasPaused = (
-                torrent->data().status == TorrentData::Status::Paused
-                || torrent->data().status == TorrentData::Status::PausedDueToSpace
-            );
+            const bool wasPaused =
+                (torrent->data().status == TorrentData::Status::Paused
+                 || torrent->data().status == TorrentData::Status::PausedDueToSpace);
             const auto oldSizeWhenDone = torrent->data().sizeWhenDone;
 
             bool changed{};
@@ -1022,16 +1077,28 @@ namespace tremotesf {
     Coroutine<> Rpc::getServerStats() {
         RequestRouter::Response statsResponse{};
         std::optional<qint64> freeSpace{};
+        std::optional<qint64> incompleteDirFreeSpace{};
+        const auto& serverSettings = mServerSettings->data();
+        const bool showIncompleteDirFreeSpace =
+            serverSettings.incompleteDirectoryEnabled
+            && !serverSettings.incompleteDirectory.isEmpty()
+            && serverSettings.incompleteDirectory != serverSettings.downloadDirectory;
         co_await waitAll(
             [&]() -> Coroutine<> {
                 statsResponse =
                     co_await mRequestRouter->postRequest("session-stats"_L1, R"({"method":"session-stats"})"_ba);
             }(),
-            [&]() -> Coroutine<> { freeSpace = co_await getDownloadDirFreeSpaceImpl(); }()
+            [&]() -> Coroutine<> { freeSpace = co_await getDownloadDirFreeSpaceImpl(); }(),
+            [&]() -> Coroutine<> {
+                if (showIncompleteDirFreeSpace && serverSettings.canShowFreeSpaceForPath()) {
+                    incompleteDirFreeSpace = co_await getFreeSpaceForPathImpl(serverSettings.incompleteDirectory);
+                }
+            }()
         );
         mServerStats->update(
             statsResponse.success ? std::optional(std::move(statsResponse.arguments)) : std::nullopt,
-            freeSpace
+            freeSpace,
+            incompleteDirFreeSpace
         );
     }
 

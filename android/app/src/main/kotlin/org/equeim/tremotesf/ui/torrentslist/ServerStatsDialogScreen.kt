@@ -35,7 +35,9 @@ import kotlinx.parcelize.Parcelize
 import org.equeim.tremotesf.R
 import org.equeim.tremotesf.rpc.GlobalRpcClient
 import org.equeim.tremotesf.rpc.RpcRequestState
+import org.equeim.tremotesf.rpc.normalizePath
 import org.equeim.tremotesf.rpc.performPeriodicRequestIntoStateFlow
+import org.equeim.tremotesf.rpc.toNativeSeparators
 import org.equeim.tremotesf.rpc.requests.FileSize
 import org.equeim.tremotesf.rpc.requests.SessionStatsResponseArguments
 import org.equeim.tremotesf.rpc.requests.TransferRate
@@ -221,7 +223,7 @@ class ServerStatsDialogScreenViewModel : ViewModel() {
                     rules.map { rule ->
                         async {
                             MinFreeSpaceRuleState(
-                                path = rule.path,
+                                path = rule.path.normalizePath(GlobalRpcClient.serverCapabilities).toNativeSeparators(),
                                 limit = rule.limit,
                                 freeSpace = runCatching { getFreeSpaceInDirectory(rule.path) }.getOrNull()
                             )

@@ -5,6 +5,8 @@
 #ifndef TREMOTESF_RPC_SERVERSTATS_H
 #define TREMOTESF_RPC_SERVERSTATS_H
 
+#include <optional>
+
 #include <QObject>
 
 class QJsonObject;
@@ -35,17 +37,23 @@ namespace tremotesf {
         [[nodiscard]] qint64 downloadSpeed() const { return mDownloadSpeed; };
         [[nodiscard]] qint64 uploadSpeed() const { return mUploadSpeed; };
         [[nodiscard]] qint64 freeSpace() const { return mFreeSpace; };
+        [[nodiscard]] std::optional<qint64> incompleteDirFreeSpace() const { return mIncompleteDirFreeSpace; };
 
         [[nodiscard]] SessionStats currentSession() const { return mCurrentSession; };
         [[nodiscard]] SessionStats total() const { return mTotal; };
 
-        void update(std::optional<QJsonObject> serverStats, std::optional<qint64> freeSpace);
+        void update(
+            std::optional<QJsonObject> serverStats,
+            std::optional<qint64> freeSpace,
+            std::optional<qint64> incompleteDirFreeSpace
+        );
         void setFreeSpace(const qint64 freeSpace);
 
     private:
         qint64 mDownloadSpeed{};
         qint64 mUploadSpeed{};
         qint64 mFreeSpace{};
+        std::optional<qint64> mIncompleteDirFreeSpace{};
         SessionStats mCurrentSession{};
         SessionStats mTotal{};
     signals:

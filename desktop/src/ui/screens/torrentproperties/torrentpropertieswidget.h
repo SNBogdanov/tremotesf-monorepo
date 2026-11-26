@@ -7,8 +7,10 @@
 
 #include <functional>
 
+#include <QFont>
 #include <QTabWidget>
 
+class QEvent;
 class QTreeView;
 
 namespace tremotesf {
@@ -29,11 +31,15 @@ namespace tremotesf {
         bool hasTorrent() const { return mTorrent != nullptr; }
         void saveState();
 
+    protected:
+        bool event(QEvent* event) override;
+
     private:
         void setupDetailsTab(bool horizontal);
         void setupPeersTab();
         void setupWebSeedersTab();
         void setupLimitsTab();
+        void updateFontSize();
 
         void setTorrent(Torrent* torrent, bool oldTorrentDestroyed);
 
@@ -50,6 +56,7 @@ namespace tremotesf {
 
         bool mUpdatingLimits{};
         std::function<void()> mUpdateLimitsTab;
+        QFont mBaseFont{};
     signals:
         void hasTorrentChanged(bool hasTorrent);
     };

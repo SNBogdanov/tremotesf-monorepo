@@ -7,6 +7,7 @@
 
 #include <QtGlobal>
 
+class QFont;
 class QIcon;
 class QString;
 class QTextDocument;
@@ -16,7 +17,10 @@ namespace tremotesf::desktoputils {
     constexpr int defaultDbusTimeout = 2000; // 2 seconds
 
     /// Icon size in logical pixels for the given device pixel ratio
-    [[nodiscard]] int iconSizeForDevicePixelRatio(qreal devicePixelRatio);
+    [[nodiscard]] int iconSizeForDevicePixelRatio(qreal devicePixelRatio, bool enlarged = false);
+
+    /// Font scaled proportionally to the enlarged icon size for the given device pixel ratio
+    [[nodiscard]] QFont scaledFont(const QFont& font, qreal devicePixelRatio, bool enlarged);
 
     enum class StatusIcon {
         ActiveDownload,

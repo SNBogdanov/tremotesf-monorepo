@@ -13,6 +13,7 @@
 #include <QComboBox>
 #include <QCoreApplication>
 #include <QDoubleSpinBox>
+#include <QEvent>
 #include <QFormLayout>
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -77,6 +78,7 @@ namespace tremotesf {
           mFilesModel(new TorrentFilesModel(mRpc, this)),
           mFilesView(new TorrentFilesView(mFilesModel, mRpc, this)),
           mTrackersViewWidget(new TrackersViewWidget(mRpc, this)) {
+        mBaseFont = font();
         setEnabled(false);
 
         setupDetailsTab(horizontalDetails);
@@ -153,6 +155,30 @@ namespace tremotesf {
         setupPeersTab();
         setupWebSeedersTab();
         setupLimitsTab();
+
+        updateFontSize();
+        QObject::connect(
+            Settings::instance(),
+            &Settings::enlargedIconsChanged,
+            this,
+            &TorrentPropertiesWidget::updateFontSize
+        );
+    }
+
+    bool TorrentPropertiesWidget::event(QEvent* event) {
+        switch (event->type()) {
+        case QEvent::DevicePixelRatioChange:
+        case QEvent::ScreenChangeInternal:
+            updateFontSize();
+            break;
+        default:
+            break;
+        }
+        return QTabWidget::event(event);
+    }
+
+    void TorrentPropertiesWidget::updateFontSize() {
+        setFont(desktoputils::scaledFont(mBaseFont, devicePixelRatioF(), Settings::instance()->get_enlargedIcons()));
     }
 
     void TorrentPropertiesWidget::saveState() {
@@ -238,6 +264,10 @@ namespace tremotesf {
         infoGroupBoxLayout->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
         auto totalSizeLabel = new QLabel(this);
         infoGroupBoxLayout->addRow(qApp->translate("tremotesf", "Total size:"), totalSizeLabel);
+        auto wantedSizeLabel = new QLabel(this);
+        infoGroupBoxLayout->addRow(qApp->translate("tremotesf", "Selected size:"), wantedSizeLabel);
+        auto completedSizeLabel = new QLabel(this);
+        infoGroupBoxLayout->addRow(qApp->translate("tremotesf", "Completed files:"), completedSizeLabel);
         auto locationLabel = new QLabel(this);
         locationLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
         //: Torrent's download directory
@@ -339,6 +369,14 @@ namespace tremotesf {
                 errorLabel->setText(mTorrent->data().errorString);
 
                 totalSizeLabel->setText(formatutils::formatByteSize(mTorrent->data().totalSize));
+                wantedSizeLabel->setText(formatutils::formatByteSize(mTorrent->data().sizeWhenDone));
+                qint64 completedFilesSize = 0;
+                for (const auto& file : mTorrent->files()) {
+                    if (file.size > 0 && file.completedSize >= file.size) {
+                        completedFilesSize += file.size;
+                    }
+                }
+                completedSizeLabel->setText(formatutils::formatByteSize(completedFilesSize));
                 locationLabel->setText(
                     toNativeSeparators(mTorrent->data().downloadDirectory, mRpc->serverSettings()->data().pathOs)
                 );
@@ -382,6 +420,8 @@ namespace tremotesf {
                 lastActivityLabel->clear();
                 errorLabel->clear();
                 totalSizeLabel->clear();
+                wantedSizeLabel->clear();
+                completedSizeLabel->clear();
                 locationLabel->clear();
                 incompleteDirectoryLabel->clear();
                 hashLabel->clear();
@@ -807,6 +847,7 @@ namespace tremotesf {
         update();
         if (mTorrent) {
             QObject::connect(mTorrent, &Torrent::changed, this, update);
+            QObject::connect(mTorrent, &Torrent::filesUpdated, this, [this] { mUpdateDetailsTab(); });
             QObject::connect(mTorrent, &QObject::destroyed, this, [this] { setTorrent(nullptr, true); });
         }
         mFilesModel->setTorrent(mTorrent, oldTorrentDestroyed);

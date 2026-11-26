@@ -34,7 +34,9 @@ fun expectedFileItem(fileId: Int, nodePath: TorrentFilesTree.NodePath): TorrentF
         7,
         TorrentFilesTree.Item.WantedState.Wanted,
         TorrentFilesTree.Item.Priority.Normal,
-        nodePath
+        nodePath,
+        666,
+        7
     )
 }
 

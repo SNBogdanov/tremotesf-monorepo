@@ -58,7 +58,12 @@ class NotificationsController(private val context: Context, coroutineScope: Coro
                         PERSISTENT_NOTIFICATION_CHANNEL_ID,
                         context.getText(R.string.persistent_notification_channel_name),
                         NotificationManager.IMPORTANCE_LOW
-                    ).apply { setShowBadge(false) }
+                    ).apply { setShowBadge(false) },
+                    NotificationChannel(
+                        SCRIPT_JOBS_NOTIFICATION_CHANNEL_ID,
+                        context.getText(R.string.script_jobs_channel_name),
+                        NotificationManager.IMPORTANCE_DEFAULT
+                    )
                 )
             )
             Timber.i("init: created notification channels")
@@ -95,6 +100,45 @@ class NotificationsController(private val context: Context, coroutineScope: Coro
 
     fun showTorrentAddedNotification(hashString: String, torrentName: String) {
         showTorrentNotification(hashString, torrentName, ADDED_NOTIFICATION_CHANNEL_ID, R.string.torrent_added)
+    }
+
+    fun showScriptJobFinishedNotification(scriptName: String, state: String, exitCode: Int?) {
+        Timber.i("showScriptJobFinishedNotification() called with: scriptName = $scriptName, state = $state, exitCode = $exitCode")
+
+        if (notificationManager == null) {
+            Timber.e("showScriptJobFinishedNotification: NotificationManager is null")
+            return
+        }
+
+        val titleRes = when (state) {
+            "failed" -> R.string.script_job_notification_failed
+            "canceled" -> R.string.script_job_notification_canceled
+            "timed_out" -> R.string.script_job_notification_timed_out
+            else -> R.string.script_job_notification_finished
+        }
+        val text = if (exitCode != null) {
+            context.getString(R.string.script_job_notification_text_with_exit_code, scriptName, exitCode)
+        } else {
+            scriptName
+        }
+
+        notificationManager.notify(
+            random.nextInt(),
+            Notification.Builder(context, SCRIPT_JOBS_NOTIFICATION_CHANNEL_ID)
+                .setSmallIcon(R.drawable.notification_icon)
+                .setContentTitle(context.getText(titleRes))
+                .setContentText(text)
+                .setContentIntent(
+                    PendingIntent.getActivity(
+                        context,
+                        0,
+                        Intent(context, NavigationActivity::class.java),
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                )
+                .setAutoCancel(true)
+                .build()
+        )
     }
 
     private fun showTorrentNotification(
@@ -227,6 +271,7 @@ class NotificationsController(private val context: Context, coroutineScope: Coro
     companion object {
         private const val FINISHED_NOTIFICATION_CHANNEL_ID = "finished"
         private const val ADDED_NOTIFICATION_CHANNEL_ID = "added"
+        private const val SCRIPT_JOBS_NOTIFICATION_CHANNEL_ID = "script_jobs"
 
         private const val PERSISTENT_NOTIFICATION_CHANNEL_ID = "persistent"
         const val PERSISTENT_NOTIFICATION_ID = Int.MAX_VALUE

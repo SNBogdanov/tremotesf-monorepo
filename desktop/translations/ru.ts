@@ -52,6 +52,11 @@
         <translation>Свободно: %1</translation>
     </message>
     <message>
+        <source>Free space in temporary folder: %1</source>
+        <extracomment>%1 is a amount of free space in a directory, e.g. 1 GB</extracomment>
+        <translation>Свободно во временной папке: %1</translation>
+    </message>
+    <message>
         <source>Error getting free space</source>
         <translation>Ошибка определения свободного места</translation>
     </message>
@@ -996,6 +1001,10 @@ Trackers list column title</extracomment>
         <translation>&amp;Панель инструментов</translation>
     </message>
     <message>
+        <source>&amp;Enlarged Icons</source>
+        <translation>&amp;Увеличенные иконки</translation>
+    </message>
+    <message>
         <source>&amp;Sidebar</source>
         <translation>&amp;Боковая панель</translation>
     </message>
@@ -1484,6 +1493,14 @@ Torrent&apos;s uploaded size</extracomment>
     <message>
         <source>Total size:</source>
         <translation>Общий размер:</translation>
+    </message>
+    <message>
+        <source>Selected size:</source>
+        <translation>Размер выбранных:</translation>
+    </message>
+    <message>
+        <source>Completed files:</source>
+        <translation>Готовые файлы:</translation>
     </message>
     <message>
         <source>Location:</source>
@@ -2611,6 +2628,414 @@ Filter option of torrents list&apos;s label filter. %1 is label, %L2 is number o
     <message>
         <source>&amp;Metadata Only</source>
         <translation>&amp;Только метаданные</translation>
+    </message>
+    <message>
+        <source>Scripts</source>
+        <translation>Скрипты</translation>
+    </message>
+    <message>
+        <source>No scripts</source>
+        <translation>Нет скриптов</translation>
+    </message>
+    <message>
+        <source>Script &amp;jobs</source>
+        <translation>&amp;Задания скриптов</translation>
+    </message>
+    <message>
+        <source>Restart &amp;daemon</source>
+        <translation>&amp;Перезапустить демон</translation>
+    </message>
+    <message>
+        <source>Script jobs</source>
+        <translation>Задания скриптов</translation>
+    </message>
+    <message>
+        <source>Script parameters</source>
+        <translation>Параметры скриптов</translation>
+    </message>
+    <message>
+        <source>Run</source>
+        <translation>Запустить</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Отмена</translation>
+    </message>
+    <message>
+        <source>Clear finished</source>
+        <translation>Очистить завершённые</translation>
+    </message>
+    <message>
+        <source>State: %1</source>
+        <translation>Состояние: %1</translation>
+    </message>
+    <message>
+        <source>Selection: %1</source>
+        <translation>Выбрано: %1</translation>
+    </message>
+    <message>
+        <source>Running</source>
+        <translation>Выполняется</translation>
+    </message>
+    <message>
+        <source>Failed</source>
+        <translation>Ошибка</translation>
+    </message>
+    <message>
+        <source>Canceled</source>
+        <translation>Отменён</translation>
+    </message>
+    <message>
+        <source>Exit code: %1</source>
+        <translation>Код возврата: %1</translation>
+    </message>
+    <message>
+        <source>No output</source>
+        <translation>Нет вывода</translation>
+    </message>
+    <message>
+        <source>[output truncated]</source>
+        <translation>[вывод усечён]</translation>
+    </message>
+    <message>
+        <source>Restart daemon</source>
+        <translation>Перезапустить демон</translation>
+    </message>
+    <message>
+        <source>The Transmission daemon will be restarted. The connection will be interrupted. Continue?</source>
+        <translation>Демон Transmission будет перезапущен. Соединение прервётся. Продолжить?</translation>
+    </message>
+    <message>
+        <source>Daemon restart has been scheduled</source>
+        <translation>Перезапуск демона запланирован</translation>
+    </message>
+    <message>
+        <source>Failed to restart daemon</source>
+        <translation>Не удалось перезапустить демон</translation>
+    </message>
+    <message>
+        <source>Failed to start script</source>
+        <translation>Не удалось запустить скрипт</translation>
+    </message>
+    <message>
+        <source>Script &quot;%1&quot;: %2</source>
+        <translation>Скрипт «%1»: %2</translation>
+    </message>
+    <message>
+        <source>Invalid script parameters</source>
+        <translation>Некорректные параметры скрипта</translation>
+    </message>
+    <message>
+        <source>Selected torrents: %1</source>
+        <translation>Выбрано торрентов: %1</translation>
+    </message>
+    <message>
+        <source>Selected files: %1</source>
+        <translation>Выбрано файлов: %1</translation>
+    </message>
+    <message>
+        <source>This script will be executed on the server. Continue?</source>
+        <translation>Скрипт будет выполнен на сервере. Продолжить?</translation>
+    </message>
+    <message>
+        <source>No torrents or files are selected</source>
+        <translation>Торренты или файлы не выбраны</translation>
+    </message>
+    <message>
+        <source>Script settings are incomplete. Fill in the script parameters in the server settings.</source>
+        <translation>Параметры скрипта не заполнены. Заполните их в настройках сервера.</translation>
+    </message>
+    <message>
+        <source>Script settings are unavailable on the server</source>
+        <translation>Параметры скриптов недоступны на сервере</translation>
+    </message>
+    <message>
+        <source>Required parameters are missing</source>
+        <translation>Не заданы обязательные параметры</translation>
+    </message>
+    <message>
+        <source>Required parameters are missing: %1</source>
+        <translation>Не заданы обязательные параметры: %1</translation>
+    </message>
+    <message>
+        <source>Loading...</source>
+        <translation>Загрузка...</translation>
+    </message>
+    <message>
+        <source>No script parameters</source>
+        <translation>Нет параметров скриптов</translation>
+    </message>
+    <message>
+        <source>Script settings were changed by another client. Reload the page and try again.</source>
+        <translation>Параметры скриптов изменены другим клиентом. Обновите страницу и повторите попытку.</translation>
+    </message>
+    <message>
+        <source>Fill in all required script parameters</source>
+        <translation>Заполните все обязательные параметры скриптов</translation>
+    </message>
+    <message>
+        <source>Script runner is disabled on the server</source>
+        <translation>Script runner отключён на сервере</translation>
+    </message>
+    <message>
+        <source>Failed to save script settings</source>
+        <translation>Не удалось сохранить параметры скриптов</translation>
+    </message>
+    <message>
+        <source>Daemon restart is disabled on the server</source>
+        <translation>Перезапуск демона отключён на сервере</translation>
+    </message>
+    <message>
+        <source>Daemon restart is already scheduled</source>
+        <translation>Перезапуск демона уже запланирован</translation>
+    </message>
+    <message>
+        <source>Daemon restart is on cooldown, try again later</source>
+        <translation>Перезапуск демона на паузе, повторите позже</translation>
+    </message>
+    <message>
+        <source>Failed to schedule daemon restart</source>
+        <translation>Не удалось запланировать перезапуск демона</translation>
+    </message>
+    <message>
+        <source>Whisparr</source>
+        <translation>Whisparr</translation>
+    </message>
+    <message>
+        <source>URL:</source>
+        <translation>URL:</translation>
+    </message>
+    <message>
+        <source>API key:</source>
+        <translation>Ключ API:</translation>
+    </message>
+    <message>
+        <source>Allow self-signed certificates (unsafe)</source>
+        <translation>Разрешить самоподписанные сертификаты (небезопасно)</translation>
+    </message>
+    <message>
+        <source>Test connection</source>
+        <translation>Проверить подключение</translation>
+    </message>
+    <message>
+        <source>Enter Whisparr URL</source>
+        <translation>Введите URL Whisparr</translation>
+    </message>
+    <message>
+        <source>Enter Whisparr API key</source>
+        <translation>Введите ключ API Whisparr</translation>
+    </message>
+    <message>
+        <source>Invalid Whisparr URL</source>
+        <translation>Некорректный URL Whisparr</translation>
+    </message>
+    <message>
+        <source>Connection to Whisparr timed out</source>
+        <translation>Время ожидания подключения к Whisparr истекло</translation>
+    </message>
+    <message>
+        <source>Invalid Whisparr API key</source>
+        <translation>Неверный ключ API Whisparr</translation>
+    </message>
+    <message>
+        <source>Whisparr returned HTTP status %1</source>
+        <translation>Whisparr вернул HTTP-статус %1</translation>
+    </message>
+    <message>
+        <source>Whisparr is available</source>
+        <translation>Whisparr доступен</translation>
+    </message>
+    <message>
+        <source>Connected to %1</source>
+        <translation>Подключено к %1</translation>
+    </message>
+    <message>
+        <source>Connected to %1 %2</source>
+        <translation>Подключено к %1 %2</translation>
+    </message>
+    <message>
+        <source>Whisparr: recognize and rename</source>
+        <translation>Whisparr: распознать и переименовать</translation>
+    </message>
+    <message>
+        <source>File</source>
+        <translation>Файл</translation>
+    </message>
+    <message>
+        <source>New name</source>
+        <translation>Новое имя</translation>
+    </message>
+    <message>
+        <source>Torrent: %1</source>
+        <translation>Торрент: %1</translation>
+    </message>
+    <message>
+        <source>Torrents: %1</source>
+        <translation>Торренты: %1</translation>
+    </message>
+    <message>
+        <source>Torrent</source>
+        <translation>Торрент</translation>
+    </message>
+    <message>
+        <source>No video files to rename</source>
+        <translation>Нет видеофайлов для переименования</translation>
+    </message>
+    <message>
+        <source>File was not recognized</source>
+        <translation>Файл не распознан</translation>
+    </message>
+    <message>
+        <source>Whisparr could not recognize any files</source>
+        <translation>Whisparr не смог распознать ни одного файла</translation>
+    </message>
+    <message>
+        <source>Recognized: %1, to rename: %2</source>
+        <translation>Распознано: %1, к переименованию: %2</translation>
+    </message>
+    <message>
+        <source>Recognizing: %1 (%2/%3)</source>
+        <translation>Распознавание: %1 (%2/%3)</translation>
+    </message>
+    <message>
+        <source>Use Whisparr to determine episode</source>
+        <translation>Использовать определение серии через Whisparr</translation>
+    </message>
+    <message>
+        <source>Analyzing with Whisparr: %1 (%2/%3)</source>
+        <translation>Анализ в Whisparr: %1 (%2/%3)</translation>
+    </message>
+    <message>
+        <source>Torrent is no longer available</source>
+        <translation>Торрент больше недоступен</translation>
+    </message>
+    <message>
+        <source>%1: no files</source>
+        <translation>%1: нет файлов</translation>
+    </message>
+    <message>
+        <source>Series was not recognized</source>
+        <translation>Серия не распознана</translation>
+    </message>
+    <message>
+        <source>Invalid archive name</source>
+        <translation>Некорректное имя архива</translation>
+    </message>
+    <message>
+        <source>Whisparr could not determine archive names:</source>
+        <translation>Whisparr не смог определить имена архивов:</translation>
+    </message>
+    <message>
+        <source>Confirm archiving</source>
+        <translation>Подтверждение архивирования</translation>
+    </message>
+    <message>
+        <source>The following torrents will be saved to archives:</source>
+        <translation>Следующие торренты будут сохранены в архивы:</translation>
+    </message>
+    <message numerus="yes">
+        <source>Archived %n torrent(s) to archive(s).</source>
+        <translation>
+            <numerusform>Сохранён %n торрент в архив.</numerusform>
+            <numerusform>Сохранено %n торрента в архив.</numerusform>
+            <numerusform>Сохранено %n торрентов в архив.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Some entries failed to archive:</source>
+        <translation>Некоторые записи не удалось сохранить в архив:</translation>
+    </message>
+    <message>
+        <source>%1: failed to save</source>
+        <translation>%1: не удалось сохранить</translation>
+    </message>
+    <message>
+        <source>Failed to rename file</source>
+        <translation>Не удалось переименовать файл</translation>
+    </message>
+    <message>
+        <source>Could not rename «%1»: %2</source>
+        <translation>Не удалось переименовать «%1»: %2</translation>
+    </message>
+    <message>
+        <source>Server</source>
+        <translation>Сервер</translation>
+    </message>
+    <message>
+        <source>TLS errors:</source>
+        <translation>Ошибки TLS:</translation>
+    </message>
+    <message>
+        <source>Check for updates on startup</source>
+        <translation>Проверять обновления при запуске</translation>
+    </message>
+    <message>
+        <source>Check for &amp;Updates...</source>
+        <translation>Проверить &amp;обновления...</translation>
+    </message>
+    <message>
+        <source>Check for Updates</source>
+        <translation>Проверка обновлений</translation>
+    </message>
+    <message>
+        <source>Failed to check for updates: %1</source>
+        <translation>Не удалось проверить обновления: %1</translation>
+    </message>
+    <message>
+        <source>Invalid update manifest</source>
+        <translation>Некорректный манифест обновления</translation>
+    </message>
+    <message>
+        <source>You are using the latest version (%1).</source>
+        <translation>У вас последняя версия (%1).</translation>
+    </message>
+    <message>
+        <source>Update Available</source>
+        <translation>Доступно обновление</translation>
+    </message>
+    <message>
+        <source>Version %1 is available. Current version: %2.
+
+Download and install it now?</source>
+        <translation>Доступна версия %1. Текущая версия: %2.
+
+Скачать и установить сейчас?</translation>
+    </message>
+    <message>
+        <source>Update manifest does not contain a Windows package</source>
+        <translation>В манифесте обновления нет пакета для Windows</translation>
+    </message>
+    <message>
+        <source>Failed to find a temporary directory</source>
+        <translation>Не удалось найти временный каталог</translation>
+    </message>
+    <message>
+        <source>Failed to create update file: %1</source>
+        <translation>Не удалось создать файл обновления: %1</translation>
+    </message>
+    <message>
+        <source>Downloading update...</source>
+        <translation>Загрузка обновления...</translation>
+    </message>
+    <message>
+        <source>Failed to download update: %1</source>
+        <translation>Не удалось скачать обновление: %1</translation>
+    </message>
+    <message>
+        <source>Failed to open downloaded update</source>
+        <translation>Не удалось открыть скачанное обновление</translation>
+    </message>
+    <message>
+        <source>Update file checksum mismatch</source>
+        <translation>Контрольная сумма файла обновления не совпадает</translation>
+    </message>
+    <message>
+        <source>Failed to start the installer</source>
+        <translation>Не удалось запустить установщик</translation>
+    </message>
+    <message>
+        <source>Update installation is supported only on Windows</source>
+        <translation>Установка обновлений поддерживается только в Windows</translation>
     </message>
 </context>
 </TS>

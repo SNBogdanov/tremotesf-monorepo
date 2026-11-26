@@ -234,6 +234,7 @@ open class RpcClient(
             rpcVersion = serverVersionResponse.arguments.rpcVersion,
             serverOs = serverOs,
             forkFeatures = serverVersionResponse.arguments.forkFeatures,
+            scriptRunner = serverVersionResponse.arguments.scriptRunner,
         )
         Timber.d("Successfully checked server capabilities: $capabilities")
         serverCapabilitiesResult.value = Result.success(capabilities)

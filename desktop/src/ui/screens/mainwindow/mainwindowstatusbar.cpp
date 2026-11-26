@@ -6,13 +6,12 @@
 
 #include <ranges>
 
-#include <QActionGroup>
+#include <QAction>
 #include <QCoreApplication>
 #include <QEvent>
 #include <QHBoxLayout>
 #include <QIcon>
 #include <QLabel>
-#include <QMenu>
 #include <QPainter>
 #include <QShowEvent>
 #include <QStyleOption>
@@ -20,18 +19,17 @@
 #include <QWindow>
 
 #include "desktoputils.h"
-#include "log/log.h"
 #include "rpc/serversettings.h"
 #include "rpc/serverstats.h"
 #include "rpc/servers.h"
 #include "rpc/rpc.h"
 #include "formatutils.h"
-#include "ui/iconthemesetup.h"
 
 using namespace Qt::StringLiterals;
 
 namespace tremotesf {
-    MainWindowStatusBar::MainWindowStatusBar(const Rpc* rpc, QWidget* parent) : QStatusBar(parent), mRpc(rpc) {
+    MainWindowStatusBar::MainWindowStatusBar(const Rpc* rpc, QAction* altSpeedLimitsAction, QWidget* parent)
+        : QStatusBar(parent), mRpc(rpc) {
         setSizeGripEnabled(false);
 
         auto container = new QWidget(this);
@@ -41,18 +39,8 @@ namespace tremotesf {
         // Top/bottom margins are set on mServerLabel below so that they don't affect separators
         mLayout->setContentsMargins(8, 0, 8, 0);
 
-        mServerButton = new QToolButton(this);
-        mServerButton->setPopupMode(QToolButton::InstantPopup);
-        mServerButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-        mServerButton->setAutoRaise(true);
-        mServerButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-        mServerMenu = new QMenu(this);
-        mServerButton->setMenu(mServerMenu);
-        mLayout->addWidget(mServerButton);
-
-        mServerSpacer = new QWidget(this);
-        mServerSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-        mLayout->addWidget(mServerSpacer);
+        mServerLabel = new QLabel(this);
+        mLayout->addWidget(mServerLabel);
 
         mFirstSeparator = new StatusBarSeparator(this);
         mLayout->addWidget(mFirstSeparator);
@@ -60,33 +48,36 @@ namespace tremotesf {
         mStatusLabel = new QLabel(this);
         mLayout->addWidget(mStatusLabel);
 
-        auto altSpeedLimitsButton = new QToolButton(this);
-        altSpeedLimitsButton->setAutoRaise(true);
-        altSpeedLimitsButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
-        mAltSpeedLimitsAction = altSpeedLimitsButton->addAction(QString{});
-        updateAltSpeedLimitIcon();
-        altSpeedLimitsButton->setDefaultAction(mAltSpeedLimitsAction);
-        mAltSpeedLimitsAction->setCheckable(true);
-        mLayout->addWidget(altSpeedLimitsButton);
-        const auto updateAltSpeedLimitsButton = [=, this] {
-            if (mRpc->serverSettings()->data().alternativeSpeedLimitsEnabled) {
-                mAltSpeedLimitsAction->setChecked(true);
-                mAltSpeedLimitsAction->setText(
-                    qApp->translate("tremotesf", "Alternative speed limits are enabled. Click to disable")
-                );
-            } else {
-                mAltSpeedLimitsAction->setChecked(false);
-                mAltSpeedLimitsAction->setText(
-                    qApp->translate("tremotesf", "Alternative speed limits are disabled. Click to enable")
-                );
+        mServerSpacer = new QWidget(this);
+        mServerSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        mLayout->addWidget(mServerSpacer);
+
+        mAltSpeedLimitsButton = new QToolButton(this);
+        mAltSpeedLimitsButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
+        mAltSpeedLimitsAction = altSpeedLimitsAction;
+        mAltSpeedLimitsButton->setDefaultAction(mAltSpeedLimitsAction);
+        mLayout->addWidget(mAltSpeedLimitsButton);
+        const auto updateAltSpeedLimitsButton = [this](bool enabled) {
+            {
+                const QSignalBlocker blocker(mAltSpeedLimitsAction);
+                mAltSpeedLimitsAction->setChecked(enabled);
             }
+            mAltSpeedLimitsAction->setText(
+                enabled ? qApp->translate("tremotesf", "Alternative speed limits are enabled. Click to disable")
+                        : qApp->translate("tremotesf", "Alternative speed limits are disabled. Click to enable")
+            );
+            updateAltSpeedLimitIcon();
         };
-        updateAltSpeedLimitsButton();
-        QObject::connect(mRpc->serverSettings(), &ServerSettings::changed, this, updateAltSpeedLimitsButton);
-        QObject::connect(mAltSpeedLimitsAction, &QAction::triggered, this, [=, this](bool checked) {
-            mRpc->serverSettings()->setAlternativeSpeedLimitsEnabled(checked);
-            updateAltSpeedLimitsButton();
+        updateAltSpeedLimitsButton(mRpc->serverSettings()->data().alternativeSpeedLimitsEnabled);
+        QObject::connect(mRpc->serverSettings(), &ServerSettings::changed, this, [this, updateAltSpeedLimitsButton] {
+            updateAltSpeedLimitsButton(mRpc->serverSettings()->data().alternativeSpeedLimitsEnabled);
         });
+        QObject::connect(
+            mAltSpeedLimitsAction,
+            &QAction::toggled,
+            this,
+            [this, updateAltSpeedLimitsButton](bool checked) { updateAltSpeedLimitsButton(checked); }
+        );
 
         mLayout->addWidget(new StatusBarSeparator(this));
 
@@ -112,6 +103,11 @@ namespace tremotesf {
         freeSpaceLabel->setContentsMargins(8, 0, 0, 0);
         mLayout->addWidget(freeSpaceLabel);
 
+        mTemporaryFreeSpaceLabel = new QLabel(this);
+        mTemporaryFreeSpaceLabel->setContentsMargins(12, 0, 0, 0);
+        mTemporaryFreeSpaceLabel->hide();
+        mLayout->addWidget(mTemporaryFreeSpaceLabel);
+
         updateLayout();
         QObject::connect(mRpc, &Rpc::connectionStateChanged, this, &MainWindowStatusBar::updateLayout);
         QObject::connect(Servers::instance(), &Servers::hasServersChanged, this, &MainWindowStatusBar::updateLayout);
@@ -129,14 +125,7 @@ namespace tremotesf {
             this,
             &MainWindowStatusBar::updateServerText
         );
-        updateServerMenu();
-        QObject::connect(
-            Servers::instance(),
-            &Servers::currentServerChanged,
-            this,
-            &MainWindowStatusBar::updateServerMenu
-        );
-        QObject::connect(Servers::instance(), &Servers::serversChanged, this, &MainWindowStatusBar::updateServerMenu);
+        QObject::connect(Servers::instance(), &Servers::serversChanged, this, &MainWindowStatusBar::updateServerText);
 
         updateStatusLabels();
         QObject::connect(mRpc, &Rpc::statusChanged, this, &MainWindowStatusBar::updateStatusLabels);
@@ -165,8 +154,20 @@ namespace tremotesf {
                 + formatLimit(uploadLimit)
                 + u')'
             );
+            const bool usingTemporaryDirectory =
+                serverSettings.incompleteDirectoryEnabled
+                && !serverSettings.incompleteDirectory.isEmpty()
+                && serverSettings.incompleteDirectory != serverSettings.downloadDirectory;
             freeSpaceLabel->setText(qApp->translate("tremotesf", "Free space: %1")
                                         .arg(formatutils::formatByteSize(mRpc->serverStats()->freeSpace())));
+            const auto incompleteDirFreeSpace = mRpc->serverStats()->incompleteDirFreeSpace();
+            if (usingTemporaryDirectory && incompleteDirFreeSpace.has_value()) {
+                mTemporaryFreeSpaceLabel->setText(qApp->translate("tremotesf", "Free space in temporary folder: %1")
+                                                      .arg(formatutils::formatByteSize(*incompleteDirFreeSpace)));
+                mTemporaryFreeSpaceLabel->show();
+            } else {
+                mTemporaryFreeSpaceLabel->hide();
+            }
         };
         updateSpeedAndFreeSpaceLabels();
         QObject::connect(mRpc->serverStats(), &ServerStats::updated, this, updateSpeedAndFreeSpaceLabels);
@@ -189,22 +190,20 @@ namespace tremotesf {
 
     void MainWindowStatusBar::updateLayout() {
         if (Servers::instance()->hasServers()) {
-            mServerButton->setIcon(QIcon{});
-            mServerSpacer->hide();
             mFirstSeparator->show();
             mStatusLabel->show();
             if (mRpc->connectionState() == Rpc::ConnectionState::Connected) {
-                for (auto* widget : widgetsAfter(mStatusLabel, mLayout)) {
+                for (auto* widget : widgetsAfter(mServerSpacer, mLayout)) {
                     widget->show();
                 }
             } else {
-                for (auto* widget : widgetsAfter(mStatusLabel, mLayout)) {
+                for (auto* widget : widgetsAfter(mServerSpacer, mLayout)) {
                     widget->hide();
                 }
             }
         } else {
-            mServerButton->setIcon(QIcon::fromTheme("dialog-error"_L1));
-            mServerSpacer->show();
+            mFirstSeparator->hide();
+            mStatusLabel->hide();
             for (auto* widget : widgetsAfter(mServerSpacer, mLayout)) {
                 widget->hide();
             }
@@ -213,48 +212,10 @@ namespace tremotesf {
 
     void MainWindowStatusBar::updateServerText() {
         if (Servers::instance()->hasServers()) {
-            mServerButton->setText(
-                QString("%1 (%2)"_L1)
-                    .arg(Servers::instance()->currentServerName(), Servers::instance()->currentServerAddress())
-            );
+            mServerLabel->setText(Servers::instance()->currentServerName());
         } else {
-            mServerButton->setText(qApp->translate("tremotesf", "No servers"));
+            mServerLabel->setText(qApp->translate("tremotesf", "No servers"));
         }
-    }
-
-    void MainWindowStatusBar::updateServerMenu() {
-        mServerMenu->clear();
-        auto* const group = new QActionGroup(mServerMenu);
-        group->setExclusive(true);
-        const auto servers = Servers::instance()->servers();
-        const auto currentServerName = Servers::instance()->currentServerName();
-        for (const auto& server : servers) {
-            auto* const action = mServerMenu->addAction(server.name);
-            action->setData(server.name);
-            action->setCheckable(true);
-            group->addAction(action);
-            if (server.name == currentServerName) {
-                action->setChecked(true);
-            }
-        }
-        mServerMenu->addSeparator();
-        auto* const connectionSettingsAction = mServerMenu->addAction(
-            QIcon::fromTheme("network-server"_L1),
-            qApp->translate("tremotesf", "&Connection Settings")
-        );
-        QObject::connect(mServerMenu, &QMenu::triggered, this, [this, connectionSettingsAction](QAction* action) {
-            if (action == connectionSettingsAction) {
-                emit showConnectionSettingsDialog();
-            } else {
-                const auto selectedName = action->data().toString();
-                const auto servers = Servers::instance()->servers();
-                if (std::ranges::contains(servers, selectedName, &Server::name)) {
-                    Servers::instance()->setCurrentServer(selectedName);
-                } else {
-                    warning().log("Selected server {} which no longer exists", selectedName);
-                }
-            }
-        });
     }
 
     void MainWindowStatusBar::updateStatusLabels() {
@@ -267,11 +228,9 @@ namespace tremotesf {
     }
 
     void MainWindowStatusBar::updateAltSpeedLimitIcon() {
-        if (isPaletteDark()) {
-            mAltSpeedLimitsAction->setIcon(desktoputils::statusIcon(desktoputils::StatusIcon::Speedometer));
-        } else {
-            mAltSpeedLimitsAction->setIcon(desktoputils::statusIcon(desktoputils::StatusIcon::Speedometer));
-        }
+        const bool enabled = mAltSpeedLimitsAction->isChecked();
+        mAltSpeedLimitsAction->setIcon(QIcon::fromTheme(enabled ? "tremotesf-slow-mode"_L1 : "tremotesf-fast-mode"_L1));
+        mAltSpeedLimitsButton->setAutoRaise(!enabled);
     }
 
     StatusBarSeparator::StatusBarSeparator(QWidget* parent) : QWidget(parent) {
@@ -332,3 +291,5 @@ namespace tremotesf {
         mIcon.paint(&painter, contentsRect());
     }
 }
+
+#include "mainwindowstatusbar.moc"

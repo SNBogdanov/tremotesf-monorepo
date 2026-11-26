@@ -17,11 +17,11 @@ set(CPACK_WIX_PRODUCT_ICON "${TREMOTESF_WINDOWS_ICON}")
 set(CPACK_WIX_EXTRA_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/registry.wxs"
     "${CMAKE_CURRENT_SOURCE_DIR}/desktop_shortcut.wxs"
+    "${CMAKE_CURRENT_SOURCE_DIR}/desktop_shortcut_ui.wxs"
 )
-set(CPACK_WIX_UI_REF "WixUI_FeatureTree")
+set(CPACK_WIX_UI_REF "TremotesfWixUI")
 set(CPACK_WIX_PATCH_FILE
     "${CMAKE_CURRENT_SOURCE_DIR}/registry_feature_patch.wxs"
-    "${CMAKE_CURRENT_SOURCE_DIR}/desktop_shortcut_patch.wxs"
 )
 
 include(CPack)

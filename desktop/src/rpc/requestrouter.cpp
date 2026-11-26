@@ -420,7 +420,11 @@ namespace tremotesf::impl {
         if (!success) {
             warning().log("method '{}' failed, response: {}", metadata.method, *json);
         }
-        co_return Response{.arguments = getReplyArguments(*json), .success = success};
+        co_return Response{
+            .arguments = getReplyArguments(*json),
+            .result = json->value("result"_L1).toString(),
+            .success = success
+        };
     }
 
     Coroutine<RequestRouter::Response> RequestRouter::onRequestError(

@@ -23,4 +23,6 @@ internal data class ServerVersionResponseArguments(
     val version: String,
     @SerialName("fork-features")
     val forkFeatures: List<String> = emptyList(),
+    @SerialName("script_runner")
+    val scriptRunner: ScriptRunnerDescriptor? = null,
 )
