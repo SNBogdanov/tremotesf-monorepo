@@ -8,6 +8,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <Fragment>
         <UI Id="TremotesfWixUI_X64">
             <Property Id="DESKTOPSHORTCUT" Value="1" Secure="yes" />
+            <Property Id="ARPNOREMOVE" Value="1" />
 
             <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
             <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
@@ -27,6 +28,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
             <DialogRef Id="UserExit" />
             <DialogRef Id="TremotesfInstallDirDlg" />
             <DialogRef Id="TremotesfUpgradeDlg" />
+            <DialogRef Id="TremotesfMaintenanceDlg" />
 
             <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999" />
 
@@ -50,14 +52,16 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
             <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="TremotesfUpgradeDlg" Order="0" Condition="NOT Installed AND WIX_UPGRADE_DETECTED" />
             <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="TremotesfInstallDirDlg" Order="1" Condition="NOT Installed AND NOT WIX_UPGRADE_DETECTED" />
-            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2" Condition="Installed AND NOT PATCH" />
+            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="TremotesfMaintenanceDlg" Order="2" Condition="Installed AND NOT PATCH" />
             <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2" Condition="Installed AND PATCH" />
 
-            <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg" />
+            <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="TremotesfMaintenanceDlg" />
 
-            <Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg" />
-            <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg" />
-            <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg" />
+            <Publish Dialog="TremotesfMaintenanceDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg" />
+            <Publish Dialog="TremotesfMaintenanceDlg" Control="RepairButton" Property="WixUI_InstallMode" Value="Repair" />
+            <Publish Dialog="TremotesfMaintenanceDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg" />
+            <Publish Dialog="TremotesfMaintenanceDlg" Control="RemoveButton" Property="WixUI_InstallMode" Value="Remove" />
+            <Publish Dialog="TremotesfMaintenanceDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg" />
 
 
         </UI>
@@ -111,6 +115,25 @@ SPDX-License-Identifier: GPL-3.0-or-later
                 <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="373" Height="0" />
 
                 <Control Id="UpgradeText" Type="Text" X="20" Y="70" Width="320" Height="90" Transparent="yes" NoPrefix="yes" Text="Setup will upgrade the installed version of Tremotesf. Settings, servers and downloaded data will be preserved." />
+            </Dialog>
+
+            <Dialog Id="TremotesfMaintenanceDlg" Width="370" Height="270" Title="Repair or remove Tremotesf">
+                <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
+                <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
+                    <Publish Event="SpawnDialog" Value="CancelDlg" />
+                </Control>
+
+                <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes" Text="Select the operation you wish to perform." />
+                <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="Repair or remove Tremotesf" />
+                <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="!(loc.InstallDirDlgBannerBitmap)" />
+                <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="373" Height="0" />
+                <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="373" Height="0" />
+
+                <Control Id="RepairButton" Type="PushButton" X="40" Y="65" Width="100" Height="18" Text="Repair" />
+                <Control Id="RepairText" Type="Text" X="40" Y="88" Width="290" Height="30" Transparent="yes" NoPrefix="yes" Text="Repairs missing or corrupt files, shortcuts and registry entries." />
+
+                <Control Id="RemoveButton" Type="PushButton" X="40" Y="125" Width="100" Height="18" Text="Remove" />
+                <Control Id="RemoveText" Type="Text" X="40" Y="148" Width="290" Height="30" Transparent="yes" NoPrefix="yes" Text="Removes Tremotesf from your computer. Settings and downloaded data are kept." />
             </Dialog>
         </UI>
     </Fragment>

@@ -54,6 +54,17 @@ SPDX-License-Identifier: CC0-1.0
   <developer_name>Alexey Rochev</developer_name>
 
   <releases>
+    <release date="2026-11-26" version="3.0.3">
+      <description>
+        <p>Changed</p>
+        <ul>
+          <li>Installer: Repair/Remove maintenance dialog, combined Uninstall/Change entry</li>
+          <li>Windows: UI language selection in settings</li>
+          <li>Script jobs refresh their state when the window is reopened</li>
+          <li>Server list and connection status improvements</li>
+        </ul>
+      </description>
+    </release>
     <release date="2026-11-26" version="3.0.2">
       <description>
         <p>Added</p>
