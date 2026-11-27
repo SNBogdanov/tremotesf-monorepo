@@ -50,6 +50,28 @@ Android-устройство: SM-N975F (`RF8N30P85JJ`), adb `adb-RF8N30P85JJ-gTx
 - Бэкап ключа: `C:\Users\SERGEYBO\Documents\Projects\_opencode_tmp\tremotesf-release-keystore`.
 - Ключ и пароли не выводить в чат и логи.
 
+## Windows: PsExec и SAMSUNG-PC
+
+- Удалённая машина: `samsung-pc` / `SAMSUNG-PC`.
+- Учётка: `MicrosoftAccount\snbogdanov1968@gmail.com`; пароль брать из
+  `_netrc` (`machine samsung-smb`), в чат и логи не выводить.
+- PsExec: `C:\Users\SERGEYBO\Downloads\SysinternalsSuite\PsExec64.exe`.
+- **`PsExec -c` копирует и запускает только программу (exe/cmd), но не
+  MSI-файл.** Команда
+  `psexec \\samsung-pc -s -c package.msi msiexec /i package.msi /qn`
+  не работает: PsExec пытается запустить сам MSI (exit code 2).
+- Рабочая схема для MSI:
+  1. Скопировать MSI в `\\samsung-pc\c$\Windows\Temp\` через admin share
+     (`New-PSDrive -Root \\samsung-pc\c$ -Credential <samsung-smb>`).
+  2. Запустить:
+     `PsExec64.exe \\samsung-pc -u "MicrosoftAccount\snbogdanov1968@gmail.com" -p <pass> -h msiexec.exe /i C:\Windows\Temp\package.msi /qn /norestart`.
+- Проверено 27.11.2026:
+  - административная установка (`msiexec /a`) — exit 0;
+  - тихая установка (`msiexec /i ... /qn`) — exit 0, версия 3.0.3,
+    установлено в `C:\Program Files\Tremotesf`.
+- Из-под `LOCAL SERVICE` локальный `msiexec` возвращает 1601; для локальной
+  машины нужен elevated-скрипт пользователя.
+
 ## Общие ограничения
 
 - Работать только в этом проекте; другие проекты — read-only.
