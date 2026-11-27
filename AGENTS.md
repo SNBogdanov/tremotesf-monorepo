@@ -27,6 +27,10 @@ Android-устройство: SM-N975F (`RF8N30P85JJ`), adb `adb-RF8N30P85JJ-gTx
    - `update.json` (version, windows URL/SHA-256/size, android versionCode/URL/SHA-256/size);
    - `SHA256SUMS`.
 6. Проверить, что `releases/latest/download/update.json` отдаёт новую версию.
+7. Скопировать установочные файлы релиза в `Y:\Install`:
+   - `tremotesf-X.Y.Z-Windows-x86_64-Release.msi`;
+   - `tremotesf-X.Y.Z-android-google.apk`.
+   Если `Y:` недоступен — сообщить об этом, не считать релиз полностью завершённым.
 
 ## После релиза
 
